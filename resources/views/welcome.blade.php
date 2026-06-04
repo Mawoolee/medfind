@@ -360,15 +360,15 @@
             position: absolute;
             top: 12px;
             right: 12px;
-            width: 32px;
-            height: 32px;
+            width: 30px;
+            height: 30px;
             background: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 20px;
+            font-size: 15px;
             font-weight: bold;
             color: #475569;
             transition: all 0.2s;
