@@ -5,463 +5,428 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>MedFind - Real-Time Pharmaceutical Inventory Locator | Legazpi City</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
-        /* ============================================
-           MEDFIND - MAIN STYLESHEET
-           ============================================ */
-        
-        /* Reset & Base */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-            background: #f0f2f5;
-            color: #1a1a2e;
-            line-height: 1.5;
+            background: #f0f4f8;
+            color: #1e293b;
+            overflow-x: hidden;
         }
-        
-        /* ============================================
-           HEADER SECTION
-           ============================================ */
-        
+
+        /* Header */
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0a3b4e 0%, #1a6d5e 100%);
             color: white;
-            padding: 40px 20px;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 16px 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
         }
-        
+
         .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-        
-        .header p {
-            opacity: 0.95;
-            font-size: 1.1em;
-            margin-bottom: 20px;
-        }
-        
-        /* Stats Bar */
-        .stats {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin-top: 25px;
-            flex-wrap: wrap;
-        }
-        
-        .stat-card {
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(10px);
-            padding: 15px 30px;
-            border-radius: 16px;
-            text-align: center;
-            transition: transform 0.3s;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-3px);
-            background: rgba(255,255,255,0.25);
-        }
-        
-        .stat-number {
-            font-size: 2em;
+            font-size: 1.6rem;
             font-weight: 800;
+            letter-spacing: -0.5px;
         }
-        
-        .stat-label {
-            font-size: 0.85em;
+
+        .header p {
+            font-size: 0.85rem;
             opacity: 0.9;
-            margin-top: 5px;
+            margin-top: 4px;
         }
-        
-        /* ============================================
-           CONTAINER & LAYOUT
-           ============================================ */
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 30px 20px;
-        }
-        
-        /* ============================================
-           SEARCH BOX SECTION
-           ============================================ */
-        
-        .search-box {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        }
-        
-        .search-input-group {
+
+        .stats-row {
             display: flex;
-            gap: 15px;
+            gap: 20px;
+            margin-top: 12px;
             flex-wrap: wrap;
-            margin-bottom: 20px;
+            align-items: center;
+            justify-content: flex-start;
         }
-        
-        .search-input-group input {
-            flex: 1;
-            padding: 16px 20px;
-            border: 2px solid #e0e0e0;
-            border-radius: 14px;
-            font-size: 16px;
-            transition: all 0.3s;
-            font-family: inherit;
-        }
-        
-        .search-input-group input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
-        }
-        
-        /* Buttons */
-        .btn {
-            padding: 16px 32px;
-            border: none;
-            border-radius: 14px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-family: inherit;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102,126,234,0.4);
-        }
-        
-        .btn-secondary {
-            background: #48bb78;
-            color: white;
-        }
-        
-        .btn-secondary:hover {
-            background: #38a169;
-            transform: translateY(-2px);
-        }
-        
-        /* Filter Buttons */
-        .filter-buttons {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        
-        .filter-btn {
-            padding: 10px 20px;
-            background: #f0f2f5;
-            border: none;
-            border-radius: 30px;
-            cursor: pointer;
-            font-size: 14px;
+
+        .stat-badge {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(8px);
+            padding: 8px 24px;
+            border-radius: 40px;
+            font-size: 0.85rem;
             font-weight: 500;
-            transition: all 0.3s;
-            font-family: inherit;
-        }
-        
-        .filter-btn:hover {
-            background: #e0e0e0;
-        }
-        
-        .filter-btn.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        
-        /* ============================================
-           RESULTS HEADER
-           ============================================ */
-        
-        .results-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        
-        .results-header h2 {
-            font-size: 1.5em;
-            color: #1a1a2e;
-        }
-        
-        .results-count {
-            color: #666;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-        
-        .sort-select {
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            background: white;
-            font-family: inherit;
-            cursor: pointer;
-        }
-        
-        /* ============================================
-           PHARMACY CARDS GRID
-           ============================================ */
-        
-        .pharmacies-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-            gap: 25px;
-        }
-        
-        .pharmacy-card {
-            background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-        
-        .pharmacy-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
-        }
-        
-        .pharmacy-image {
-            height: 120px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 48px;
-        }
-        
-        .pharmacy-info {
-            padding: 20px;
-        }
-        
-        .pharmacy-name {
-            font-size: 1.2em;
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: #1a1a2e;
-        }
-        
-        .pharmacy-address {
-            color: #666;
-            font-size: 0.85em;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .distance-badge {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            background: #e0e7ff;
-            padding: 5px 12px;
+            justify-content: center;
+            gap: 8px;
+            min-width: 180px;
+            white-space: nowrap;
+        }
+
+        .stat-badge strong {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        /* Map container */
+        .map-container {
+            position: relative;
+            height: calc(100vh - 130px);
+            width: 100%;
+        }
+
+        #medfindMap {
+            height: 100%;
+            width: 100%;
+            background: #c8e0e0;
+        }
+
+        /* Floating search panel */
+        .search-panel {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        .search-card {
+            background: white;
+            border-radius: 50px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            padding: 6px 6px 6px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 550px;
+            width: 90%;
+            pointer-events: auto;
+            border: 1px solid rgba(0,0,0,0.05);
+            position: relative;
+        }
+
+        .search-card input {
+            flex: 1;
+            border: none;
+            padding: 14px 0;
+            font-size: 1rem;
+            font-family: inherit;
+            outline: none;
+            background: transparent;
+        }
+
+        .search-card button {
+            background: linear-gradient(135deg, #1a6d5e, #0f5447);
+            border: none;
+            color: white;
+            padding: 10px 28px;
+            border-radius: 40px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .search-card button:hover {
+            background: linear-gradient(135deg, #0f5447, #0a3b4e);
+            transform: scale(0.97);
+        }
+
+        /* Autocomplete dropdown */
+        .autocomplete-items {
+            position: absolute;
+            top: 100%;
+            left: 24px;
+            right: 100px;
+            background: white;
             border-radius: 20px;
-            font-size: 0.8em;
-            color: #4c51bf;
-            margin-bottom: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            max-height: 280px;
+            overflow-y: auto;
+            z-index: 1001;
+            margin-top: 8px;
         }
-        
-        /* Medicine List */
-        .medicine-list {
-            margin-top: 15px;
-            border-top: 1px solid #e0e0e0;
-            padding-top: 15px;
+
+        .autocomplete-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.9rem;
         }
-        
-        .medicine-list > strong {
+
+        .autocomplete-item:hover {
+            background: #eef2ff;
+        }
+
+        .autocomplete-item strong {
+            color: #1a6d5e;
+        }
+
+        /* Custom popup styling */
+        .custom-popup .leaflet-popup-content-wrapper {
+            border-radius: 20px;
+            padding: 0;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.25);
+            min-width: 360px;
+            max-width: 400px;
+        }
+
+        .custom-popup .leaflet-popup-content {
+            margin: 0 !important;
+            width: auto !important;
+            min-width: 360px;
+        }
+
+        .custom-popup .leaflet-popup-tip {
+            background: white;
+        }
+
+        /* I-hide ang default Leaflet close button */
+        .custom-popup .leaflet-popup-close-button {
+            display: none;
+        }
+
+        .pharmacy-popup {
+            font-family: 'Inter', sans-serif;
+            padding: 18px 18px 16px 18px;
+            min-width: 340px;
+            position: relative;
+        }
+
+        .pharmacy-popup h4 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #0a3b4e;
+            margin-bottom: 8px;
+            padding-right: 32px;
+        }
+
+        .pharmacy-popup .address {
+            font-size: 0.75rem;
+            color: #5b6e8c;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 8px;
+        }
+
+        .stock-info {
+            background: #eef2ff;
+            padding: 12px 14px;
+            border-radius: 16px;
+            margin: 12px 0;
+        }
+
+        .stock-info strong {
+            font-size: 0.8rem;
+            color: #1e40af;
             display: block;
-            margin-bottom: 10px;
-            font-size: 0.9em;
-            color: #555;
+            margin-bottom: 8px;
         }
-        
-        .medicine-item {
+
+        .med-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 10px 0;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px dashed #cbd5e1;
+            flex-wrap: wrap;
+            gap: 6px;
         }
-        
-        .medicine-item:last-child {
+
+        .med-item:last-child {
             border-bottom: none;
         }
-        
-        .medicine-name {
+
+        .med-name-wrapper {
+            flex: 2;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .med-name {
             font-weight: 600;
-            font-size: 0.95em;
+            font-size: 0.85rem;
+            color: #1e293b;
         }
-        
-        .medicine-details {
-            text-align: right;
-        }
-        
-        .medicine-price {
-            font-weight: 700;
-            color: #48bb78;
-            font-size: 1em;
-        }
-        
-        /* Stock Badges */
-        .stock-badge {
+
+        .rx-badge {
             display: inline-block;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 0.7em;
-            font-weight: 600;
-            margin-left: 8px;
-        }
-        
-        .stock-high {
-            background: #c6f6d5;
-            color: #22543d;
-        }
-        
-        .stock-medium {
-            background: #feebc8;
-            color: #7b341e;
-        }
-        
-        .stock-low {
-            background: #fed7d7;
-            color: #742a2a;
-        }
-        
-        .prescription-badge {
-            display: inline-block;
-            background: #e0e7ff;
-            color: #4c51bf;
-            font-size: 0.65em;
+            background: #f59e0b;
+            color: white;
+            font-size: 0.6rem;
             padding: 2px 8px;
             border-radius: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .med-price-stock {
+            text-align: right;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .med-price {
+            font-weight: 700;
+            color: #059669;
+            font-size: 0.85rem;
+        }
+
+        .med-stock {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
             margin-left: 8px;
         }
-        
-        /* Action Buttons */
-        .action-buttons {
+
+        .med-stock.low {
+            background: #f59e0b;
+        }
+
+        .med-stock.out {
+            background: #ef4444;
+        }
+
+        .distance-text {
+            font-size: 0.7rem;
+            color: #3b5e7a;
+            margin: 10px 0 6px 0;
+            font-weight: 600;
+            background: #f1f5f9;
+            padding: 6px 12px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+
+        .action-popup-buttons {
             display: flex;
             gap: 12px;
-            margin-top: 18px;
+            margin-top: 16px;
         }
-        
-        .action-btn {
+
+        .popup-btn {
             flex: 1;
-            padding: 10px;
+            padding: 10px 8px;
+            border-radius: 40px;
             border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 0.85em;
             font-weight: 600;
-            transition: all 0.3s;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: 0.2s;
             font-family: inherit;
         }
-        
-        .chat-btn {
-            background: #667eea;
+
+        .popup-btn.chat {
+            background: #1a6d5e;
             color: white;
         }
-        
-        .chat-btn:hover {
-            background: #5a67d8;
+
+        .popup-btn.chat:hover {
+            background: #0f5447;
+            transform: translateY(-1px);
         }
-        
-        .directions-btn {
-            background: #48bb78;
+
+        .popup-btn.directions {
+            background: #2c7da0;
             color: white;
         }
-        
-        .directions-btn:hover {
-            background: #38a169;
+
+        .popup-btn.directions:hover {
+            background: #1f5e7a;
+            transform: translateY(-1px);
         }
-        
-        /* ============================================
-           LOADING STATE
-           ============================================ */
-        
-        .loading {
-            text-align: center;
-            padding: 60px;
+
+        /* Custom close button sa loob ng popup - dito mo pwedeng baguhin ang top at right */
+        .popup-close-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 32px;
+            height: 32px;
             background: white;
-            border-radius: 20px;
-        }
-        
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #e0e0e0;
-            border-top-color: #667eea;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: bold;
+            color: #475569;
+            transition: all 0.2s;
+            z-index: 25;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            border: 1px solid #e2e8f0;
         }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+
+        .popup-close-btn:hover {
+            color: #ef4444;
+            background: #fef2f2;
+            transform: scale(1.1);
+            border-color: #fecaca;
         }
-        
-        /* ============================================
-           NO RESULTS STATE
-           ============================================ */
-        
-        .no-results {
-            text-align: center;
-            padding: 60px;
-            background: white;
-            border-radius: 20px;
+
+        /* Floating Chat Widget */
+        .chat-float {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 2000;
         }
-        
-        .no-results h3 {
-            font-size: 1.5em;
-            margin-bottom: 10px;
-            color: #1a1a2e;
+
+        .chat-toggle {
+            background: linear-gradient(135deg, #1a6d5e, #0f5447);
+            width: 56px;
+            height: 56px;
+            border-radius: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: 0.2s;
+            font-size: 22px;
+            font-weight: 600;
+            color: white;
         }
-        
-        .no-results p {
-            color: #666;
+
+        .chat-toggle:hover {
+            transform: scale(1.05);
         }
-        
-        /* ============================================
-           CHAT MODAL
-           ============================================ */
-        
+
         .chat-modal {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 380px;
+            bottom: 90px;
+            right: 24px;
+            width: 350px;
             background: white;
             border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
             display: none;
-            z-index: 1000;
-            animation: slideUp 0.3s ease;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 2001;
+            animation: slideUp 0.2s ease;
         }
-        
+
         @keyframes slideUp {
             from {
                 opacity: 0;
@@ -472,636 +437,587 @@
                 transform: translateY(0);
             }
         }
-        
+
         .chat-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #0a3b4e;
             color: white;
-            padding: 15px 20px;
-            border-radius: 20px 20px 0 0;
-            cursor: pointer;
+            padding: 14px 18px;
+            font-weight: 700;
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            font-weight: 600;
+            cursor: pointer;
         }
-        
+
         .chat-messages {
-            height: 350px;
+            height: 320px;
             overflow-y: auto;
-            padding: 15px;
-            background: #f7fafc;
+            padding: 12px;
+            background: #f8fafc;
         }
-        
-        /* Message Bubbles */
+
         .message {
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             display: flex;
             flex-direction: column;
         }
-        
+
         .message.sent {
             align-items: flex-end;
         }
-        
+
         .message.received {
             align-items: flex-start;
         }
-        
-        .message-bubble {
-            max-width: 80%;
-            padding: 10px 15px;
+
+        .bubble {
+            max-width: 85%;
+            padding: 8px 14px;
             border-radius: 18px;
-            word-wrap: break-word;
+            font-size: 0.85rem;
         }
-        
-        .message.sent .message-bubble {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+        .message.sent .bubble {
+            background: #1a6d5e;
             color: white;
-            border-bottom-right-radius: 4px;
         }
-        
-        .message.received .message-bubble {
+
+        .message.received .bubble {
             background: white;
-            color: #1a1a2e;
-            border-bottom-left-radius: 4px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+            color: #1e293b;
         }
-        
-        .message-time {
-            font-size: 0.65em;
-            margin-top: 4px;
-            color: #999;
-        }
-        
+
         .chat-input-area {
             display: flex;
-            padding: 15px;
-            border-top: 1px solid #e0e0e0;
+            padding: 12px;
+            border-top: 1px solid #e2e8f0;
+            gap: 8px;
             background: white;
-            border-radius: 0 0 20px 20px;
-            gap: 10px;
         }
-        
+
         .chat-input-area input {
             flex: 1;
-            padding: 12px 15px;
-            border: 1px solid #e0e0e0;
+            padding: 10px 14px;
             border-radius: 25px;
+            border: 1px solid #cbd5e1;
+            outline: none;
             font-family: inherit;
         }
-        
-        .chat-input-area input:focus {
-            outline: none;
-            border-color: #667eea;
+
+        .chat-input-area button {
+            background: #1a6d5e;
+            border: none;
+            color: white;
+            padding: 0 18px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
         }
-        
-        .chat-input-area .btn {
-            padding: 12px 20px;
-        }
-        
-        /* ============================================
-           RESPONSIVE DESIGN
-           ============================================ */
-        
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 1.5em;
+
+        @media (max-width: 640px) {
+            .search-card {
+                width: 95%;
+                padding: 4px 4px 4px 16px;
             }
-            
-            .header p {
-                font-size: 0.9em;
+            .search-card button {
+                padding: 8px 18px;
+                font-size: 0.8rem;
             }
-            
-            .stat-card {
-                padding: 10px 20px;
+            .autocomplete-items {
+                left: 16px;
+                right: 80px;
             }
-            
-            .stat-number {
-                font-size: 1.5em;
-            }
-            
-            .pharmacies-grid {
-                grid-template-columns: 1fr;
-            }
-            
             .chat-modal {
-                width: 100%;
-                right: 0;
-                bottom: 0;
-                border-radius: 20px 20px 0 0;
+                width: calc(100% - 40px);
+                right: 20px;
             }
-            
-            .search-input-group {
-                flex-direction: column;
-            }
-            
-            .btn {
-                width: 100%;
-            }
-            
-            .filter-buttons {
-                justify-content: center;
-            }
-            
-            .results-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .sort-select {
-                width: 100%;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .stats {
+            .stats-row {
                 gap: 10px;
             }
-            
-            .stat-card {
-                padding: 8px 15px;
+            .stat-badge {
+                font-size: 0.7rem;
+                padding: 6px 12px;
+                min-width: auto;
+                white-space: nowrap;
             }
-            
-            .stat-number {
-                font-size: 1.2em;
+            .stat-badge strong {
+                font-size: 1rem;
             }
-            
-            .stat-label {
-                font-size: 0.7em;
+            .header h1 {
+                font-size: 1.3rem;
             }
-            
-            .pharmacy-info {
-                padding: 15px;
+            .custom-popup .leaflet-popup-content-wrapper {
+                min-width: 280px;
+                max-width: 320px;
             }
-            
-            .medicine-item {
+            .custom-popup .leaflet-popup-content {
+                min-width: 280px;
+            }
+            .pharmacy-popup {
+                min-width: 260px;
+                padding: 14px;
+            }
+            .med-item {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 5px;
             }
-            
-            .medicine-details {
+            .med-price-stock {
                 text-align: left;
+                margin-top: 2px;
             }
-            
-            .action-buttons {
-                flex-direction: column;
-            }
-        }
-        
-        /* Scrollbar Styling */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 10px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>MedFind</h1>
-        <p>Real-Time Pharmaceutical Inventory Locator System | Legazpi City</p>
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-number" id="pharmacyCount">0</div>
-                <div class="stat-label">Partner Pharmacies</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="medicineCount">0</div>
-                <div class="stat-label">Medicines Available</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="searchCount">0</div>
-                <div class="stat-label">Searches Today</div>
-            </div>
+
+<div class="header">
+    <h1>MedFind</h1>
+    <div class="stats-row">
+        <div class="stat-badge">
+            <strong id="pharmacyCount">0</strong> Partner Pharmacies
+        </div>
+        <div class="stat-badge">
+            <strong id="medicineStockCount">0</strong> Medicines in Stock
+        </div>
+        <div class="stat-badge" id="searchResultBadge">
+            Ready to search
         </div>
     </div>
-    
-    <div class="container">
-        <div class="search-box">
-            <div class="search-input-group">
-                <input type="text" id="searchInput" placeholder="Search for medicine... (e.g., Paracetamol, Amoxicillin, Ibuprofen)">
-                <button class="btn btn-primary" onclick="searchMedicine()">Search</button>
-                <button class="btn btn-secondary" onclick="getUserLocation()">Near Me</button>
-            </div>
-            <div class="filter-buttons">
-                <button class="filter-btn active" onclick="filterBy('all')">All Pharmacies</button>
-                <button class="filter-btn" onclick="filterBy('in-stock')">In Stock Only</button>
-                <button class="filter-btn" onclick="filterBy('prescription')">Prescription Meds</button>
-            </div>
-        </div>
-        
-        <div class="results-header">
-            <div>
-                <h2>Available Pharmacies</h2>
-                <div class="results-count" id="resultsCount">Showing 0 results</div>
-            </div>
-            <select class="sort-select" id="sortSelect" onchange="sortResults()">
-                <option value="distance">Sort by: Distance (Closest)</option>
-                <option value="price">Sort by: Price (Lowest)</option>
-                <option value="name">Sort by: Name (A-Z)</option>
-            </select>
-        </div>
-        
-        <div id="resultsContainer">
-            <div class="loading">
-                <div class="spinner"></div>
-                <p>Loading pharmacies...</p>
-            </div>
+</div>
+
+<div class="map-container">
+    <div class="search-panel">
+        <div class="search-card">
+            <input type="text" id="medicineSearch" placeholder="Search medicine... e.g., Paracetamol, Amoxicillin, Ibuprofen" autocomplete="off">
+            <button id="searchBtn">Search</button>
+            <div id="autocompleteList" class="autocomplete-items" style="display: none;"></div>
         </div>
     </div>
-    
-    <!-- Chat Modal -->
+    <div id="medfindMap"></div>
+</div>
+
+<!-- Floating Chat -->
+<div class="chat-float">
+    <div class="chat-toggle" onclick="toggleChat()">
+        💬
+    </div>
     <div id="chatModal" class="chat-modal">
         <div class="chat-header" onclick="toggleChat()">
-            <span>Chat with Pharmacy</span>
-            <span>_</span>
+            <span>MedFind Support</span>
+            <span>—</span>
         </div>
         <div id="chatMessages" class="chat-messages">
             <div class="message received">
-                <div class="message-bubble">Hello! How can we help you today?</div>
-                <div class="message-time">Just now</div>
+                <div class="bubble">Hello! Ask about medicine availability or chat with pharmacy staff. You can also send prescription inquiries here.</div>
             </div>
         </div>
         <div class="chat-input-area">
             <input type="text" id="chatInput" placeholder="Type your message...">
-            <button class="btn btn-primary" onclick="sendChatMessage()">Send</button>
+            <button onclick="sendChatMessage()">Send</button>
         </div>
     </div>
+</div>
+
+<script>
+    // ============================================
+    // MEDFIND - PHARMACY DATA (Legazpi City)
+    // ============================================
     
-    <script>
-        // ============================================
-        // MEDFIND - JAVASCRIPT APPLICATION
-        // ============================================
+    const pharmaciesData = [
+        { id: 1, name: "Mercury Drug - Legazpi", address: "Rizal St., Legazpi City", lat: 13.1486, lng: 123.7412,
+          medicines: [
+              { name: "Paracetamol 500mg", price: 85, stock: 45, prescription: false },
+              { name: "Amoxicillin 500mg", price: 125, stock: 23, prescription: true },
+              { name: "Ibuprofen 200mg", price: 95, stock: 12, prescription: false },
+              { name: "Mefenamic Acid 500mg", price: 110, stock: 8, prescription: false }
+          ] },
+        { id: 2, name: "Watsons - Pacific Mall", address: "Pacific Mall, Legazpi City", lat: 13.1505, lng: 123.7480,
+          medicines: [
+              { name: "Paracetamol 500mg", price: 92, stock: 28, prescription: false },
+              { name: "Amoxicillin 500mg", price: 135, stock: 8, prescription: true },
+              { name: "Cetirizine 10mg", price: 60, stock: 15, prescription: false },
+              { name: "Loperamide 2mg", price: 48, stock: 20, prescription: false }
+          ] },
+        { id: 3, name: "South Star Drug", address: "Lapu-Lapu St., Legazpi City", lat: 13.1550, lng: 123.7395,
+          medicines: [
+              { name: "Paracetamol 500mg", price: 78, stock: 3, prescription: false },
+              { name: "Ibuprofen 200mg", price: 88, stock: 15, prescription: false },
+              { name: "Amoxicillin 500mg", price: 118, stock: 12, prescription: true },
+              { name: "Losartan 50mg", price: 195, stock: 6, prescription: true }
+          ] },
+        { id: 4, name: "Generics Pharmacy", address: "Peñaranda St., Legazpi City", lat: 13.1420, lng: 123.7300,
+          medicines: [
+              { name: "Paracetamol 500mg", price: 65, stock: 0, prescription: false },
+              { name: "Amoxicillin 500mg", price: 90, stock: 5, prescription: true },
+              { name: "Mefenamic Acid 500mg", price: 85, stock: 7, prescription: false }
+          ] },
+        { id: 5, name: "SM City Legazpi Pharmacy", address: "SM City Legazpi, Airport Rd", lat: 13.1563, lng: 123.7318,
+          medicines: [
+              { name: "Paracetamol 500mg", price: 88, stock: 110, prescription: false },
+              { name: "Amoxicillin 500mg", price: 132, stock: 22, prescription: true },
+              { name: "Losartan 50mg", price: 210, stock: 8, prescription: true },
+              { name: "Cetirizine 10mg", price: 58, stock: 35, prescription: false }
+          ] },
+        { id: 6, name: "ACE Medical Pharmacy", address: "ACE Medical Center, Legazpi", lat: 13.1402, lng: 123.7350,
+          medicines: [
+              { name: "Paracetamol 500mg", price: 95, stock: 33, prescription: false },
+              { name: "Amoxicillin 500mg", price: 140, stock: 0, prescription: true },
+              { name: "Ibuprofen 200mg", price: 100, stock: 5, prescription: false }
+          ] },
+        { id: 7, name: "Tamaoyan Drugstore", address: "Tamaoyan St, Legazpi City", lat: 13.1462, lng: 123.7375,
+          medicines: [
+              { name: "Loperamide 2mg", price: 45, stock: 12, prescription: false },
+              { name: "Amoxicillin 500mg", price: 115, stock: 5, prescription: true },
+              { name: "Hyoscine 10mg", price: 70, stock: 4, prescription: false }
+          ] },
+        { id: 8, name: "Kilicao Botika", address: "Kilicao, Legazpi City", lat: 13.1535, lng: 123.7442,
+          medicines: [
+              { name: "Paracetamol 500mg", price: 72, stock: 25, prescription: false },
+              { name: "Cetirizine 10mg", price: 55, stock: 9, prescription: false }
+          ] }
+    ];
+    
+    // Extract all unique medicine names for autocomplete
+    const allMedicineNames = [];
+    pharmaciesData.forEach(pharmacy => {
+        pharmacy.medicines.forEach(medicine => {
+            if (!allMedicineNames.includes(medicine.name)) {
+                allMedicineNames.push(medicine.name);
+            }
+        });
+    });
+    allMedicineNames.sort();
+    
+    // Global variables
+    let map;
+    let markers = [];
+    let userLat = 13.1486;
+    let userLng = 123.7412;
+    let currentSearchQuery = "";
+    let currentFilteredPharmacies = [];
+    let activeChatPharmacy = null;
+    let chatVisible = false;
+    let activePopup = null;
+    
+    // Distance calculation
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) *
+                  Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+    
+    // Close popup function
+    function closePopup() {
+        if (map && activePopup) {
+            map.closePopup();
+            activePopup = null;
+        }
+    }
+    
+    // Get user location
+    function getUserLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    userLat = position.coords.latitude;
+                    userLng = position.coords.longitude;
+                    if (map) map.setView([userLat, userLng], 14);
+                    performSearch();
+                },
+                () => performSearch()
+            );
+        } else {
+            performSearch();
+        }
+    }
+    
+    // Autocomplete
+    function showAutocompleteSuggestions() {
+        const input = document.getElementById("medicineSearch");
+        const query = input.value.trim().toLowerCase();
+        const autocompleteDiv = document.getElementById("autocompleteList");
         
-        let pharmaciesData = [];
-        let currentFilter = 'all';
-        let currentSort = 'distance';
-        let userLocation = null;
-        let currentPharmacy = null;
-        let chatOpen = false;
+        if (query === "") {
+            autocompleteDiv.style.display = "none";
+            return;
+        }
         
-        // Load pharmacies on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            searchMedicine();
-            getUserLocation();
-            
-            // Auto-search as user types
-            const searchInput = document.getElementById('searchInput');
-            let typingTimer;
-            searchInput.addEventListener('input', function() {
-                clearTimeout(typingTimer);
-                typingTimer = setTimeout(searchMedicine, 500);
-            });
+        const matches = allMedicineNames.filter(name => 
+            name.toLowerCase().includes(query)
+        ).slice(0, 8);
+        
+        if (matches.length === 0) {
+            autocompleteDiv.style.display = "none";
+            return;
+        }
+        
+        let html = "";
+        matches.forEach(match => {
+            const highlighted = match.replace(new RegExp(`(${query})`, 'gi'), '<strong>$1</strong>');
+            html += `<div class="autocomplete-item" onclick="selectMedicine('${match.replace(/'/g, "\\'")}')">${highlighted}</div>`;
         });
         
-        // Get user location
-        function getUserLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    position => {
-                        userLocation = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude
-                        };
-                        console.log('Location detected:', userLocation);
-                        searchMedicine();
-                    },
-                    error => {
-                        console.log('Geolocation error:', error);
-                        userLocation = { lat: 13.1486, lng: 123.7412 };
-                        searchMedicine();
-                    }
+        autocompleteDiv.innerHTML = html;
+        autocompleteDiv.style.display = "block";
+    }
+    
+    function selectMedicine(medicineName) {
+        document.getElementById("medicineSearch").value = medicineName;
+        document.getElementById("autocompleteList").style.display = "none";
+        performSearch();
+    }
+    
+    document.addEventListener("click", function(e) {
+        const searchCard = document.querySelector(".search-card");
+        if (searchCard && !searchCard.contains(e.target)) {
+            document.getElementById("autocompleteList").style.display = "none";
+        }
+    });
+    
+    // Perform search & filter
+    function performSearch() {
+        const query = document.getElementById("medicineSearch").value.trim();
+        currentSearchQuery = query.toLowerCase();
+        
+        document.getElementById("autocompleteList").style.display = "none";
+        
+        if (currentSearchQuery === "") {
+            currentFilteredPharmacies = pharmaciesData;
+            document.getElementById("searchResultBadge").innerHTML = "All pharmacies";
+        } else {
+            currentFilteredPharmacies = pharmaciesData.filter(pharmacy => {
+                return pharmacy.medicines.some(med => 
+                    med.name.toLowerCase().includes(currentSearchQuery) && med.stock > 0
                 );
+            });
+            if (currentFilteredPharmacies.length === 0) {
+                document.getElementById("searchResultBadge").innerHTML = "No stock found";
             } else {
-                userLocation = { lat: 13.1486, lng: 123.7412 };
-                searchMedicine();
+                document.getElementById("searchResultBadge").innerHTML = `${currentFilteredPharmacies.length} pharmacy(s) have "${currentSearchQuery}"`;
             }
         }
         
-        // Search for medicine
-        async function searchMedicine() {
-            const query = document.getElementById('searchInput').value;
-            
-            document.getElementById('resultsContainer').innerHTML = `
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p>Searching for "${query || 'medicines'}"...</p>
-                </div>
-            `;
-            
-            try {
-                const response = await fetch(`/api/search?query=${encodeURIComponent(query)}`);
-                const result = await response.json();
-                
-                if (result.success && result.data) {
-                    pharmaciesData = result.data;
-                    updateStats();
-                    filterAndDisplayResults();
-                } else {
-                    loadDemoData(query);
-                }
-            } catch (error) {
-                console.error('Search error:', error);
-                loadDemoData(query);
-            }
-        }
+        let totalStock = 0;
+        currentFilteredPharmacies.forEach(ph => {
+            const relevantMeds = currentSearchQuery === "" ? 
+                ph.medicines.filter(m => m.stock > 0) :
+                ph.medicines.filter(m => m.name.toLowerCase().includes(currentSearchQuery) && m.stock > 0);
+            totalStock += relevantMeds.reduce((sum, m) => sum + m.stock, 0);
+        });
         
-        // Load demo data (fallback)
-        function loadDemoData(query) {
-            const demoData = [
-                {
-                    id: 1,
-                    name: "Mercury Drug - Legazpi",
-                    address: "Rizal St., Legazpi City",
-                    latitude: 13.1486,
-                    longitude: 123.7412,
-                    medicines: [
-                        { name: "Paracetamol 500mg", price: 85, stock: 45, requires_prescription: false },
-                        { name: "Amoxicillin 500mg", price: 120, stock: 23, requires_prescription: true },
-                        { name: "Ibuprofen 200mg", price: 95, stock: 12, requires_prescription: false }
-                    ]
-                },
-                {
-                    id: 2,
-                    name: "Watsons - Pacific Mall",
-                    address: "Pacific Mall, Legazpi City",
-                    latitude: 13.1500,
-                    longitude: 123.7480,
-                    medicines: [
-                        { name: "Paracetamol 500mg", price: 92, stock: 28, requires_prescription: false },
-                        { name: "Amoxicillin 500mg", price: 135, stock: 8, requires_prescription: true }
-                    ]
-                },
-                {
-                    id: 3,
-                    name: "South Star Drug",
-                    address: "Lapu-Lapu St., Legazpi City",
-                    latitude: 13.1550,
-                    longitude: 123.7350,
-                    medicines: [
-                        { name: "Paracetamol 500mg", price: 78, stock: 3, requires_prescription: false },
-                        { name: "Ibuprofen 200mg", price: 88, stock: 15, requires_prescription: false }
-                    ]
-                },
-                {
-                    id: 4,
-                    name: "Generics Pharmacy",
-                    address: "Peñaranda St., Legazpi City",
-                    latitude: 13.1420,
-                    longitude: 123.7300,
-                    medicines: [
-                        { name: "Paracetamol 500mg", price: 65, stock: 0, requires_prescription: false },
-                        { name: "Amoxicillin 500mg", price: 90, stock: 5, requires_prescription: true }
-                    ]
-                }
-            ];
+        document.getElementById("pharmacyCount").innerText = currentFilteredPharmacies.length;
+        document.getElementById("medicineStockCount").innerText = totalStock;
+        
+        updateMapMarkers();
+    }
+    
+    // Update map markers with custom close button inside popup
+    function updateMapMarkers() {
+        markers.forEach(marker => map.removeLayer(marker));
+        markers = [];
+        
+        currentFilteredPharmacies.forEach(pharmacy => {
+            const distance = calculateDistance(userLat, userLng, pharmacy.lat, pharmacy.lng);
+            const distanceText = distance.toFixed(1);
             
-            if (query) {
-                const filtered = [];
-                for (const pharmacy of demoData) {
-                    const matchingMeds = pharmacy.medicines.filter(m => 
-                        m.name.toLowerCase().includes(query.toLowerCase())
-                    );
-                    if (matchingMeds.length > 0) {
-                        filtered.push({
-                            ...pharmacy,
-                            medicines: matchingMeds
-                        });
-                    }
-                }
-                pharmaciesData = filtered;
+            let displayMeds;
+            if (currentSearchQuery === "") {
+                displayMeds = pharmacy.medicines.filter(m => m.stock > 0);
             } else {
-                pharmaciesData = demoData;
+                displayMeds = pharmacy.medicines.filter(m => 
+                    m.name.toLowerCase().includes(currentSearchQuery) && m.stock > 0
+                );
             }
             
-            updateStats();
-            filterAndDisplayResults();
-        }
-        
-        // Update statistics
-        function updateStats() {
-            let totalMedicines = 0;
-            pharmaciesData.forEach(pharmacy => {
-                totalMedicines += pharmacy.medicines.length;
-            });
-            document.getElementById('pharmacyCount').textContent = pharmaciesData.length;
-            document.getElementById('medicineCount').textContent = totalMedicines;
-            document.getElementById('searchCount').textContent = Math.floor(Math.random() * 100) + 50;
-        }
-        
-        // Filter results
-        function filterBy(filter) {
-            currentFilter = filter;
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.textContent.toLowerCase().includes(filter) || 
-                    (filter === 'all' && btn.textContent.includes('All'))) {
-                    btn.classList.add('active');
-                }
-            });
-            filterAndDisplayResults();
-        }
-        
-        // Sort results
-        function sortResults() {
-            currentSort = document.getElementById('sortSelect').value;
-            filterAndDisplayResults();
-        }
-        
-        // Calculate distance between coordinates
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            if (!lat1 || !lon1 || !lat2 || !lon2) return null;
-            const R = 6371;
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                      Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return R * c;
-        }
-        
-        // Filter and display results
-        function filterAndDisplayResults() {
-            let filtered = [...pharmaciesData];
-            
-            if (currentFilter === 'in-stock') {
-                filtered = filtered.map(pharmacy => ({
-                    ...pharmacy,
-                    medicines: pharmacy.medicines.filter(m => m.stock > 0)
-                })).filter(p => p.medicines.length > 0);
-            } else if (currentFilter === 'prescription') {
-                filtered = filtered.map(pharmacy => ({
-                    ...pharmacy,
-                    medicines: pharmacy.medicines.filter(m => m.requires_prescription)
-                })).filter(p => p.medicines.length > 0);
-            }
-            
-            filtered.forEach(pharmacy => {
-                if (userLocation) {
-                    pharmacy.distance = calculateDistance(
-                        userLocation.lat, userLocation.lng,
-                        pharmacy.latitude, pharmacy.longitude
-                    );
-                } else {
-                    pharmacy.distance = null;
-                }
-            });
-            
-            if (currentSort === 'distance') {
-                filtered.sort((a, b) => (a.distance || 999) - (b.distance || 999));
-            } else if (currentSort === 'price') {
-                filtered.sort((a, b) => {
-                    const minPriceA = Math.min(...a.medicines.map(m => m.price));
-                    const minPriceB = Math.min(...b.medicines.map(m => m.price));
-                    return minPriceA - minPriceB;
-                });
-            } else if (currentSort === 'name') {
-                filtered.sort((a, b) => a.name.localeCompare(b.name));
-            }
-            
-            displayResults(filtered);
-        }
-        
-        // Display results
-        function displayResults(pharmacies) {
-            const container = document.getElementById('resultsContainer');
-            document.getElementById('resultsCount').textContent = `Showing ${pharmacies.length} pharmacy${pharmacies.length !== 1 ? 's' : ''}`;
-            
-            if (pharmacies.length === 0) {
-                container.innerHTML = `
-                    <div class="no-results">
-                        <h3>No pharmacies found</h3>
-                        <p>Try searching for a different medicine or check back later</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            let html = '<div class="pharmacies-grid">';
-            
-            for (const pharmacy of pharmacies) {
-                const distanceText = pharmacy.distance ? `${pharmacy.distance.toFixed(1)} km away` : 'Distance unavailable';
-                
-                html += `
-                    <div class="pharmacy-card" onclick="openChatWithPharmacy('${pharmacy.name}')">
-                        <div class="pharmacy-image"></div>
-                        <div class="pharmacy-info">
-                            <div class="pharmacy-name">${escapeHtml(pharmacy.name)}</div>
-                            <div class="pharmacy-address">${escapeHtml(pharmacy.address)}</div>
-                            <div class="distance-badge">${distanceText}</div>
-                            <div class="medicine-list">
-                                <strong>Available Medicines:</strong>
-                `;
-                
-                for (const medicine of pharmacy.medicines) {
-                    let stockClass = medicine.stock > 20 ? 'stock-high' : (medicine.stock > 5 ? 'stock-medium' : 'stock-low');
-                    let stockText = medicine.stock > 0 ? `${medicine.stock} in stock` : 'Out of stock';
-                    
-                    html += `
-                        <div class="medicine-item">
-                            <div>
-                                <span class="medicine-name">${escapeHtml(medicine.name)}</span>
-                                ${medicine.requires_prescription ? '<span class="prescription-badge">Rx Required</span>' : ''}
+            // Build medicine list HTML
+            let medsHtml = `<div class="stock-info"><strong>Available Stock:</strong>`;
+            if (displayMeds.length === 0) {
+                medsHtml += `<span style="color:gray;">No matching medicine in stock</span>`;
+            } else {
+                displayMeds.forEach(med => {
+                    const stockClass = med.stock < 5 ? (med.stock === 0 ? 'out' : 'low') : '';
+                    const prescriptionBadge = med.prescription ? '<span class="rx-badge">Prescription Required</span>' : '';
+                    medsHtml += `
+                        <div class="med-item">
+                            <div class="med-name-wrapper">
+                                <span class="med-name">${med.name}</span>
+                                ${prescriptionBadge}
                             </div>
-                            <div class="medicine-details">
-                                <span class="medicine-price">₱${medicine.price}</span>
-                                <span class="stock-badge ${stockClass}">${stockText}</span>
-                            </div>
+                            <span class="med-price-stock">
+                                <span class="med-price">₱${med.price}</span>
+                                <span class="med-stock ${stockClass}">${med.stock} pcs</span>
+                            </span>
                         </div>
                     `;
-                }
-                
-                html += `
-                            </div>
-                            <div class="action-buttons">
-                                <button class="action-btn chat-btn" onclick="event.stopPropagation(); openChatWithPharmacy('${escapeHtml(pharmacy.name)}')">Chat</button>
-                                <button class="action-btn directions-btn" onclick="event.stopPropagation(); getDirections(${pharmacy.latitude}, ${pharmacy.longitude})">Directions</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
+                });
             }
+            medsHtml += `</div>`;
             
-            html += '</div>';
-            container.innerHTML = html;
-        }
-        
-        // Escape HTML to prevent XSS
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-        
-        // Get directions
-        function getDirections(lat, lng) {
-            window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank');
-        }
-        
-        // Toggle chat modal
-        function toggleChat() {
-            chatOpen = !chatOpen;
-            document.getElementById('chatModal').style.display = chatOpen ? 'block' : 'none';
-        }
-        
-        // Open chat with pharmacy
-        function openChatWithPharmacy(pharmacyName) {
-            currentPharmacy = pharmacyName;
-            const chatMessages = document.getElementById('chatMessages');
-            chatMessages.innerHTML = `
-                <div class="message received">
-                    <div class="message-bubble">Hello! Welcome to ${escapeHtml(pharmacyName)}. How can we help you today?</div>
-                    <div class="message-time">Just now</div>
-                </div>
-            `;
-            if (!chatOpen) toggleChat();
-        }
-        
-        // Send chat message
-        function sendChatMessage() {
-            const input = document.getElementById('chatInput');
-            const message = input.value.trim();
-            if (!message) return;
-            
-            const chatMessages = document.getElementById('chatMessages');
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            
-            chatMessages.innerHTML += `
-                <div class="message sent">
-                    <div class="message-bubble">${escapeHtml(message)}</div>
-                    <div class="message-time">${timeStr}</div>
-                </div>
-            `;
-            input.value = '';
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-            
-            setTimeout(() => {
-                const responseTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                chatMessages.innerHTML += `
-                    <div class="message received">
-                        <div class="message-bubble">Thank you for your message. We'll check our inventory and get back to you shortly.</div>
-                        <div class="message-time">${responseTime}</div>
+            // Custom close button sa loob ng popup
+            const popupContent = `
+                <div class="pharmacy-popup">
+                    <div class="popup-close-btn" onclick="closePopup()">✕</div>
+                    <h4>${pharmacy.name}</h4>
+                    <div class="address">📍 ${pharmacy.address}</div>
+                    <div class="distance-text">Distance: ${distanceText} km from your location</div>
+                    ${medsHtml}
+                    <div class="action-popup-buttons">
+                        <button class="popup-btn chat" data-pharmacy="${pharmacy.name.replace(/"/g, '&quot;')}">Chat & Prescription</button>
+                        <button class="popup-btn directions" data-lat="${pharmacy.lat}" data-lng="${pharmacy.lng}">Directions</button>
                     </div>
-                `;
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            }, 1500);
+                </div>
+            `;
+            
+            const hasLowStock = displayMeds.some(m => m.stock < 5);
+            const markerIcon = L.divIcon({
+                html: `<div style="background: ${hasLowStock ? '#f59e0b' : '#10b981'}; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3); font-size: 16px; font-weight: bold; color: white;">H</div>`,
+                iconSize: [34, 34],
+                className: 'custom-marker'
+            });
+            
+            const marker = L.marker([pharmacy.lat, pharmacy.lng], { icon: markerIcon })
+                .bindPopup(popupContent, { maxWidth: 400, minWidth: 340, className: 'custom-popup' })
+                .addTo(map);
+            
+            // Track active popup and bind button events
+            marker.on('popupopen', function() {
+                activePopup = marker;
+                const popupNode = document.querySelector('.custom-popup .pharmacy-popup');
+                if (popupNode) {
+                    const chatBtn = popupNode.querySelector('.popup-btn.chat');
+                    const dirBtn = popupNode.querySelector('.popup-btn.directions');
+                    if (chatBtn) {
+                        const phName = chatBtn.getAttribute('data-pharmacy') || pharmacy.name;
+                        chatBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            openChat(phName);
+                        };
+                    }
+                    if (dirBtn) {
+                        const lat = parseFloat(dirBtn.getAttribute('data-lat'));
+                        const lng = parseFloat(dirBtn.getAttribute('data-lng'));
+                        dirBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            getDirections(lat, lng);
+                        };
+                    }
+                }
+            });
+            
+            marker.on('popupclose', function() {
+                activePopup = null;
+            });
+            
+            markers.push(marker);
+        });
+        
+        if (currentFilteredPharmacies.length === 0 && currentSearchQuery !== "") {
+            const tempPopup = L.popup()
+                .setLatLng([userLat, userLng])
+                .setContent(`<div style="padding:20px;font-family:Inter;text-align:center;">No pharmacies have <strong>${currentSearchQuery}</strong> in stock.<br>Try a different medicine or check back later.</div>`)
+                .openOn(map);
+            setTimeout(() => map.closePopup(tempPopup), 4000);
         }
-    </script>
+    }
+    
+    function getDirections(lat, lng) {
+        window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank');
+    }
+    
+    // Chat functions
+    function toggleChat() {
+        const modal = document.getElementById("chatModal");
+        chatVisible = !chatVisible;
+        modal.style.display = chatVisible ? "flex" : "none";
+        if (chatVisible) {
+            const msgDiv = document.getElementById("chatMessages");
+            msgDiv.scrollTop = msgDiv.scrollHeight;
+        }
+    }
+    
+    function openChat(pharmacyName) {
+        if (!chatVisible) toggleChat();
+        activeChatPharmacy = pharmacyName;
+        const chatMsgDiv = document.getElementById("chatMessages");
+        chatMsgDiv.innerHTML = `
+            <div class="message received">
+                <div class="bubble">You are now chatting with <strong>${pharmacyName}</strong>. Share your prescription or ask about stock availability.</div>
+            </div>
+            <div class="message received">
+                <div class="bubble">Our pharmacist will assist you shortly. You can send your prescription image or questions here.</div>
+            </div>
+        `;
+    }
+    
+    function sendChatMessage() {
+        const input = document.getElementById("chatInput");
+        const message = input.value.trim();
+        if (!message) return;
+        
+        const messagesDiv = document.getElementById("chatMessages");
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        messagesDiv.innerHTML += `
+            <div class="message sent">
+                <div class="bubble">${escapeHtml(message)}</div>
+                <div style="font-size:0.6rem;color:#aaa;margin-top:2px;">${time}</div>
+            </div>
+        `;
+        input.value = "";
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        
+        setTimeout(() => {
+            const replyTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            messagesDiv.innerHTML += `
+                <div class="message received">
+                    <div class="bubble">Thank you for your message! We've received your inquiry. Our staff will verify stock and prescription requirements and get back to you shortly.</div>
+                    <div style="font-size:0.6rem;color:#aaa;margin-top:2px;">${replyTime}</div>
+                </div>
+            `;
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }, 1500);
+    }
+    
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    // Initialize map
+    function initMap() {
+        map = L.map('medfindMap').setView([13.1486, 123.7412], 14);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; CartoDB',
+            subdomains: 'abcd',
+            maxZoom: 19,
+            minZoom: 12
+        }).addTo(map);
+        
+        // Close popup when clicking on map
+        map.on('click', function() {
+            closePopup();
+        });
+        
+        getUserLocation();
+    }
+    
+    // Event listeners
+    document.addEventListener("DOMContentLoaded", () => {
+        initMap();
+        const searchInput = document.getElementById("medicineSearch");
+        const searchBtn = document.getElementById("searchBtn");
+        searchBtn.addEventListener("click", performSearch);
+        searchInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") performSearch();
+        });
+        searchInput.addEventListener("input", showAutocompleteSuggestions);
+    });
+</script>
 </body>
 </html>
