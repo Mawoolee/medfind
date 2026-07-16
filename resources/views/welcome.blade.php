@@ -631,7 +631,7 @@
               { name: "Ibuprofen 200mg", price: 95, stock: 12, prescription: false },
               { name: "Mefenamic Acid 500mg", price: 110, stock: 8, prescription: false }
           ] },
-        { id: 2, name: "Watsons - Pacific Mall", address: "Pacific Mall, Legazpi City", lat: 13.1505, lng: 123.7480,
+        { id: 2, name: "Bicol Ultra Drug", address: "4PQM+H57, Rizal St, Brgy: 7 Baño, Albay District, Legazpi City, 4500 Albay", lat: 13.13905, lng: 123.73290,
           medicines: [
               { name: "Paracetamol 500mg", price: 92, stock: 28, prescription: false },
               { name: "Amoxicillin 500mg", price: 135, stock: 8, prescription: true },
@@ -651,26 +651,19 @@
               { name: "Amoxicillin 500mg", price: 90, stock: 5, prescription: true },
               { name: "Mefenamic Acid 500mg", price: 85, stock: 7, prescription: false }
           ] },
-        { id: 5, name: "SM City Legazpi Pharmacy", address: "SM City Legazpi, Airport Rd", lat: 13.1563, lng: 123.7318,
-          medicines: [
-              { name: "Paracetamol 500mg", price: 88, stock: 110, prescription: false },
-              { name: "Amoxicillin 500mg", price: 132, stock: 22, prescription: true },
-              { name: "Losartan 50mg", price: 210, stock: 8, prescription: true },
-              { name: "Cetirizine 10mg", price: 58, stock: 35, prescription: false }
-          ] },
-        { id: 6, name: "ACE Medical Pharmacy", address: "ACE Medical Center, Legazpi", lat: 13.1402, lng: 123.7350,
+        { id: 5, name: "ACE Medical Pharmacy", address: "ACE Medical Center, Legazpi", lat: 13.1402, lng: 123.7350,
           medicines: [
               { name: "Paracetamol 500mg", price: 95, stock: 33, prescription: false },
               { name: "Amoxicillin 500mg", price: 140, stock: 0, prescription: true },
               { name: "Ibuprofen 200mg", price: 100, stock: 5, prescription: false }
           ] },
-        { id: 7, name: "Tamaoyan Drugstore", address: "Tamaoyan St, Legazpi City", lat: 13.1462, lng: 123.7375,
+        { id: 6, name: "Tamaoyan Drugstore", address: "Tamaoyan St, Legazpi City", lat: 13.1462, lng: 123.7375,
           medicines: [
               { name: "Loperamide 2mg", price: 45, stock: 12, prescription: false },
               { name: "Amoxicillin 500mg", price: 115, stock: 5, prescription: true },
               { name: "Hyoscine 10mg", price: 70, stock: 4, prescription: false }
           ] },
-        { id: 8, name: "Kilicao Botika", address: "Kilicao, Legazpi City", lat: 13.1535, lng: 123.7442,
+        { id:7, name: "Kilicao Botika", address: "Kilicao, Legazpi City", lat: 13.1535, lng: 123.7442,
           medicines: [
               { name: "Paracetamol 500mg", price: 72, stock: 25, prescription: false },
               { name: "Cetirizine 10mg", price: 55, stock: 9, prescription: false }
