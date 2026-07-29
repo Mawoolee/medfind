@@ -2,26 +2,21 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Medicine extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
-        'name',
-        'generic_name',
-        'dosage_form',
-        'category',
-        'description',
-        'requires_prescription',
+        'medicine_name',
+        'dosage',
+        'manufacturer',
+        'requiresPrescription',
+        'category'
     ];
 
-    protected $casts = [
-        'requires_prescription' => 'boolean',
-    ];
-
-    public function inventoryItems(): HasMany
-    {
-        return $this->hasMany(InventoryItem::class);
-    }
+    // Or use $guarded = [] to allow all fields
+    // protected $guarded = [];
 }

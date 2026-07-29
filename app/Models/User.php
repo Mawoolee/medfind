@@ -3,8 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -17,6 +15,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'pharmacy_id',
     ];
 
     protected $hidden = [
@@ -28,32 +27,27 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password'          => 'hashed',
+            'password' => 'hashed',
         ];
     }
 
-    public function isAdmin(): bool
+    public function pharmacy()
+    {
+        return $this->belongsTo(Pharmacy::class);
+    }
+
+    public function isAdmin()
     {
         return $this->role === 'admin';
     }
 
-    public function isPharmacyOperator(): bool
+    public function isPharmacy()
     {
-        return $this->role === 'pharmacy_operator';
+        return $this->role === 'pharmacy';
     }
 
-    public function isConsumer(): bool
+    public function isConsumer()
     {
         return $this->role === 'consumer';
-    }
-
-    public function pharmacy(): HasOne
-    {
-        return $this->hasOne(Pharmacy::class);
-    }
-
-    public function sentMessages(): HasMany
-    {
-        return $this->hasMany(Message::class, 'consumer_id');
     }
 }

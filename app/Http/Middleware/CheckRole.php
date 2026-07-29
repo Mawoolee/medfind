@@ -10,13 +10,13 @@ class CheckRole
     public function handle(Request $request, Closure $next, ...$roles)
     {
         if (!auth()->check()) {
-            return redirect()->route('login');
+            return redirect('login');
         }
-        
-        if (!in_array(auth()->user()->role, $roles)) {
-            abort(403, 'Unauthorized access.');
+
+        if (in_array(auth()->user()->role, $roles)) {
+            return $next($request);
         }
-        
-        return $next($request);
+
+        abort(403, 'Unauthorized access.');
     }
 }

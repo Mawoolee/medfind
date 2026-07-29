@@ -1,0 +1,45 @@
+
+  GET|HEAD  / ........................................................................ home › ConsumerController@index
+  GET|HEAD  admin/dashboard ......................................... admin.dashboard › AdminDashboardController@index
+  GET|HEAD  admin/logs .................................................... admin.logs › AdminDashboardController@logs
+  GET|HEAD  admin/pharmacies .................................. admin.pharmacies › AdminDashboardController@pharmacies
+  GET|HEAD  admin/pharmacy/add ............................. admin.pharmacy.add › AdminDashboardController@addPharmacy
+  POST      admin/pharmacy/store ....................... admin.pharmacy.store › AdminDashboardController@storePharmacy
+  DELETE    admin/pharmacy/{id} ...................... admin.pharmacy.delete › AdminDashboardController@deletePharmacy
+  DELETE    admin/user/{id} .................................. admin.user.delete › AdminDashboardController@deleteUser
+  GET|HEAD  admin/users ................................................. admin.users › AdminDashboardController@users
+  GET|POST|HEAD broadcasting/auth ......................... Illuminate\Broadcasting › BroadcastController@authenticate
+  GET|HEAD  confirm-password .............................. password.confirm › Auth\ConfirmablePasswordController@show
+  POST      confirm-password ................................................ Auth\ConfirmablePasswordController@store
+  GET|HEAD  consumer/dashboard ......................................... consumer.dashboard › ConsumerController@index
+  POST      consumer/message/send .................................... consumer.message.send › MessageController@store
+  GET|HEAD  consumer/messages ............................ consumer.messages › MessageController@consumerConversations
+  GET|HEAD  consumer/pharmacy/{id} .................... consumer.pharmacy.details › ConsumerController@pharmacyDetails
+  GET|HEAD  consumer/search ........................................ consumer.search › MedicineSearchController@search
+  GET|HEAD  dashboard .................................................................. dashboard › routes/web.php:18
+  POST      email/verification-notification ... verification.send › Auth\EmailVerificationNotificationController@store
+  GET|HEAD  forgot-password ............................... password.request › Auth\PasswordResetLinkController@create
+  POST      forgot-password .................................. password.email › Auth\PasswordResetLinkController@store
+  GET|HEAD  login ................................................. login › Auth\AuthenticatedSessionController@create
+  POST      login .......................................................... Auth\AuthenticatedSessionController@store
+  POST      logout .............................................. logout › Auth\AuthenticatedSessionController@destroy
+  PUT       password ................................................ password.update › Auth\PasswordController@update
+  GET|HEAD  pharmacy/dashboard ................................ pharmacy.dashboard › PharmacyDashboardController@index
+  GET|HEAD  pharmacy/inventory ............................ pharmacy.inventory › PharmacyDashboardController@inventory
+  POST      pharmacy/inventory/update ........ pharmacy.inventory.update › PharmacyDashboardController@updateInventory
+  GET|HEAD  pharmacy/message/mark-read/{id} ........ pharmacy.message.mark-read › PharmacyDashboardController@markRead
+  POST      pharmacy/message/reply/{id} ............ pharmacy.message.reply › PharmacyDashboardController@replyMessage
+  GET|HEAD  pharmacy/messages ............................... pharmacy.messages › PharmacyDashboardController@messages
+  GET|HEAD  register ................................................. register › Auth\RegisteredUserController@create
+  POST      register ............................................................. Auth\RegisteredUserController@store
+  POST      reset-password ......................................... password.store › Auth\NewPasswordController@store
+  GET|HEAD  reset-password/{token} ................................ password.reset › Auth\NewPasswordController@create
+  GET|HEAD  sanctum/csrf-cookie .................... sanctum.csrf-cookie › Laravel\Sanctum › CsrfCookieController@show
+  GET|HEAD  storage/{path} storage.local › vendor/laravel/framework/src/Illuminate/Filesystem/FilesystemServiceProvid…
+  PUT       storage/{path} storage.local.upload › vendor/laravel/framework/src/Illuminate/Filesystem/FilesystemServic…
+  GET|HEAD  up ........... vendor/laravel/framework/src/Illuminate/Foundation/Configuration/ApplicationBuilder.php:219
+  GET|HEAD  verify-email ................................ verification.notice › Auth\EmailVerificationPromptController
+  GET|HEAD  verify-email/{id}/{hash} ................................ verification.verify › Auth\VerifyEmailController
+
+                                                                                                   Showing [41] routes
+

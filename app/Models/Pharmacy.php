@@ -2,33 +2,34 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Pharmacy extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
-        'user_id',
-        'name',
-        'address',
+        'pharmacy_name',
+        'pharmacyAddress',
         'latitude',
         'longitude',
-        'contact_number',
-        'status',
+        'contactNumber',
+        'user_id',
+        'status', // Add this
     ];
 
-    public function user(): BelongsTo
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    public function inventoryItems(): HasMany
+    public function inventory()
     {
         return $this->hasMany(InventoryItem::class);
     }
 
-    public function messages(): HasMany
+    public function messages()
     {
         return $this->hasMany(Message::class);
     }
