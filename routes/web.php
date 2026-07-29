@@ -24,7 +24,7 @@ Route::get('/dashboard', function () {
     
     if ($role === 'admin') {
         return redirect()->route('admin.dashboard');
-    } elseif ($role === 'pharmacy') {
+    } elseif ($role === 'pharmacy_operator') {
         return redirect()->route('pharmacy.dashboard');
     } else {
         return redirect()->route('consumer.dashboard');
@@ -50,7 +50,7 @@ Route::middleware(['auth', 'role:consumer'])->prefix('consumer')->name('consumer
 // ============================================
 // PHARMACY ROUTES
 // ============================================
-Route::middleware(['auth', 'role:pharmacy'])->prefix('pharmacy')->name('pharmacy.')->group(function () {
+Route::middleware(['auth', 'role:pharmacy_operator'])->prefix('pharmacy')->name('pharmacy.')->group(function () {
     Route::get('/dashboard', [PharmacyDashboardController::class, 'index'])->name('dashboard');
     Route::get('/inventory', [PharmacyDashboardController::class, 'inventory'])->name('inventory');
     Route::post('/inventory/update', [PharmacyDashboardController::class, 'updateInventory'])->name('inventory.update');

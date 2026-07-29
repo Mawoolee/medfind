@@ -13,7 +13,7 @@ class MedicineSearchController extends Controller
         
         $results = InventoryItem::with(['pharmacy', 'medicine'])
             ->whereHas('medicine', function($q) use ($query) {
-                $q->where('medicine_name', 'ILIKE', "%{$query}%");
+                $q->where('medicine_name', 'like', "%{$query}%");
             })
             ->whereHas('pharmacy', function($q) {
                 $q->where('status', 'approved');

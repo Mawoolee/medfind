@@ -43,7 +43,7 @@ class User extends Authenticatable
 
     public function isPharmacy()
     {
-        return $this->role === 'pharmacy';
+        return $this->role === 'pharmacy_operator';
     }
 
     public function isConsumer()

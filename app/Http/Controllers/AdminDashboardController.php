@@ -14,24 +14,29 @@ class AdminDashboardController extends Controller
 {
     public function index(): View
     {
-        $stats = [
-            'users'      => User::count(),
-            'pharmacies' => Pharmacy::count(),
-            'medicines'  => Medicine::count(),
-            'searches'   => InventoryItem::sum('stock_quantity'),
-        ];
+        $userCount = User::count();
+        $pharmacyCount = Pharmacy::count();
+        $medicineCount = Medicine::count();
+        $messageCount = Message::count();
 
-        $recentUsers     = User::latest()->take(5)->get();
+        $recentUsers = User::latest()->take(5)->get();
         $recentPharmacies = Pharmacy::latest()->take(5)->get();
 
-        return view('admin.dashboard', compact('stats', 'recentUsers', 'recentPharmacies'));
+        return view('admin.dashboard', compact(
+            'userCount',
+            'pharmacyCount',
+            'medicineCount',
+            'messageCount',
+            'recentUsers',
+            'recentPharmacies'
+        ));
     }
 
     // ── Users ─────────────────────────────────────────────────────────────────
     public function users()
     {
         $users = User::orderBy('created_at', 'desc')->get();
-        return response()->json($users);
+        return view('admin.users', compact('users'));
     }
 
     public function updateUser(Request $request, User $user)
@@ -46,18 +51,36 @@ class AdminDashboardController extends Controller
         return response()->json(['success' => true, 'user' => $user]);
     }
 
-    public function destroyUser(User $user)
+    public function deleteUser(User $user)
     {
         abort_if($user->id === auth()->id(), 403, 'Cannot delete yourself.');
         $user->delete();
-        return response()->json(['success' => true]);
+        return redirect()->route('admin.users')->with('success', 'User deleted successfully.');
     }
 
     // ── Pharmacies ────────────────────────────────────────────────────────────
     public function pharmacies()
     {
         $pharmacies = Pharmacy::with('user')->orderBy('created_at', 'desc')->get();
-        return response()->json($pharmacies);
+        return view('admin.pharmacies', compact('pharmacies'));
+    }
+
+    public function addPharmacy(): View
+    {
+        return view('admin.add-pharmacy');
+    }
+
+    public function logs(): View
+    {
+        $logPath = storage_path('logs/laravel.log');
+        $logs = [];
+
+        if (file_exists($logPath)) {
+            $contents = collect(array_slice(explode("\n", file_get_contents($logPath)), -100));
+            $logs = $contents->filter()->values();
+        }
+
+        return view('admin.logs', compact('logs'));
     }
 
     public function storePharmacy(Request $request)
@@ -97,10 +120,10 @@ class AdminDashboardController extends Controller
         return response()->json(['success' => true, 'pharmacy' => $pharmacy]);
     }
 
-    public function destroyPharmacy(Pharmacy $pharmacy)
+    public function deletePharmacy(Pharmacy $pharmacy)
     {
         $pharmacy->delete();
-        return response()->json(['success' => true]);
+        return redirect()->route('admin.pharmacies')->with('success', 'Pharmacy deleted successfully.');
     }
 
     public function approvePharmacy(Pharmacy $pharmacy)

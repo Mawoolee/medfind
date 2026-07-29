@@ -22,7 +22,7 @@ class MessageController extends Controller
             return redirect()->back()->with('error', 'Unauthorized access.');
         }
 
-        if ($user->role === 'pharmacy' && $user->pharmacy_id !== $pharmacy->id) {
+        if ($user->role === 'pharmacy_operator' && $user->pharmacy_id !== $pharmacy->id) {
             return redirect()->back()->with('error', 'Unauthorized access.');
         }
 
@@ -40,7 +40,7 @@ class MessageController extends Controller
     public function unreadCount()
     {
         $user = Auth::user();
-        if ($user->role !== 'pharmacy') {
+        if ($user->role !== 'pharmacy_operator') {
             return response()->json(['count' => 0]);
         }
 
@@ -96,7 +96,7 @@ class MessageController extends Controller
         $user = Auth::user();
 
         // Verify ownership
-        if ($user->role === 'pharmacy') {
+        if ($user->role === 'pharmacy_operator') {
             $pharmacy = Pharmacy::where('user_id', $user->id)->first();
             if (!$pharmacy || $message->pharmacy_id !== $pharmacy->id) {
                 return redirect()->back()->with('error', 'Unauthorized.');
@@ -122,7 +122,7 @@ class MessageController extends Controller
 
         $user = Auth::user();
 
-        if ($user->role !== 'pharmacy') {
+        if ($user->role !== 'pharmacy_operator') {
             return redirect()->back()->with('error', 'Only pharmacies can reply.');
         }
 

@@ -34,9 +34,9 @@
                                 <td class="px-4 py-3">
                                     <span class="px-2 py-1 rounded text-xs 
                                         {{ $user->role === 'admin' ? 'bg-red-100 text-red-700' : '' }}
-                                        {{ $user->role === 'pharmacy' ? 'bg-blue-100 text-blue-700' : '' }}
+                                        {{ $user->role === 'pharmacy_operator' ? 'bg-blue-100 text-blue-700' : '' }}
                                         {{ $user->role === 'consumer' ? 'bg-green-100 text-green-700' : '' }}">
-                                        {{ ucfirst($user->role) }}
+                                        {{ str_replace('_', ' ', ucfirst($user->role)) }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-3">{{ $user->created_at->format('M d, Y') }}</td>
