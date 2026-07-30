@@ -7,11 +7,17 @@
 @section('content')
 <div class="container mx-auto px-4 py-8">
     <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">Customer Messages</h1>
+        <h1 class="text-2xl font-bold text-gray-800">💬 Customer Messages</h1>
         <a href="{{ route('pharmacy.dashboard') }}" class="text-blue-600 hover:text-blue-800">
-            <i class="fas fa-arrow-left mr-2"></i>Back
+            <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
         </a>
     </div>
+
+    @if(session('success'))
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4">
+            {{ session('success') }}
+        </div>
+    @endif
 
     @if(isset($messages) && $messages->count() > 0)
         <div class="space-y-4">
@@ -20,12 +26,19 @@
                     <div class="flex items-start justify-between">
                         <div class="flex-1">
                             <div class="flex items-center mb-2">
-                                <h3 class="font-semibold text-gray-800">From: {{ $message->consumer->name ?? 'Customer' }}</h3>
+                                <h3 class="font-semibold text-gray-800">
+                                    <i class="fas fa-user mr-2 text-gray-400"></i>
+                                    From: {{ $message->consumer->name ?? 'Customer' }}
+                                </h3>
                                 @if(!$message->is_read)
                                     <span class="ml-3 text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">New</span>
                                 @endif
+                                <span class="ml-3 text-xs text-gray-400">{{ $message->created_at->format('M d, Y g:i A') }}</span>
                             </div>
-                            <p class="text-gray-700 mb-2">{{ $message->message }}</p>
+                            
+                            <div class="bg-gray-50 p-4 rounded-lg mb-3">
+                                <p class="text-gray-700">{{ $message->message }}</p>
+                            </div>
                             
                             @if($message->prescription_image)
                                 <div class="mt-2">
@@ -62,8 +75,6 @@
                                     </form>
                                 </div>
                             @endif
-                            
-                            <p class="text-xs text-gray-400 mt-2">{{ $message->created_at->format('M d, Y g:i A') }}</p>
                         </div>
                     </div>
                 </div>
@@ -73,7 +84,7 @@
         <div class="bg-gray-50 rounded-lg p-12 text-center">
             <i class="fas fa-inbox text-gray-400 text-6xl mb-4"></i>
             <h3 class="text-xl font-semibold text-gray-600 mb-2">No Messages Yet</h3>
-            <p class="text-gray-500">Customer messages will appear here.</p>
+            <p class="text-gray-500">Customer messages will appear here when consumers contact you.</p>
         </div>
     @endif
 </div>

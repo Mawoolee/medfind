@@ -1,4 +1,5 @@
 <?php
+// routes/web.php
 
 use App\Http\Controllers\ConsumerController;
 use App\Http\Controllers\PharmacyDashboardController;
@@ -19,12 +20,12 @@ Route::get('/dashboard', function () {
     if (!auth()->check()) {
         return redirect()->route('login');
     }
-    
+
     $role = auth()->user()->role;
-    
+
     if ($role === 'admin') {
         return redirect()->route('admin.dashboard');
-    } elseif ($role === 'pharmacy_operator') {
+    } elseif ($role === 'pharmacy') {
         return redirect()->route('pharmacy.dashboard');
     } else {
         return redirect()->route('consumer.dashboard');
@@ -41,7 +42,7 @@ require __DIR__.'/auth.php';
 // ============================================
 Route::middleware(['auth', 'role:consumer'])->prefix('consumer')->name('consumer.')->group(function () {
     Route::get('/dashboard', [ConsumerController::class, 'index'])->name('dashboard');
-    Route::get('/search', [MedicineSearchController::class, 'search'])->name('search');
+    Route::get('/search', [ConsumerController::class, 'search'])->name('search');
     Route::get('/pharmacy/{id}', [ConsumerController::class, 'pharmacyDetails'])->name('pharmacy.details');
     Route::post('/message/send', [MessageController::class, 'store'])->name('message.send');
     Route::get('/messages', [MessageController::class, 'consumerConversations'])->name('messages');
@@ -50,7 +51,7 @@ Route::middleware(['auth', 'role:consumer'])->prefix('consumer')->name('consumer
 // ============================================
 // PHARMACY ROUTES
 // ============================================
-Route::middleware(['auth', 'role:pharmacy_operator'])->prefix('pharmacy')->name('pharmacy.')->group(function () {
+Route::middleware(['auth', 'role:pharmacy'])->prefix('pharmacy')->name('pharmacy.')->group(function () {
     Route::get('/dashboard', [PharmacyDashboardController::class, 'index'])->name('dashboard');
     Route::get('/inventory', [PharmacyDashboardController::class, 'inventory'])->name('inventory');
     Route::post('/inventory/update', [PharmacyDashboardController::class, 'updateInventory'])->name('inventory.update');

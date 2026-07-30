@@ -14,9 +14,22 @@ class Medicine extends Model
         'dosage',
         'manufacturer',
         'requiresPrescription',
-        'category'
+        'category',
     ];
 
-    // Or use $guarded = [] to allow all fields
-    // protected $guarded = [];
+    /**
+     * Get the inventory items for the medicine.
+     */
+    public function inventory()
+    {
+        return $this->hasMany(InventoryItem::class);
+    }
+
+    /**
+     * Check if medicine requires prescription.
+     */
+    public function getRequiresPrescriptionAttribute($value)
+    {
+        return (bool) $value;
+    }
 }

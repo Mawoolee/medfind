@@ -168,7 +168,6 @@
                 selectedFile = file;
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    // Show preview in chat
                     const chatDiv = document.getElementById('chatMessages');
                     chatDiv.innerHTML += `
                         <div class="message sent">

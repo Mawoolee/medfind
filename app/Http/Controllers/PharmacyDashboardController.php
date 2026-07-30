@@ -1,39 +1,42 @@
 <?php
+// app/Http/Controllers/PharmacyDashboardController.php
 
 namespace App\Http\Controllers;
 
+use App\Models\Pharmacy;
 use App\Models\InventoryItem;
-use App\Models\Medicine;
 use App\Models\Message;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 
 class PharmacyDashboardController extends Controller
 {
-    private function pharmacy()
+    public function index()
     {
-        return auth()->user()->pharmacy;
-    }
+        // Get the pharmacy associated with the logged-in user
+        $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
 
-    public function index(): View
-    {
-        $pharmacy = $this->pharmacy();
-        $inventory = InventoryItem::with('medicine')
-            ->where('pharmacy_id', $pharmacy->id)
-            ->orderBy('created_at', 'desc')
-            ->get();
+        if (!$pharmacy) {
+            return redirect()->back()->with('error', 'No pharmacy assigned to your account.');
+        }
 
+        // Get inventory count
+        $inventoryCount = InventoryItem::where('pharmacy_id', $pharmacy->id)->count();
+
+        // Get items in stock
+        $inStockCount = InventoryItem::where('pharmacy_id', $pharmacy->id)
+            ->where('stockQuantity', '>', 0)
+            ->count();
+
+        // Get messages count
         $messageCount = Message::where('pharmacy_id', $pharmacy->id)->count();
+
+        // Get unread messages count
         $unreadCount = Message::where('pharmacy_id', $pharmacy->id)
             ->where('is_read', false)
             ->count();
 
-        $inventoryCount = $inventory->count();
-        $inStockCount = $inventory->where('stockQuantity', '>', 0)->count();
-
         return view('pharmacy.dashboard', compact(
             'pharmacy',
-            'inventory',
             'inventoryCount',
             'inStockCount',
             'messageCount',
@@ -41,138 +44,129 @@ class PharmacyDashboardController extends Controller
         ));
     }
 
-    public function inventory(): View
+    public function inventory()
     {
-        $pharmacy = $this->pharmacy();
+        $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
+
+        if (!$pharmacy) {
+            return redirect()->back()->with('error', 'No pharmacy assigned.');
+        }
+
         $inventory = InventoryItem::with('medicine')
             ->where('pharmacy_id', $pharmacy->id)
-            ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('pharmacy.inventory', compact('inventory'));
+        return view('pharmacy.inventory', compact('pharmacy', 'inventory'));
     }
 
     public function updateInventory(Request $request)
     {
-        $pharmacy = $this->pharmacy();
+        $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
 
-        $request->validate([
-            'stock' => 'array',
-            'price' => 'array',
-            'stock.*' => 'integer|min:0',
-            'price.*' => 'numeric|min:0',
-        ]);
+        if (!$pharmacy) {
+            return redirect()->back()->with('error', 'No pharmacy assigned.');
+        }
 
-        $stock = $request->input('stock', []);
-        $price = $request->input('price', []);
-
-        foreach ($stock as $itemId => $quantity) {
-            $item = InventoryItem::where('id', $itemId)
+        // Update individual item
+        if ($request->has('update_id')) {
+            $item = InventoryItem::where('id', $request->update_id)
                 ->where('pharmacy_id', $pharmacy->id)
                 ->first();
 
-            if (!$item) {
-                continue;
+            if ($item) {
+                if ($request->has('stock') && isset($request->stock[$item->id])) {
+                    $item->stockQuantity = $request->stock[$item->id];
+                }
+                if ($request->has('price') && isset($request->price[$item->id])) {
+                    $item->price = $request->price[$item->id];
+                }
+                $item->save();
+                return redirect()->back()->with('success', 'Inventory updated successfully!');
             }
-
-            $item->update([
-                'stockQuantity' => $quantity,
-                'price' => $price[$itemId] ?? $item->price,
-            ]);
         }
 
-        return back()->with('success', 'Inventory updated successfully.');
+        // Update multiple items
+        if ($request->has('stock')) {
+            foreach ($request->stock as $itemId => $stock) {
+                $item = InventoryItem::where('id', $itemId)
+                    ->where('pharmacy_id', $pharmacy->id)
+                    ->first();
+
+                if ($item) {
+                    $item->stockQuantity = $stock;
+                    if (isset($request->price[$itemId])) {
+                        $item->price = $request->price[$itemId];
+                    }
+                    $item->save();
+                }
+            }
+            return redirect()->back()->with('success', 'All inventory updated successfully!');
+        }
+
+        return redirect()->back()->with('error', 'No changes made.');
     }
 
-    public function messages(): View
+    public function messages()
     {
-        $pharmacy = $this->pharmacy();
-        $messages = Message::with('consumer')
-            ->where('pharmacy_id', $pharmacy->id)
+        $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
+
+        if (!$pharmacy) {
+            return redirect()->back()->with('error', 'No pharmacy assigned.');
+        }
+
+        $messages = Message::where('pharmacy_id', $pharmacy->id)
+            ->with('consumer')
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('pharmacy.messages', compact('messages'));
+        return view('pharmacy.messages', compact('pharmacy', 'messages'));
     }
 
-    public function replyMessage(Request $request, Message $message)
+    public function replyMessage(Request $request, $id)
     {
         $request->validate([
             'reply' => 'required|string|max:1000',
         ]);
 
-        $pharmacy = $this->pharmacy();
-        abort_if($message->pharmacy_id !== $pharmacy->id, 403);
+        $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
+
+        if (!$pharmacy) {
+            return redirect()->back()->with('error', 'No pharmacy assigned.');
+        }
+
+        $message = Message::where('id', $id)
+            ->where('pharmacy_id', $pharmacy->id)
+            ->first();
+
+        if (!$message) {
+            return redirect()->back()->with('error', 'Message not found.');
+        }
 
         $message->reply = $request->reply;
         $message->replied_at = now();
         $message->is_read = true;
         $message->save();
 
-        return back()->with('success', 'Reply sent successfully!');
+        return redirect()->back()->with('success', 'Reply sent successfully!');
     }
 
-    public function markRead(Message $message)
+    public function markRead($id)
     {
-        $pharmacy = $this->pharmacy();
-        abort_if($message->pharmacy_id !== $pharmacy->id, 403);
+        $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
 
-        $message->is_read = true;
-        $message->save();
-
-        return back()->with('success', 'Message marked as read.');
-    }
-
-    public function store(Request $request)
-    {
-        $request->validate([
-            'medicine_id'    => 'required|exists:medicines,id',
-            'stock_quantity' => 'required|integer|min:0',
-            'price'          => 'required|numeric|min:0',
-        ]);
-
-        $pharmacy = $this->pharmacy();
-
-        $existing = InventoryItem::where('pharmacy_id', $pharmacy->id)
-            ->where('medicine_id', $request->medicine_id)
-            ->first();
-
-        if ($existing) {
-            return back()->with('error', 'This medicine already exists in inventory. Please update it instead.');
+        if (!$pharmacy) {
+            return redirect()->back()->with('error', 'No pharmacy assigned.');
         }
 
-        InventoryItem::create([
-            'pharmacy_id'    => $pharmacy->id,
-            'medicine_id'    => $request->medicine_id,
-            'stockQuantity'  => $request->stock_quantity,
-            'price'          => $request->price,
-        ]);
+        $message = Message::where('id', $id)
+            ->where('pharmacy_id', $pharmacy->id)
+            ->first();
 
-        return back()->with('success', 'Medicine added to inventory.');
-    }
+        if ($message) {
+            $message->is_read = true;
+            $message->save();
+        }
 
-    public function update(Request $request, InventoryItem $item)
-    {
-        abort_if($item->pharmacy_id !== $this->pharmacy()->id, 403);
-
-        $request->validate([
-            'stock_quantity' => 'required|integer|min:0',
-            'price'          => 'required|numeric|min:0',
-        ]);
-
-        $item->update([
-            'stockQuantity' => $request->stock_quantity,
-            'price'         => $request->price,
-        ]);
-
-        return back()->with('success', 'Stock updated successfully.');
-    }
-
-    public function destroy(InventoryItem $item)
-    {
-        abort_if($item->pharmacy_id !== $this->pharmacy()->id, 403);
-        $item->delete();
-
-        return back()->with('success', 'Medicine removed from inventory.');
+        return redirect()->back()->with('success', 'Message marked as read.');
     }
 }

@@ -14,9 +14,22 @@ class InventoryItem extends Model
         'medicine_id',
         'stockQuantity',
         'price',
-        'status'
+        'status',
     ];
 
-    // Or use this to allow all fields:
-    // protected $guarded = [];
+    /**
+     * Get the pharmacy that owns the inventory item.
+     */
+    public function pharmacy()
+    {
+        return $this->belongsTo(Pharmacy::class);
+    }
+
+    /**
+     * Get the medicine that owns the inventory item.
+     */
+    public function medicine()
+    {
+        return $this->belongsTo(Medicine::class);
+    }
 }

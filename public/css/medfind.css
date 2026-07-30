@@ -1,0 +1,411 @@
+/* ============================================
+   MEDFIND - MINIMALIST STYLES & LEAFLET OVERRIDES
+   Colors:
+   Dominant: #191970 (Midnight Blue)
+   Secondary: #9400D3 (Dark Violet)
+   Accent: #D9F855 (Lime Yellow)
+   Neutral: #7FFFD4 (Aquamarine)
+   ============================================ */
+
+/* ============================================
+   LEAFLET POPUP - FIX FOR CLICKABLE BUTTONS
+   ============================================ */
+.leaflet-popup {
+    z-index: 9999 !important;
+    pointer-events: auto !important;
+}
+
+.leaflet-popup-content-wrapper {
+    z-index: 9999 !important;
+    pointer-events: auto !important;
+    background: transparent !important;
+    box-shadow: 0 20px 25px -5px rgba(25, 25, 112, 0.15), 0 8px 10px -6px rgba(25, 25, 112, 0.1) !important;
+    padding: 0 !important;
+    border-radius: 24px !important;
+    overflow: visible !important;
+    border: none !important;
+}
+
+.leaflet-popup-content {
+    margin: 0 !important;
+    width: 100% !important;
+    line-height: 1.4 !important;
+    pointer-events: auto !important;
+    z-index: 9999 !important;
+}
+
+.leaflet-popup-content * {
+    pointer-events: auto !important;
+}
+
+.leaflet-popup-content button {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    z-index: 9999 !important;
+    position: relative !important;
+}
+
+.leaflet-popup-content div {
+    pointer-events: auto !important;
+}
+
+.leaflet-popup-content-wrapper .leaflet-popup-content {
+    pointer-events: auto !important;
+}
+
+.leaflet-popup-tip-container {
+    z-index: 9999 !important;
+}
+
+.leaflet-popup-tip {
+    background: #ffffff !important;
+    box-shadow: none !important;
+    z-index: 9999 !important;
+}
+
+.leaflet-popup-close-button {
+    display: none !important;
+}
+
+.leaflet-control-container {
+    z-index: 50 !important;
+}
+
+.leaflet-control-zoom {
+    z-index: 50 !important;
+}
+
+.marker-dot {
+    cursor: pointer;
+}
+
+/* Force all popup content to be clickable */
+.custom-popup .leaflet-popup-content-wrapper {
+    pointer-events: auto !important;
+}
+
+.custom-popup .leaflet-popup-content {
+    pointer-events: auto !important;
+}
+
+.custom-popup .leaflet-popup-content button,
+.custom-popup .leaflet-popup-content div,
+.custom-popup .leaflet-popup-content span,
+.custom-popup .leaflet-popup-content a {
+    pointer-events: auto !important;
+}
+
+/* ============================================
+   STATS BAR - FIXED Z-INDEX
+   ============================================ */
+.stats-bar {
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999 !important;
+    background: rgba(255, 255, 255, 0.95);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border-radius: 9999px;
+    padding: 8px 20px;
+    box-shadow: 0 4px 20px rgba(25, 25, 112, 0.08);
+    border: 1px solid rgba(148, 0, 211, 0.12);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 12px;
+    pointer-events: none;
+}
+
+.stats-bar .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.stats-bar .stat-number {
+    font-weight: 700;
+    color: #191970;
+}
+
+.stats-bar .stat-label {
+    color: #94a3b8;
+}
+
+.stats-bar .stat-divider {
+    width: 1px;
+    height: 16px;
+    background: #e2e8f0;
+}
+
+/* ============================================
+   SEARCH PANEL
+   ============================================ */
+.search-panel {
+    position: absolute;
+    top: 76px;
+    left: 0;
+    right: 0;
+    z-index: 100 !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+}
+
+.search-card-minimal {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(25, 25, 112, 0.08);
+    padding: 6px 6px 6px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 440px;
+    width: 90%;
+    pointer-events: auto;
+    border: 1px solid rgba(148, 0, 211, 0.15);
+}
+
+.search-card-minimal input {
+    flex: 1;
+    border: none;
+    padding: 10px 0;
+    font-size: 13px;
+    font-family: system-ui, -apple-system, sans-serif;
+    outline: none;
+    background: transparent;
+    color: #191970;
+}
+
+.search-card-minimal input::placeholder {
+    color: #bbb;
+}
+
+.search-card-minimal button {
+    background: #191970;
+    border: none;
+    color: #D9F855;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: system-ui, -apple-system, sans-serif;
+    transition: 0.2s;
+}
+
+.search-card-minimal button:hover {
+    background: #2a2a8a;
+}
+
+/* ============================================
+   AUTOCOMPLETE
+   ============================================ */
+.autocomplete-items {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 440px;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 6px 24px rgba(25, 25, 112, 0.08);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 9999 !important;
+    border: 1px solid rgba(148, 0, 211, 0.15);
+}
+
+.autocomplete-item {
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #191970;
+    border-bottom: 1px solid rgba(148, 0, 211, 0.08);
+}
+
+.autocomplete-item:hover {
+    background: rgba(148, 0, 211, 0.05);
+}
+
+.autocomplete-item strong {
+    color: #9400D3;
+    font-weight: 700;
+}
+
+.autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+/* ============================================
+   FLOATING CHAT MODAL - FIXED Z-INDEX
+   ============================================ */
+.chat-float {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 999 !important;
+}
+
+.chat-toggle {
+    background: #191970;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(25, 25, 112, 0.25);
+    transition: 0.2s;
+    color: #D9F855;
+    font-size: 18px;
+}
+
+.chat-toggle:hover {
+    transform: scale(1.06);
+    background: #2a2a8a;
+}
+
+.chat-modal {
+    position: fixed;
+    bottom: 84px;
+    right: 24px;
+    width: 310px;
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 10px 40px rgba(25, 25, 112, 0.12);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 1000 !important;
+    border: 1px solid rgba(148, 0, 211, 0.12);
+}
+
+.chat-header {
+    padding: 12px 16px;
+    font-weight: 700;
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(148, 0, 211, 0.1);
+    color: #191970;
+    font-size: 13px;
+    background: rgba(148, 0, 211, 0.03);
+}
+
+.chat-messages {
+    height: 260px;
+    overflow-y: auto;
+    padding: 12px;
+    background: rgba(148, 0, 211, 0.02);
+}
+
+.message {
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.message.sent {
+    align-items: flex-end;
+}
+.message.received {
+    align-items: flex-start;
+}
+
+.bubble {
+    max-width: 85%;
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.message.sent .bubble {
+    background: #191970;
+    color: #D9F855;
+}
+
+.message.received .bubble {
+    background: #ffffff;
+    border: 1px solid rgba(148, 0, 211, 0.15);
+    color: #191970;
+}
+
+.chat-input-area {
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid rgba(148, 0, 211, 0.1);
+    gap: 6px;
+    background: #ffffff;
+}
+
+.chat-input-area input {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(148, 0, 211, 0.15);
+    outline: none;
+    font-size: 12px;
+    font-family: system-ui, -apple-system, sans-serif;
+    background: rgba(148, 0, 211, 0.02);
+    color: #191970;
+}
+
+.chat-input-area input:focus {
+    border-color: #9400D3;
+}
+
+.chat-input-area button {
+    background: #191970;
+    border: none;
+    color: #D9F855;
+    padding: 8px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.chat-input-area button:hover {
+    background: #2a2a8a;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 640px) {
+    .search-card-minimal {
+        width: 95%;
+        padding: 4px 4px 4px 12px;
+    }
+    .search-card-minimal input {
+        font-size: 12px;
+        padding: 8px 0;
+    }
+    .search-card-minimal button {
+        padding: 6px 12px;
+        font-size: 11px;
+    }
+    .chat-modal {
+        width: calc(100% - 32px);
+        right: 16px;
+        bottom: 78px;
+    }
+    .stats-bar {
+        padding: 4px 12px;
+        gap: 8px;
+        font-size: 10px;
+        top: 12px;
+    }
+    .stats-bar .stat-divider {
+        height: 12px;
+    }
+    .search-panel {
+        top: 68px;
+    }
+}

@@ -16,19 +16,28 @@ class Pharmacy extends Model
         'longitude',
         'contactNumber',
         'user_id',
-        'status', // Add this
+        'status',
     ];
 
+    /**
+     * Get the user that owns the pharmacy.
+     */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Get the inventory items for the pharmacy.
+     */
     public function inventory()
     {
         return $this->hasMany(InventoryItem::class);
     }
 
+    /**
+     * Get the messages for the pharmacy.
+     */
     public function messages()
     {
         return $this->hasMany(Message::class);

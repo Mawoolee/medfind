@@ -1,0 +1,6 @@
+Login and Test
+
+Role	           Email	            Password	        Dashboard URL
+Pharmacy	pharmacy1@medfind.com	    password	    /pharmacy/dashboard
+Consumer	consumer@medfind.com	    password	    /consumer/dashboard
+Admin	    admin@medfind.com	        password	    /admin/dashboard

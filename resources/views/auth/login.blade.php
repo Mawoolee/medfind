@@ -1,47 +1,88 @@
 <x-guest-layout>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
-
-    <form method="POST" action="{{ route('login') }}">
-        @csrf
-
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+    <div class="min-h-screen flex flex-col items-center justify-center bg-[#f0f0ff] px-4">
+        <!-- Logo -->
+        <div class="mb-8 text-center">
+            <div class="flex items-center justify-center gap-2 mb-2">
+                <div class="bg-[#191970] rounded-lg p-2">
+                    <i class="fas fa-hospital text-[#D9F855] text-xl"></i>
+                </div>
+                <span class="text-2xl font-bold text-[#191970]">MedFind</span>
+            </div>
+            <p class="text-sm text-[#9400D3] font-light">Sign in to your account</p>
         </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+        <!-- Card -->
+        <div class="w-full max-w-sm bg-white rounded-xl border border-[#9400D3]/10 shadow-lg overflow-hidden">
+            <div class="p-6">
+                <x-auth-session-status class="mb-4" :status="session('status')" />
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
+                <form method="POST" action="{{ route('login') }}">
+                    @csrf
 
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                    <!-- Email -->
+                    <div class="mb-4">
+                        <label for="email" class="block text-xs font-medium text-[#9400D3] uppercase tracking-wider mb-1.5">
+                            Email
+                        </label>
+                        <input id="email" 
+                               type="email" 
+                               name="email" 
+                               value="{{ old('email') }}" 
+                               required 
+                               autofocus 
+                               autocomplete="username"
+                               class="w-full px-4 py-2.5 bg-[#f8f4ff] border border-[#9400D3]/20 rounded-lg text-sm text-[#191970] focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30 focus:border-[#9400D3] transition"
+                               placeholder="you@example.com">
+                        <x-input-error :messages="$errors->get('email')" class="mt-1" />
+                    </div>
+
+                    <!-- Password -->
+                    <div class="mb-4">
+                        <label for="password" class="block text-xs font-medium text-[#9400D3] uppercase tracking-wider mb-1.5">
+                            Password
+                        </label>
+                        <input id="password" 
+                               type="password" 
+                               name="password" 
+                               required 
+                               autocomplete="current-password"
+                               class="w-full px-4 py-2.5 bg-[#f8f4ff] border border-[#9400D3]/20 rounded-lg text-sm text-[#191970] focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30 focus:border-[#9400D3] transition"
+                               placeholder="••••••••">
+                        <x-input-error :messages="$errors->get('password')" class="mt-1" />
+                    </div>
+
+                    <!-- Remember Me -->
+                    <div class="flex items-center justify-between mb-6">
+                        <label class="flex items-center gap-2 text-sm text-gray-500 cursor-pointer">
+                            <input type="checkbox" name="remember" class="w-4 h-4 rounded border-[#9400D3]/30 text-[#191970] focus:ring-[#9400D3]">
+                            <span class="font-light">Remember me</span>
+                        </label>
+                        @if (Route::has('password.request'))
+                            <a href="{{ route('password.request') }}" class="text-sm text-[#9400D3] hover:text-[#191970] transition font-light">
+                                Forgot password?
+                            </a>
+                        @endif
+                    </div>
+
+                    <!-- Submit -->
+                    <button type="submit" class="w-full bg-[#191970] text-[#D9F855] text-sm font-medium py-2.5 rounded-lg hover:bg-[#2a2a8a] transition">
+                        Sign in
+                    </button>
+
+                    <!-- Register Link -->
+                    <p class="text-center text-sm text-gray-400 font-light mt-4">
+                        Don't have an account?
+                        <a href="{{ route('register') }}" class="text-[#9400D3] hover:text-[#191970] transition font-medium">
+                            Sign up
+                        </a>
+                    </p>
+                </form>
+            </div>
         </div>
 
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-            </label>
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
-                </a>
-            @endif
-
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
-        </div>
-    </form>
+        <!-- Footer -->
+        <p class="text-xs text-[#9400D3]/30 font-light mt-8">
+            &copy; 2026 MedFind. All rights reserved.
+        </p>
+    </div>
 </x-guest-layout>

@@ -13,7 +13,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-gray-500 text-sm">Total Users</p>
-                    <p class="text-2xl font-bold text-blue-600">{{ $userCount ?? 0 }}</p>
+                    <p class="text-2xl font-bold text-blue-600">{{ \App\Models\User::count() }}</p>
                 </div>
                 <i class="fas fa-users text-4xl text-blue-200"></i>
             </div>
@@ -22,7 +22,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-gray-500 text-sm">Pharmacies</p>
-                    <p class="text-2xl font-bold text-green-600">{{ $pharmacyCount ?? 0 }}</p>
+                    <p class="text-2xl font-bold text-green-600">{{ \App\Models\Pharmacy::count() }}</p>
                 </div>
                 <i class="fas fa-store text-4xl text-green-200"></i>
             </div>
@@ -31,7 +31,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-gray-500 text-sm">Medicines</p>
-                    <p class="text-2xl font-bold text-purple-600">{{ $medicineCount ?? 0 }}</p>
+                    <p class="text-2xl font-bold text-purple-600">{{ \App\Models\Medicine::count() }}</p>
                 </div>
                 <i class="fas fa-capsules text-4xl text-purple-200"></i>
             </div>
@@ -40,7 +40,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-gray-500 text-sm">Messages</p>
-                    <p class="text-2xl font-bold text-orange-600">{{ $messageCount ?? 0 }}</p>
+                    <p class="text-2xl font-bold text-orange-600">{{ \App\Models\Message::count() }}</p>
                 </div>
                 <i class="fas fa-envelope text-4xl text-orange-200"></i>
             </div>

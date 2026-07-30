@@ -1,11 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="map-container" style="height: 100vh; width: 100%; position: relative; overflow: hidden;">
-    <!-- Map Container -->
-    <div id="medfindMap" style="height: 100%; width: 100%;"></div>
+<div class="map-wrapper" style="position: relative; height: 100vh; width: 100%;">
     
-    <!-- Stats Bar - Fixed position para hindi matabunan -->
+    <!-- Stats Bar -->
     <div class="stats-bar-fixed">
         <span class="stat-item">
             <span class="stat-number" id="pharmacyCount">{{ $pharmacyCount ?? 0 }}</span>
@@ -32,7 +30,10 @@
         <div id="autocompleteList" class="autocomplete-items" style="display: none;"></div>
     </div>
 
-    <!-- Chat Button - Fixed position -->
+    <!-- Map Container -->
+    <div id="medfindMap" style="height: 100%; width: 100%;"></div>
+
+    <!-- Chat Button -->
     <div class="chat-float-fixed">
         <button onclick="toggleChat()" class="chat-toggle-btn">
             <i class="fas fa-comment"></i>
@@ -59,14 +60,26 @@
     </div>
 </div>
 
-<!-- Pass PHP data to JavaScript -->
 <script>
     const pharmaciesData = @json($formattedPharmacies ?? []);
     const allMedicineNames = @json($medicineNames ?? []);
 </script>
 
 <style>
-    /* Force all UI elements to be on top */
+    /* Force all UI elements to be on top of map */
+    .map-wrapper {
+        position: relative;
+        height: 100vh;
+        width: 100%;
+        overflow: hidden;
+    }
+    
+    #medfindMap {
+        height: 100%;
+        width: 100%;
+        z-index: 1;
+    }
+    
     .stats-bar-fixed {
         position: fixed !important;
         top: 76px !important;
@@ -140,6 +153,7 @@
         outline: none !important;
         background: transparent !important;
         color: #191970 !important;
+        pointer-events: auto !important;
     }
     
     .search-card-minimal input::placeholder {
@@ -157,6 +171,7 @@
         font-size: 12px !important;
         font-family: system-ui, -apple-system, sans-serif !important;
         transition: 0.2s !important;
+        pointer-events: auto !important;
     }
     
     .search-card-minimal button:hover {
@@ -177,6 +192,7 @@
         z-index: 99999 !important;
         border: 1px solid rgba(148, 0, 211, 0.15) !important;
         display: none !important;
+        pointer-events: auto !important;
     }
     
     .autocomplete-items.active {
@@ -189,6 +205,7 @@
         font-size: 13px !important;
         color: #191970 !important;
         border-bottom: 1px solid rgba(148, 0, 211, 0.08) !important;
+        pointer-events: auto !important;
     }
     
     .autocomplete-item:hover {
@@ -204,7 +221,6 @@
         border-bottom: none !important;
     }
     
-    /* Chat Button - Fixed position with highest z-index */
     .chat-float-fixed {
         position: fixed !important;
         bottom: 24px !important;
@@ -226,6 +242,7 @@
         color: #D9F855 !important;
         font-size: 18px !important;
         border: none !important;
+        pointer-events: auto !important;
     }
     
     .chat-toggle-btn:hover {
@@ -246,6 +263,7 @@
         overflow: hidden !important;
         z-index: 10000 !important;
         border: 1px solid rgba(148, 0, 211, 0.12) !important;
+        pointer-events: auto !important;
     }
     
     .chat-modal-fixed.active {
@@ -262,6 +280,7 @@
         color: #191970 !important;
         font-size: 13px !important;
         background: rgba(148, 0, 211, 0.03) !important;
+        pointer-events: auto !important;
     }
     
     .chat-messages {
@@ -309,6 +328,7 @@
         border-top: 1px solid rgba(148, 0, 211, 0.1) !important;
         gap: 6px !important;
         background: #ffffff !important;
+        pointer-events: auto !important;
     }
     
     .chat-input-area input {
@@ -321,6 +341,7 @@
         font-family: system-ui, -apple-system, sans-serif !important;
         background: rgba(148, 0, 211, 0.02) !important;
         color: #191970 !important;
+        pointer-events: auto !important;
     }
     
     .chat-input-area input:focus {
@@ -336,23 +357,39 @@
         cursor: pointer !important;
         font-size: 12px !important;
         font-weight: 600 !important;
+        pointer-events: auto !important;
     }
     
     .chat-input-area button:hover {
         background: #2a2a8a !important;
     }
     
-    /* Force Leaflet popup to be below UI */
+    /* IMPORTANT: Make popup buttons clickable */
     .leaflet-popup {
-        z-index: 50 !important;
+        z-index: 9999 !important;
+        pointer-events: auto !important;
     }
     
     .leaflet-popup-content-wrapper {
-        z-index: 50 !important;
+        z-index: 9999 !important;
+        pointer-events: auto !important;
+    }
+    
+    .leaflet-popup-content {
+        pointer-events: auto !important;
+        z-index: 9999 !important;
+    }
+    
+    .leaflet-popup-content button,
+    .leaflet-popup-content div,
+    .leaflet-popup-content span,
+    .leaflet-popup-content a {
+        pointer-events: auto !important;
+        cursor: pointer !important;
     }
     
     .leaflet-popup-tip-container {
-        z-index: 50 !important;
+        z-index: 9999 !important;
     }
     
     .leaflet-control-container {
@@ -361,6 +398,22 @@
     
     .leaflet-control-zoom {
         z-index: 50 !important;
+    }
+    
+    /* Fix for popup buttons */
+    .custom-popup .leaflet-popup-content-wrapper {
+        pointer-events: auto !important;
+    }
+    
+    .custom-popup .leaflet-popup-content {
+        pointer-events: auto !important;
+    }
+    
+    .custom-popup .leaflet-popup-content button {
+        pointer-events: auto !important;
+        cursor: pointer !important;
+        z-index: 9999 !important;
+        position: relative !important;
     }
     
     @media (max-width: 640px) {
