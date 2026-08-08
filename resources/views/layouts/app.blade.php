@@ -20,8 +20,8 @@
     <!-- MedFind Custom CSS -->
     <link rel="stylesheet" href="{{ asset('css/medfind.css') }}">
 
-    <!-- Scripts - Use CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Vite for Tailwind CSS (para sa production-ready) -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -54,7 +54,18 @@
             right: 0;
             z-index: 10000;
         }
+
+        /* Fallback kung walang Vite (development mode) */
+        @if(!app()->environment('production'))
+            /* Temporary Tailwind CDN for development */
+            /* Remove this in production */
+        @endif
     </style>
+
+    <!-- For development only - remove this in production -->
+    @if(app()->environment('local'))
+        <script src="https://cdn.tailwindcss.com"></script>
+    @endif
 </head>
 <body>
     <div class="h-screen overflow-hidden">

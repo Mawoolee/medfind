@@ -4,20 +4,30 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\User;
+use App\Models\Pharmacy;
 
 class Message extends Model
 {
     protected $fillable = [
         'consumer_id',
         'pharmacy_id',
-        'content',
-        'sender',
+        'message',
+        'prescription_image',
+        'reply',
+        'replied_at',
         'is_read',
-        'prescription_file',
+        // verification fields
+        'verified_by',
+        'verification_status',
+        'verification_notes',
+        'verified_at',
     ];
 
     protected $casts = [
         'is_read' => 'boolean',
+        'replied_at' => 'datetime',
+        'verified_at' => 'datetime',
     ];
 
     public function consumer(): BelongsTo
@@ -28,5 +38,10 @@ class Message extends Model
     public function pharmacy(): BelongsTo
     {
         return $this->belongsTo(Pharmacy::class);
+    }
+
+    public function verifier(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'verified_by');
     }
 }

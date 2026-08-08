@@ -34,7 +34,7 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        if ($user->role === 'pharmacy_operator') {
+        if (in_array($user->role, ['pharmacy', 'pharmacy_operator'], true)) {
             return redirect()->route('pharmacy.dashboard');
         }
 

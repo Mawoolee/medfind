@@ -32,11 +32,14 @@
                                 <td class="px-4 py-3">{{ $user->name }}</td>
                                 <td class="px-4 py-3">{{ $user->email }}</td>
                                 <td class="px-4 py-3">
+                                    @php
+                                       $roleLabel = $user->role === 'pharmacy_operator' ? 'pharmacy' : $user->role;
+                                    @endphp
                                     <span class="px-2 py-1 rounded text-xs 
-                                        {{ $user->role === 'admin' ? 'bg-red-100 text-red-700' : '' }}
-                                        {{ $user->role === 'pharmacy_operator' ? 'bg-blue-100 text-blue-700' : '' }}
-                                        {{ $user->role === 'consumer' ? 'bg-green-100 text-green-700' : '' }}">
-                                        {{ str_replace('_', ' ', ucfirst($user->role)) }}
+                                       {{ $user->role === 'admin' ? 'bg-red-100 text-red-700' : '' }}
+                                       {{ in_array($user->role, ['pharmacy', 'pharmacy_operator']) ? 'bg-blue-100 text-blue-700' : '' }}
+                                       {{ $user->role === 'consumer' ? 'bg-green-100 text-green-700' : '' }}">
+                                       {{ str_replace('_', ' ', ucfirst($roleLabel)) }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-3">{{ $user->created_at->format('M d, Y') }}</td>

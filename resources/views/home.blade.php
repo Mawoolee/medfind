@@ -24,10 +24,10 @@
     <div class="search-panel">
         <div class="search-card-minimal">
             <i class="fas fa-search text-[#9400D3]/40 text-sm"></i>
-            <input type="text" id="medicineSearch" placeholder="Search for a medicine..." autocomplete="off">
-            <button id="searchBtn">Search</button>
+            <input type="text" id="medicineSearch" placeholder="Search for a medicine..." autocomplete="off" spellcheck="false">
+            <button id="searchBtn" type="button">Search</button>
         </div>
-        <div id="autocompleteList" class="autocomplete-items" style="display: none;"></div>
+        <div id="autocompleteList" class="autocomplete-items"></div>
     </div>
 
     <!-- Map Container -->
@@ -63,10 +63,12 @@
 <script>
     const pharmaciesData = @json($formattedPharmacies ?? []);
     const allMedicineNames = @json($medicineNames ?? []);
+    
+    console.log('Pharmacies Data:', pharmaciesData);
+    console.log('Medicine Names:', allMedicineNames);
 </script>
 
 <style>
-    /* Force all UI elements to be on top of map */
     .map-wrapper {
         position: relative;
         height: 100vh;
@@ -128,7 +130,6 @@
         z-index: 9998 !important;
         width: 90% !important;
         max-width: 440px !important;
-        pointer-events: none !important;
     }
     
     .search-card-minimal {
@@ -142,6 +143,8 @@
         width: 100% !important;
         pointer-events: auto !important;
         border: 1px solid rgba(148, 0, 211, 0.15) !important;
+        position: relative !important;
+        z-index: 9999 !important;
     }
     
     .search-card-minimal input {
@@ -154,6 +157,8 @@
         background: transparent !important;
         color: #191970 !important;
         pointer-events: auto !important;
+        position: relative !important;
+        z-index: 9999 !important;
     }
     
     .search-card-minimal input::placeholder {
@@ -172,27 +177,31 @@
         font-family: system-ui, -apple-system, sans-serif !important;
         transition: 0.2s !important;
         pointer-events: auto !important;
+        position: relative !important;
+        z-index: 9999 !important;
     }
     
     .search-card-minimal button:hover {
         background: #2a2a8a !important;
     }
     
+    /* AUTOCOMPLETE STYLES - COMPLETELY FIXED */
     .autocomplete-items {
         position: absolute !important;
-        top: calc(100% + 6px) !important;
-        left: 50% !important;
-        transform: translateX(-50%) !important;
+        top: calc(100% + 4px) !important;
+        left: 0 !important;
+        right: 0 !important;
         width: 100% !important;
         background: #ffffff !important;
         border-radius: 14px !important;
-        box-shadow: 0 6px 24px rgba(25, 25, 112, 0.08) !important;
-        max-height: 200px !important;
+        box-shadow: 0 8px 30px rgba(25, 25, 112, 0.12) !important;
+        max-height: 220px !important;
         overflow-y: auto !important;
         z-index: 99999 !important;
-        border: 1px solid rgba(148, 0, 211, 0.15) !important;
+        border: 1px solid rgba(148, 0, 211, 0.12) !important;
         display: none !important;
         pointer-events: auto !important;
+        margin-top: 2px !important;
     }
     
     .autocomplete-items.active {
@@ -200,16 +209,25 @@
     }
     
     .autocomplete-item {
-        padding: 10px 16px !important;
+        padding: 12px 16px !important;
         cursor: pointer !important;
         font-size: 13px !important;
-        color: #191970 !important;
-        border-bottom: 1px solid rgba(148, 0, 211, 0.08) !important;
+        color: #1a1a2e !important;
+        border-bottom: 1px solid rgba(148, 0, 211, 0.06) !important;
         pointer-events: auto !important;
+        transition: background 0.15s ease !important;
+        user-select: none !important;
+        -webkit-user-select: none !important;
+        position: relative !important;
+        z-index: 99999 !important;
     }
     
     .autocomplete-item:hover {
-        background: rgba(148, 0, 211, 0.05) !important;
+        background: rgba(148, 0, 211, 0.08) !important;
+    }
+    
+    .autocomplete-item:active {
+        background: rgba(148, 0, 211, 0.15) !important;
     }
     
     .autocomplete-item strong {
@@ -219,6 +237,22 @@
     
     .autocomplete-item:last-child {
         border-bottom: none !important;
+    }
+    
+    /* Scrollbar for autocomplete */
+    .autocomplete-items::-webkit-scrollbar {
+        width: 5px;
+    }
+    .autocomplete-items::-webkit-scrollbar-track {
+        background: rgba(148, 0, 211, 0.05);
+        border-radius: 10px;
+    }
+    .autocomplete-items::-webkit-scrollbar-thumb {
+        background: rgba(148, 0, 211, 0.25);
+        border-radius: 10px;
+    }
+    .autocomplete-items::-webkit-scrollbar-thumb:hover {
+        background: rgba(148, 0, 211, 0.4);
     }
     
     .chat-float-fixed {
@@ -364,7 +398,6 @@
         background: #2a2a8a !important;
     }
     
-    /* IMPORTANT: Make popup buttons clickable */
     .leaflet-popup {
         z-index: 9999 !important;
         pointer-events: auto !important;
@@ -373,34 +406,73 @@
     .leaflet-popup-content-wrapper {
         z-index: 9999 !important;
         pointer-events: auto !important;
+        background: transparent !important;
+        box-shadow: 0 20px 25px -5px rgba(25, 25, 112, 0.15), 0 8px 10px -6px rgba(25, 25, 112, 0.1) !important;
+        padding: 0 !important;
+        border-radius: 24px !important;
+        overflow: visible !important;
+        border: none !important;
     }
     
     .leaflet-popup-content {
+        margin: 0 !important;
+        width: 100% !important;
+        line-height: 1.4 !important;
         pointer-events: auto !important;
         z-index: 9999 !important;
     }
     
-    .leaflet-popup-content button,
-    .leaflet-popup-content div,
-    .leaflet-popup-content span,
-    .leaflet-popup-content a {
+    .leaflet-popup-content * {
+        pointer-events: auto !important;
+    }
+    
+    .leaflet-popup-content button {
         pointer-events: auto !important;
         cursor: pointer !important;
+        z-index: 9999 !important;
+        position: relative !important;
+    }
+    
+    .leaflet-popup-content div {
+        pointer-events: auto !important;
     }
     
     .leaflet-popup-tip-container {
         z-index: 9999 !important;
     }
     
+    .leaflet-popup-tip {
+        background: #ffffff !important;
+        box-shadow: none !important;
+        z-index: 9999 !important;
+    }
+    
+    .leaflet-popup-close-button {
+        display: none !important;
+    }
+    
     .leaflet-control-container {
-        z-index: 50 !important;
+        z-index: 100 !important;
     }
     
     .leaflet-control-zoom {
-        z-index: 50 !important;
+        z-index: 100 !important;
     }
     
-    /* Fix for popup buttons */
+    .leaflet-control-zoom a {
+        pointer-events: auto !important;
+        background: white !important;
+        color: #191970 !important;
+    }
+    
+    .leaflet-control-zoom a:hover {
+        background: #f0f0ff !important;
+    }
+    
+    .leaflet-control-attribution {
+        z-index: 100 !important;
+    }
+    
     .custom-popup .leaflet-popup-content-wrapper {
         pointer-events: auto !important;
     }

@@ -26,7 +26,7 @@
     <div class="search-panel">
         <div class="search-card-minimal">
             <i class="fas fa-search text-[#9400D3]/40 text-sm"></i>
-            <input type="text" id="medicineSearch" placeholder="Search for a medicine..." autocomplete="off">
+            <input type="text" id="medicineSearch" placeholder="Search for a medicine..." autocomplete="on">
             <button id="searchBtn">Search</button>
         </div>
         <div id="autocompleteList" class="autocomplete-items" style="display: none;"></div>
@@ -115,7 +115,6 @@
         z-index: 9998 !important;
         width: 90% !important;
         max-width: 440px !important;
-        pointer-events: none !important;
     }
     
     .search-card-minimal {

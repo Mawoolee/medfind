@@ -97,7 +97,6 @@
             z-index: 1000;
             display: flex;
             justify-content: center;
-            pointer-events: none;
         }
 
         .search-card {

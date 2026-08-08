@@ -26,7 +26,7 @@ class CheckRole
         // Redirect to appropriate dashboard based on role
         if ($userRole === 'admin') {
             return redirect()->route('admin.dashboard');
-        } elseif ($userRole === 'pharmacy') {
+        } elseif (in_array($userRole, ['pharmacy', 'pharmacy_operator'], true)) {
             return redirect()->route('pharmacy.dashboard');
         } else {
             return redirect()->route('consumer.dashboard');

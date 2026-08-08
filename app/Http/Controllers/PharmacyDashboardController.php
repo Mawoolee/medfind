@@ -56,7 +56,9 @@ class PharmacyDashboardController extends Controller
             ->where('pharmacy_id', $pharmacy->id)
             ->get();
 
-        return view('pharmacy.inventory', compact('pharmacy', 'inventory'));
+        $inventoryMedicineNames = $inventory->pluck('medicine.medicine_name')->filter()->unique()->values()->toArray();
+
+        return view('pharmacy.inventory', compact('pharmacy', 'inventory', 'inventoryMedicineNames'));
     }
 
     public function updateInventory(Request $request)

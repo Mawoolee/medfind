@@ -23,7 +23,7 @@ class UserRoleSeeder extends Seeder
             'name' => 'Mercury Drug Operator',
             'email' => 'pharmacy@medfind.com',
             'password' => Hash::make('password'),
-            'role' => 'pharmacy_operator',
+            'role' => 'pharmacy',
         ]);
         
         // Regular Consumer Account

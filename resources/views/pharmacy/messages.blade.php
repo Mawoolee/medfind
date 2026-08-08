@@ -7,7 +7,11 @@
 @section('content')
 <div class="container mx-auto px-4 py-8">
     <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">💬 Customer Messages</h1>
+        <div class="flex items-center">
+            <h1 class="text-2xl font-bold text-gray-800">💬 Customer Messages</h1>
+            @php $unreadCount = \App\Models\Message::where('pharmacy_id', $pharmacy->id)->where('is_read', false)->count(); @endphp
+            <span id="pharmacyUnreadCountBadge" class="ml-4 text-sm bg-red-600 text-white px-2 py-1 rounded-full">{{ $unreadCount }}</span>
+        </div>
         <a href="{{ route('pharmacy.dashboard') }}" class="text-blue-600 hover:text-blue-800">
             <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
         </a>
@@ -31,7 +35,7 @@
                                     From: {{ $message->consumer->name ?? 'Customer' }}
                                 </h3>
                                 @if(!$message->is_read)
-                                    <span class="ml-3 text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">New</span>
+                                                                    <span class="ml-3 text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full message-new">New</span>
                                 @endif
                                 <span class="ml-3 text-xs text-gray-400">{{ $message->created_at->format('M d, Y g:i A') }}</span>
                             </div>
@@ -41,11 +45,27 @@
                             </div>
                             
                             @if($message->prescription_image)
-                                <div class="mt-2">
+                                <div class="mt-2 flex items-center gap-4">
                                     <a href="{{ asset('storage/' . $message->prescription_image) }}" target="_blank" 
-                                       class="text-blue-600 hover:text-blue-800 text-sm">
-                                        <i class="fas fa-file-prescription mr-1"></i>View Prescription
+                                       class="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-2">
+                                        <img src="{{ asset('storage/' . $message->prescription_image) }}" alt="prescription" class="w-24 h-auto rounded border" />
+                                        <span><i class="fas fa-file-prescription mr-1"></i>View Prescription</span>
                                     </a>
+
+                                    {{-- Verify controls --}}
+                                    <div class="ml-2">
+                                        @if(!$message->verification_status)
+                                           <button type="button" class="js-verify-button bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm" data-id="{{ $message->id }}">Verify</button>
+                                        @else
+                                           <div class="text-sm">
+                                               <span class="px-2 py-1 rounded-full text-white text-xs font-semibold {{ $message->verification_status === 'approved' ? 'bg-green-600' : 'bg-red-600' }}">{{ ucfirst($message->verification_status) }}</span>
+                                               <div class="text-xs text-gray-500">By: {{ $message->verifier->name ?? '-' }} at {{ optional($message->verified_at)->format('M d, Y g:i A') }}</div>
+                                               @if($message->verification_notes)
+                                                   <div class="mt-1 text-xs text-gray-700">Notes: {{ $message->verification_notes }}</div>
+                                               @endif
+                                           </div>
+                                        @endif
+                                    </div>
                                 </div>
                             @endif
                             
@@ -67,10 +87,9 @@
                                             <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition duration-200">
                                                 <i class="fas fa-reply mr-2"></i>Send Reply
                                             </button>
-                                            <a href="{{ route('pharmacy.message.mark-read', $message->id) }}" 
-                                               class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg transition duration-200">
+                                            <button type="button" data-id="{{ $message->id }}" class="js-mark-read bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg transition duration-200">
                                                 <i class="fas fa-check mr-2"></i>Mark as Read
-                                            </a>
+                                            </button>
                                         </div>
                                     </form>
                                 </div>
@@ -88,4 +107,34 @@
         </div>
     @endif
 </div>
+
+<!-- Verification Modal -->
+<div id="verifyModal" class="fixed inset-0 z-50 flex items-center justify-center" style="display:none;">
+    <div id="verifyModalBackdrop" class="absolute inset-0 bg-black opacity-50"></div>
+    <div class="relative bg-white rounded-lg shadow-lg w-11/12 max-w-md p-6 z-10">
+        <h2 class="text-lg font-semibold mb-4">Verify Prescription</h2>
+        <div class="mb-3">
+            <label class="block text-sm font-medium text-gray-700">Decision</label>
+            <div class="mt-2 flex gap-4">
+                <label class="inline-flex items-center">
+                    <input type="radio" name="verify_status" value="approved" checked class="form-radio text-green-600">
+                    <span class="ml-2 text-sm">Approve</span>
+                </label>
+                <label class="inline-flex items-center">
+                    <input type="radio" name="verify_status" value="rejected" class="form-radio text-red-600">
+                    <span class="ml-2 text-sm">Reject</span>
+                </label>
+            </div>
+        </div>
+        <div class="mb-4">
+            <label for="verifyNotes" class="block text-sm font-medium text-gray-700">Notes (optional)</label>
+            <textarea id="verifyNotes" rows="4" class="w-full mt-2 px-3 py-2 border border-gray-300 rounded-md"></textarea>
+        </div>
+        <div class="flex justify-end gap-2">
+            <button id="cancelVerifyBtn" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">Cancel</button>
+            <button id="confirmVerifyBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Confirm</button>
+        </div>
+    </div>
+</div>
+
 @endsection

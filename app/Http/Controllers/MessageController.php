@@ -22,7 +22,7 @@ class MessageController extends Controller
             return redirect()->back()->with('error', 'Unauthorized access.');
         }
 
-        if ($user->role === 'pharmacy_operator' && $user->pharmacy_id !== $pharmacy->id) {
+        if ($user->isPharmacy() && $user->pharmacy_id !== $pharmacy->id) {
             return redirect()->back()->with('error', 'Unauthorized access.');
         }
 
@@ -40,7 +40,7 @@ class MessageController extends Controller
     public function unreadCount()
     {
         $user = Auth::user();
-        if ($user->role !== 'pharmacy_operator') {
+        if (! $user->isPharmacy()) {
             return response()->json(['count' => 0]);
         }
 
@@ -96,7 +96,7 @@ class MessageController extends Controller
         $user = Auth::user();
 
         // Verify ownership
-        if ($user->role === 'pharmacy_operator') {
+        if ($user->isPharmacy()) {
             $pharmacy = Pharmacy::where('user_id', $user->id)->first();
             if (!$pharmacy || $message->pharmacy_id !== $pharmacy->id) {
                 return redirect()->back()->with('error', 'Unauthorized.');
@@ -112,6 +112,64 @@ class MessageController extends Controller
     }
 
     /**
+     * Mark message as read via AJAX (returns JSON)
+     */
+    public function markReadAjax($id)
+    {
+        $user = Auth::user();
+
+        if (! $user->isPharmacy()) {
+            return response()->json(['success' => false, 'error' => 'Unauthorized'], 403);
+        }
+
+        $pharmacy = Pharmacy::where('user_id', $user->id)->first();
+        if (! $pharmacy) {
+            return response()->json(['success' => false, 'error' => 'Pharmacy not found'], 404);
+        }
+
+        $message = Message::where('id', $id)->where('pharmacy_id', $pharmacy->id)->first();
+        if (! $message) {
+            return response()->json(['success' => false, 'error' => 'Message not found'], 404);
+        }
+
+        $message->is_read = true;
+        $message->save();
+
+        $count = Message::where('pharmacy_id', $pharmacy->id)->where('is_read', false)->count();
+
+        return response()->json(['success' => true, 'count' => $count]);
+    }
+
+    /**
+     * Mark message as unread via AJAX (returns JSON)
+     */
+    public function markUnreadAjax($id)
+    {
+        $user = Auth::user();
+
+        if (! $user->isPharmacy()) {
+            return response()->json(['success' => false, 'error' => 'Unauthorized'], 403);
+        }
+
+        $pharmacy = Pharmacy::where('user_id', $user->id)->first();
+        if (! $pharmacy) {
+            return response()->json(['success' => false, 'error' => 'Pharmacy not found'], 404);
+        }
+
+        $message = Message::where('id', $id)->where('pharmacy_id', $pharmacy->id)->first();
+        if (! $message) {
+            return response()->json(['success' => false, 'error' => 'Message not found'], 404);
+        }
+
+        $message->is_read = false;
+        $message->save();
+
+        $count = Message::where('pharmacy_id', $pharmacy->id)->where('is_read', false)->count();
+
+        return response()->json(['success' => true, 'count' => $count]);
+    }
+
+    /**
      * Reply to a message from pharmacy
      */
     public function reply(Request $request, Message $message)
@@ -122,7 +180,7 @@ class MessageController extends Controller
 
         $user = Auth::user();
 
-        if ($user->role !== 'pharmacy_operator') {
+        if (! $user->isPharmacy()) {
             return redirect()->back()->with('error', 'Only pharmacies can reply.');
         }
 
@@ -137,6 +195,40 @@ class MessageController extends Controller
         $message->save();
 
         return redirect()->back()->with('success', 'Reply sent successfully!');
+    }
+
+    /**
+     * Verify prescription (AJAX) - records verifier, status and notes
+     */
+    public function verifyAjax(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:approved,rejected',
+            'notes' => 'nullable|string|max:2000',
+        ]);
+
+        $user = Auth::user();
+        if (! $user->isPharmacy()) {
+            return response()->json(['success' => false, 'error' => 'Unauthorized'], 403);
+        }
+
+        $pharmacy = Pharmacy::where('user_id', $user->id)->first();
+        if (! $pharmacy) {
+            return response()->json(['success' => false, 'error' => 'Pharmacy not found'], 404);
+        }
+
+        $message = Message::where('id', $id)->where('pharmacy_id', $pharmacy->id)->first();
+        if (! $message) {
+            return response()->json(['success' => false, 'error' => 'Message not found'], 404);
+        }
+
+        $message->verified_by = $user->id;
+        $message->verification_status = $request->input('status');
+        $message->verification_notes = $request->input('notes');
+        $message->verified_at = now();
+        $message->save();
+
+        return response()->json(['success' => true, 'status' => $message->verification_status, 'verifier' => $user->name, 'verified_at' => $message->verified_at->toDateTimeString()]);
     }
 
     /**

@@ -67,12 +67,27 @@
     display: none !important;
 }
 
+/* Fix zoom controls visibility */
 .leaflet-control-container {
-    z-index: 50 !important;
+    z-index: 100 !important;
 }
 
 .leaflet-control-zoom {
-    z-index: 50 !important;
+    z-index: 100 !important;
+}
+
+.leaflet-control-zoom a {
+    pointer-events: auto !important;
+    background: white !important;
+    color: #191970 !important;
+}
+
+.leaflet-control-zoom a:hover {
+    background: #f0f0ff !important;
+}
+
+.leaflet-control-attribution {
+    z-index: 100 !important;
 }
 
 .marker-dot {
@@ -139,6 +154,15 @@
     background: #e2e8f0;
 }
 
+/* Fix for the stats bar - ensure no pointer events */
+.stats-bar-fixed {
+    pointer-events: none !important;
+}
+
+.stats-bar-fixed * {
+    pointer-events: none !important;
+}
+
 /* ============================================
    SEARCH PANEL
    ============================================ */
@@ -151,7 +175,10 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    pointer-events: none;
+    pointer-events: auto !important;
+}
+.search-panel, .search-panel * {
+    pointer-events: auto !important;
 }
 
 .search-card-minimal {
@@ -198,6 +225,12 @@
 
 .search-card-minimal button:hover {
     background: #2a2a8a;
+}
+
+/* Ensure search panel is clickable */
+.search-card-minimal,
+.search-card-minimal * {
+    pointer-events: auto !important;
 }
 
 /* ============================================
@@ -373,6 +406,17 @@
 
 .chat-input-area button:hover {
     background: #2a2a8a;
+}
+
+/* Chat button and modal - ensure clickable */
+.chat-float-fixed,
+.chat-float-fixed * {
+    pointer-events: auto !important;
+}
+
+.chat-modal-fixed,
+.chat-modal-fixed * {
+    pointer-events: auto !important;
 }
 
 /* ============================================

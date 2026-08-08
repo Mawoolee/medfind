@@ -30,6 +30,27 @@
 
     <div class="bg-white rounded-lg shadow-lg overflow-hidden">
         <div class="p-6">
+            <div class="mb-6">
+                <div class="inventory-search-wrapper relative max-w-xl mx-auto">
+                    <div class="search-card-minimal">
+                        <input
+                            id="pharmacyInventorySearch"
+                            type="text"
+                            placeholder="Search inventory by medicine name"
+                            autocomplete="off"
+                            class="w-full"
+                        />
+                        <button id="inventorySearchBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">
+                            Search
+                        </button>
+                    </div>
+                    <div id="inventoryAutocompleteList" class="autocomplete-items" style="display:none;"></div>
+                </div>
+                <p id="inventorySearchResultCount" class="mt-3 text-sm text-gray-500">Showing all inventory items.</p>
+            </div>
+            <script>
+                window.inventoryMedicineNames = @json($inventoryMedicineNames ?? []);
+            </script>
             <form action="{{ route('pharmacy.inventory.update') }}" method="POST">
                 @csrf
                 <div class="overflow-x-auto">
@@ -45,11 +66,11 @@
                                 <th class="px-4 py-3 text-left text-gray-600">Action</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="inventoryTableBody">
                             @forelse($inventory as $item)
                                 <tr class="border-t border-gray-200">
-                                    <td class="px-4 py-3 font-semibold">{{ $item->medicine->medicine_name }}</td>
-                                    <td class="px-4 py-3">{{ $item->medicine->dosage }}</td>
+                                        <td class="px-4 py-3 font-semibold" data-medicine-name>{{ $item->medicine->medicine_name }}</td>
+                                        <td class="px-4 py-3" data-medicine-dosage>{{ $item->medicine->dosage }}</td>
                                     <td class="px-4 py-3 text-sm">{{ $item->medicine->manufacturer }}</td>
                                     <td class="px-4 py-3">
                                         <input type="number" 

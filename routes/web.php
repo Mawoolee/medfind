@@ -51,13 +51,19 @@ Route::middleware(['auth', 'role:consumer'])->prefix('consumer')->name('consumer
 // ============================================
 // PHARMACY ROUTES
 // ============================================
-Route::middleware(['auth', 'role:pharmacy'])->prefix('pharmacy')->name('pharmacy.')->group(function () {
+Route::middleware(['auth', 'role:pharmacy,pharmacy_operator'])->prefix('pharmacy')->name('pharmacy.')->group(function () {
     Route::get('/dashboard', [PharmacyDashboardController::class, 'index'])->name('dashboard');
     Route::get('/inventory', [PharmacyDashboardController::class, 'inventory'])->name('inventory');
     Route::post('/inventory/update', [PharmacyDashboardController::class, 'updateInventory'])->name('inventory.update');
     Route::get('/messages', [PharmacyDashboardController::class, 'messages'])->name('messages');
     Route::post('/message/reply/{id}', [PharmacyDashboardController::class, 'replyMessage'])->name('message.reply');
     Route::get('/message/mark-read/{id}', [PharmacyDashboardController::class, 'markRead'])->name('message.mark-read');
+
+    // AJAX endpoints for pharmacy messaging (return JSON) - used by frontend polling and mark-as-read buttons
+    Route::get('/unread-count', [MessageController::class, 'unreadCount'])->name('unread.count');
+    Route::post('/message/mark-read-ajax/{id}', [MessageController::class, 'markReadAjax'])->name('message.mark-read-ajax');
+    Route::post('/message/mark-unread-ajax/{id}', [MessageController::class, 'markUnreadAjax'])->name('message.mark-unread-ajax');
+    Route::post('/message/verify-ajax/{id}', [MessageController::class, 'verifyAjax'])->name('message.verify-ajax');
 });
 
 // ============================================
