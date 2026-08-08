@@ -79,3 +79,4 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('/pharmacy/{id}', [AdminDashboardController::class, 'deletePharmacy'])->name('pharmacy.delete');
     Route::get('/logs', [AdminDashboardController::class, 'logs'])->name('logs');
 });
+

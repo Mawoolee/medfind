@@ -21,6 +21,20 @@
     <link rel="stylesheet" href="{{ asset('css/medfind.css') }}">
 
     <!-- Vite for Tailwind CSS (para sa production-ready) -->
+
+    <script>
+    // Pusher guard early: place before any bundled scripts so inlined/compiled code won't throw when no key is present
+    (function(){
+        try {
+            var _pusherKey = "{{ env('PUSHER_APP_KEY', '') }}";
+            if (!_pusherKey) {
+                window.Pusher = function() { console.debug && console.debug('Pusher stub used (no app key)'); };
+                window.Pusher.prototype = {};
+            }
+        } catch(e) {}
+    })();
+    </script>
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
@@ -83,6 +97,20 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <!-- MedFind Custom JS -->
+    <script>
+    // Pusher guard: if no PUSHER_APP_KEY is configured, install a harmless stub so pages that call Pusher won't throw.
+    (function(){
+        try {
+            var _pusherKey = "{{ env('PUSHER_APP_KEY', '') }}";
+            if (!_pusherKey) {
+                // Minimal stub that mimics Pusher constructor so code calling `new Pusher()` doesn't throw.
+                window.Pusher = function() { console.debug && console.debug('Pusher stub used (no app key)'); };
+                window.Pusher.prototype = {};
+            }
+        } catch(e) { /* swallow */ }
+    })();
+    </script>
     <script src="{{ asset('js/medfind.js') }}"></script>
+
 </body>
 </html>
