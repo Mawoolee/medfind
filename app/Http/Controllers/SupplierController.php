@@ -31,4 +31,32 @@ class SupplierController extends Controller
         Supplier::create($data);
         return redirect()->route('pharmacy.suppliers.index')->with('success', 'Supplier added');
     }
+
+    public function edit($id)
+    {
+        $supplier = Supplier::findOrFail($id);
+        return view('pharmacy.suppliers_edit', compact('supplier'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $supplier = Supplier::findOrFail($id);
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'contact_person' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:50',
+            'email' => 'nullable|email',
+            'address' => 'nullable|string',
+        ]);
+
+        $supplier->update($data);
+        return redirect()->route('pharmacy.suppliers.index')->with('success', 'Supplier updated');
+    }
+
+    public function destroy($id)
+    {
+        $supplier = Supplier::findOrFail($id);
+        $supplier->delete();
+        return redirect()->route('pharmacy.suppliers.index')->with('success', 'Supplier deleted');
+    }
 }
