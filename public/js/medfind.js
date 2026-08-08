@@ -2,6 +2,12 @@
 // MEDFIND - FULL JS LOGIC WITH WORKING AUTOCOMPLETE
 // ============================================
 
+// Ensure globals exist when pages don't provide them to avoid ReferenceErrors
+if (typeof window !== 'undefined') {
+    if (typeof window.allMedicineNames === 'undefined') window.allMedicineNames = [];
+    if (typeof window.inventoryMedicineNames === 'undefined') window.inventoryMedicineNames = [];
+}
+
 let map;
 let markers = [];
 let userLat = 13.1475;
