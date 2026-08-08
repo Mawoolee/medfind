@@ -53,8 +53,16 @@ Route::middleware(['auth', 'role:consumer'])->prefix('consumer')->name('consumer
 // ============================================
 Route::middleware(['auth', 'role:pharmacy,pharmacy_operator'])->prefix('pharmacy')->name('pharmacy.')->group(function () {
     Route::get('/dashboard', [PharmacyDashboardController::class, 'index'])->name('dashboard');
-    Route::get('/inventory', [PharmacyDashboardController::class, 'inventory'])->name('inventory');
-    Route::post('/inventory/update', [PharmacyDashboardController::class, 'updateInventory'])->name('inventory.update');
+    // Inventory management (CRUD, search, pagination)
+    use App\Http\Controllers\InventoryController;
+    Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory');
+    Route::get('/inventory/create', [InventoryController::class, 'create'])->name('inventory.create');
+    Route::post('/inventory', [InventoryController::class, 'store'])->name('inventory.store');
+    Route::get('/inventory/{id}/edit', [InventoryController::class, 'edit'])->name('inventory.edit');
+    Route::put('/inventory/{id}', [InventoryController::class, 'update'])->name('inventory.update');
+    Route::delete('/inventory/{id}', [InventoryController::class, 'destroy'])->name('inventory.destroy');
+    // Legacy bulk update endpoint kept for compatibility
+    Route::post('/inventory/update', [PharmacyDashboardController::class, 'updateInventory'])->name('inventory.bulk-update');
     Route::get('/messages', [PharmacyDashboardController::class, 'messages'])->name('messages');
     Route::post('/message/reply/{id}', [PharmacyDashboardController::class, 'replyMessage'])->name('message.reply');
     Route::get('/message/mark-read/{id}', [PharmacyDashboardController::class, 'markRead'])->name('message.mark-read');

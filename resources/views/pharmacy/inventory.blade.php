@@ -31,27 +31,29 @@
     <div class="bg-white rounded-lg shadow-lg overflow-hidden">
         <div class="p-6">
             <div class="mb-6">
-                <div class="inventory-search-wrapper relative max-w-xl mx-auto">
-                    <div class="search-card-minimal">
+                <form method="GET" action="{{ route('pharmacy.inventory') }}" class="inventory-search-wrapper relative max-w-xl mx-auto">
+                    <div class="flex">
                         <input
                             id="pharmacyInventorySearch"
+                            name="q"
+                            value="{{ $q ?? '' }}"
                             type="text"
                             placeholder="Search inventory by medicine name"
                             autocomplete="off"
-                            class="w-full"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-l focus:outline-none"
                         />
-                        <button id="inventorySearchBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-r text-sm">
                             Search
                         </button>
                     </div>
-                    <div id="inventoryAutocompleteList" class="autocomplete-items" style="display:none;"></div>
-                </div>
-                <p id="inventorySearchResultCount" class="mt-3 text-sm text-gray-500">Showing all inventory items.</p>
+                </form>
+                <p id="inventorySearchResultCount" class="mt-3 text-sm text-gray-500">Showing {{ $inventory->total() }} inventory items.</p>
             </div>
             <script>
                 window.inventoryMedicineNames = @json($inventoryMedicineNames ?? []);
             </script>
-            <form action="{{ route('pharmacy.inventory.update') }}" method="POST">
+
+            <form action="{{ route('pharmacy.inventory.bulk-update') }}" method="POST">
                 @csrf
                 <div class="overflow-x-auto">
                     <table class="w-full">
@@ -110,12 +112,19 @@
                         </tbody>
                     </table>
                 </div>
-                @if($inventory->count() > 0)
+                @if($inventory->total() > 0)
                     <div class="mt-6 flex justify-between items-center">
-                        <p class="text-sm text-gray-500">Total: {{ $inventory->count() }} medicines</p>
-                        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition duration-200">
-                            <i class="fas fa-save mr-2"></i>Save All Changes
-                        </button>
+                        <p class="text-sm text-gray-500">Total: {{ $inventory->total() }} medicines</p>
+                        <div class="flex items-center space-x-4">
+                            <a href="{{ route('pharmacy.inventory.create') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded">Add Medicine</a>
+                            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition duration-200">
+                                <i class="fas fa-save mr-2"></i>Save All Changes
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        {{ $inventory->links() }}
                     </div>
                 @endif
             </form>
