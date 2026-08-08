@@ -6,6 +6,7 @@ use App\Http\Controllers\PharmacyDashboardController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\MedicineSearchController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\InventoryController;
 use Illuminate\Support\Facades\Route;
 
 // ============================================
@@ -54,7 +55,6 @@ Route::middleware(['auth', 'role:consumer'])->prefix('consumer')->name('consumer
 Route::middleware(['auth', 'role:pharmacy,pharmacy_operator'])->prefix('pharmacy')->name('pharmacy.')->group(function () {
     Route::get('/dashboard', [PharmacyDashboardController::class, 'index'])->name('dashboard');
     // Inventory management (CRUD, search, pagination)
-    use App\Http\Controllers\InventoryController;
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory');
     Route::get('/inventory/create', [InventoryController::class, 'create'])->name('inventory.create');
     Route::post('/inventory', [InventoryController::class, 'store'])->name('inventory.store');
@@ -63,6 +63,14 @@ Route::middleware(['auth', 'role:pharmacy,pharmacy_operator'])->prefix('pharmacy
     Route::delete('/inventory/{id}', [InventoryController::class, 'destroy'])->name('inventory.destroy');
     // Legacy bulk update endpoint kept for compatibility
     Route::post('/inventory/update', [PharmacyDashboardController::class, 'updateInventory'])->name('inventory.bulk-update');
+
+    // Receiving & suppliers
+    Route::get('/receiving/create', [\App\Http\Controllers\ReceivingController::class, 'create'])->name('receiving.create');
+    Route::post('/receiving', [\App\Http\Controllers\ReceivingController::class, 'store'])->name('receiving.store');
+
+    Route::get('/suppliers', [\App\Http\Controllers\SupplierController::class, 'index'])->name('suppliers.index');
+    Route::get('/suppliers/create', [\App\Http\Controllers\SupplierController::class, 'create'])->name('suppliers.create');
+    Route::post('/suppliers', [\App\Http\Controllers\SupplierController::class, 'store'])->name('suppliers.store');
     Route::get('/messages', [PharmacyDashboardController::class, 'messages'])->name('messages');
     Route::post('/message/reply/{id}', [PharmacyDashboardController::class, 'replyMessage'])->name('message.reply');
     Route::get('/message/mark-read/{id}', [PharmacyDashboardController::class, 'markRead'])->name('message.mark-read');
