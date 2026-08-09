@@ -70,9 +70,8 @@ class AdminDashboardController extends Controller
         return view('admin.users', compact('users'));
     }
 
-    public function editUser($id): View
+public function editUser(User $user): View
     {
-        $user = User::findOrFail($id);
         return view('admin.edit-user', compact('user'));
     }
 
@@ -166,9 +165,8 @@ class AdminDashboardController extends Controller
         return redirect()->route('admin.pharmacies')->with('success', 'Pharmacy added successfully.');
     }
 
-    public function editPharmacy($id): View
+public function editPharmacy(Pharmacy $pharmacy): View
     {
-        $pharmacy = Pharmacy::findOrFail($id);
         $users = User::whereIn('role', ['pharmacy', 'pharmacy_operator'])->orderBy('name')->get();
         return view('admin.edit-pharmacy', compact('pharmacy', 'users'));
     }
@@ -256,9 +254,8 @@ class AdminDashboardController extends Controller
         return view('admin.add-medicine');
     }
 
-    public function editMedicine($id): View
+public function editMedicine(Medicine $medicine): View
     {
-        $medicine = Medicine::findOrFail($id);
         return view('admin.edit-medicine', compact('medicine'));
     }
 

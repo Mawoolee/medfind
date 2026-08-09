@@ -117,28 +117,28 @@ Route::middleware(['auth', 'role:pharmacy,pharmacy_operator'])->prefix('pharmacy
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
-    // Users
+// Users
     Route::get('/users', [AdminDashboardController::class, 'users'])->name('users');
-    Route::get('/user/{id}/edit', [AdminDashboardController::class, 'editUser'])->name('user.edit');
-    Route::put('/user/{id}', [AdminDashboardController::class, 'updateUser'])->name('user.update');
-    Route::delete('/user/{id}', [AdminDashboardController::class, 'deleteUser'])->name('user.delete');
+    Route::get('/user/{user}/edit', [AdminDashboardController::class, 'editUser'])->name('user.edit');
+    Route::put('/user/{user}', [AdminDashboardController::class, 'updateUser'])->name('user.update');
+    Route::delete('/user/{user}', [AdminDashboardController::class, 'deleteUser'])->name('user.delete');
 
     // Pharmacies
     Route::get('/pharmacies', [AdminDashboardController::class, 'pharmacies'])->name('pharmacies');
     Route::get('/pharmacy/add', [AdminDashboardController::class, 'addPharmacy'])->name('pharmacy.add');
     Route::post('/pharmacy/store', [AdminDashboardController::class, 'storePharmacy'])->name('pharmacy.store');
-    Route::get('/pharmacy/{id}/edit', [AdminDashboardController::class, 'editPharmacy'])->name('pharmacy.edit');
-    Route::put('/pharmacy/{id}', [AdminDashboardController::class, 'updatePharmacy'])->name('pharmacy.update');
-    Route::post('/pharmacy/{id}/approve', [AdminDashboardController::class, 'approvePharmacy'])->name('pharmacy.approve');
-    Route::delete('/pharmacy/{id}', [AdminDashboardController::class, 'deletePharmacy'])->name('pharmacy.delete');
+    Route::get('/pharmacy/{pharmacy}/edit', [AdminDashboardController::class, 'editPharmacy'])->name('pharmacy.edit');
+    Route::put('/pharmacy/{pharmacy}', [AdminDashboardController::class, 'updatePharmacy'])->name('pharmacy.update');
+    Route::post('/pharmacy/{pharmacy}/approve', [AdminDashboardController::class, 'approvePharmacy'])->name('pharmacy.approve');
+    Route::delete('/pharmacy/{pharmacy}', [AdminDashboardController::class, 'deletePharmacy'])->name('pharmacy.delete');
 
     // Medicines
     Route::get('/medicines', [AdminDashboardController::class, 'medicinesPage'])->name('medicines');
     Route::get('/medicine/add', [AdminDashboardController::class, 'addMedicine'])->name('medicine.add');
     Route::post('/medicine/store', [AdminDashboardController::class, 'storeMedicine'])->name('medicine.store');
-    Route::get('/medicine/{id}/edit', [AdminDashboardController::class, 'editMedicine'])->name('medicine.edit');
-    Route::put('/medicine/{id}', [AdminDashboardController::class, 'updateMedicine'])->name('medicine.update');
-    Route::delete('/medicine/{id}', [AdminDashboardController::class, 'destroyMedicine'])->name('medicine.delete');
+    Route::get('/medicine/{medicine}/edit', [AdminDashboardController::class, 'editMedicine'])->name('medicine.edit');
+    Route::put('/medicine/{medicine}', [AdminDashboardController::class, 'updateMedicine'])->name('medicine.update');
+    Route::delete('/medicine/{medicine}', [AdminDashboardController::class, 'destroyMedicine'])->name('medicine.delete');
 
 // Logs
     Route::get('/logs', [AdminDashboardController::class, 'logs'])->name('logs');
