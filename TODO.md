@@ -31,3 +31,9 @@
 - [x] Commit with meaningful message (e76f8d2)
 - [x] Push to remote (branch `blackboxai/admin-pagination-notifications-audit`)
 - [ ] Open PR to `main` — requires `gh` CLI (not installed; no package manager available). PR URL: https://github.com/Mawoolee/medfind/pull/new/blackboxai/admin-pagination-notifications-audit
+
+## Admin Delete Bug Fix
+- [x] Root cause: route model binding mismatch — routes used `{id}` but controller type-hinted `User $user`/`Pharmacy $pharmacy`/`Medicine $medicine`, so model was never bound and delete/update silently failed
+- [x] Renamed route params to `{user}`, `{pharmacy}`, `{medicine}`
+- [x] Converted `editUser`/`editPharmacy`/`editMedicine` to model type-hints
+- [x] `php -l` passed; routes verified; committed (a69060b) and pushed
