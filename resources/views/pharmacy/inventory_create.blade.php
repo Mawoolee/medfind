@@ -40,6 +40,32 @@
                 </div>
 
                 <div>
+                    <label class="block text-sm font-medium text-gray-700">Category</label>
+                    <select name="category" class="mt-1 block w-full border border-gray-300 rounded px-2 py-2">
+                        <option value="">-- Select --</option>
+                        <option value="analgesic">Analgesic</option>
+                        <option value="antibiotic">Antibiotic</option>
+                        <option value="antidiarrheal">Antidiarrheal</option>
+                        <option value="antihistamine">Antihistamine</option>
+                        <option value="nsaid">NSAID</option>
+                        <option value="controlled">Controlled</option>
+                        <option value="vitamin">Vitamin</option>
+                        <option value="supplement">Supplement</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Supplier</label>
+                    <select name="supplier_id" class="mt-1 block w-full border border-gray-300 rounded px-2 py-2">
+                        <option value="">-- Select --</option>
+                        @foreach($suppliers ?? [] as $sp)
+                            <option value="{{ $sp->id }}">{{ $sp->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
                     <label class="block text-sm font-medium text-gray-700">Price (₱)</label>
                     <input type="number" step="0.01" name="price" class="mt-1 block w-full border border-gray-300 rounded px-2 py-2" required />
                 </div>
@@ -47,6 +73,27 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Initial Stock</label>
                     <input type="number" name="stockQuantity" min="0" class="mt-1 block w-full border border-gray-300 rounded px-2 py-2" required />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Par Level (min stock)</label>
+                    <input type="number" name="par_level" min="0" value="0" class="mt-1 block w-full border border-gray-300 rounded px-2 py-2" />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Batch Number</label>
+                    <input type="text" name="batch_number" class="mt-1 block w-full border border-gray-300 rounded px-2 py-2" />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Expiry Date</label>
+                    <input type="date" name="expiry_date" class="mt-1 block w-full border border-gray-300 rounded px-2 py-2" />
+                </div>
+
+                <div class="flex items-end">
+                    <label class="flex items-center text-sm font-medium text-gray-700">
+                        <input type="checkbox" name="cold_chain" value="1" class="mr-2"> Cold Chain (temperature-sensitive)
+                    </label>
                 </div>
             </div>
 

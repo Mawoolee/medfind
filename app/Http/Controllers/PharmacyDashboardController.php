@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 use App\Models\Pharmacy;
 use App\Models\InventoryItem;
 use App\Models\Message;
+use App\Models\SearchLog;
 use Illuminate\Http\Request;
 
 class PharmacyDashboardController extends Controller
@@ -35,12 +36,63 @@ class PharmacyDashboardController extends Controller
             ->where('is_read', false)
             ->count();
 
+        // Low stock alerts (at or below par level)
+        $lowStockItems = InventoryItem::with('medicine')
+            ->where('pharmacy_id', $pharmacy->id)
+            ->belowPar()
+            ->orderBy('stockQuantity', 'asc')
+            ->limit(10)
+            ->get();
+
+        // Expired / expiring soon (FEFO)
+        $expiringItems = InventoryItem::with('medicine')
+            ->where('pharmacy_id', $pharmacy->id)
+            ->whereNotNull('expiry_date')
+            ->where('expiry_date', '<=', now()->addDays(90)->endOfDay())
+            ->orderBy('expiry_date', 'asc')
+            ->limit(10)
+            ->get();
+
+        $expiredCount = InventoryItem::where('pharmacy_id', $pharmacy->id)
+            ->whereNotNull('expiry_date')
+            ->where('expiry_date', '<', now()->startOfDay())
+            ->count();
+
+$lowStockCount = $lowStockItems->count();
+
+        // Search tracking stats (per thesis: "track number of searches made for their store daily")
+        $searchCountTotal = SearchLog::where('pharmacy_id', $pharmacy->id)->count();
+        $searchCountToday = SearchLog::where('pharmacy_id', $pharmacy->id)
+            ->whereDate('created_at', today())
+            ->count();
+        $searchCountWeek = SearchLog::where('pharmacy_id', $pharmacy->id)
+            ->where('created_at', '>=', now()->subDays(7)->startOfDay())
+            ->count();
+
+        // Top searched medicines for this pharmacy (derived from search logs)
+        $topSearchQueries = SearchLog::where('pharmacy_id', $pharmacy->id)
+            ->whereNotNull('query')
+            ->selectRaw('query, COUNT(*) as total')
+            ->groupBy('query')
+            ->orderBy('total', 'desc')
+            ->orderBy('query', 'asc')
+            ->limit(5)
+            ->get();
+
         return view('pharmacy.dashboard', compact(
             'pharmacy',
             'inventoryCount',
             'inStockCount',
             'messageCount',
-            'unreadCount'
+            'unreadCount',
+            'lowStockItems',
+            'lowStockCount',
+            'expiringItems',
+            'expiredCount',
+            'searchCountTotal',
+            'searchCountToday',
+            'searchCountWeek',
+            'topSearchQueries'
         ));
     }
 
@@ -108,7 +160,7 @@ class PharmacyDashboardController extends Controller
         return redirect()->back()->with('error', 'No changes made.');
     }
 
-    public function messages()
+public function messages(Request $request)
     {
         $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
 
@@ -116,12 +168,23 @@ class PharmacyDashboardController extends Controller
             return redirect()->back()->with('error', 'No pharmacy assigned.');
         }
 
-        $messages = Message::where('pharmacy_id', $pharmacy->id)
-            ->with('consumer')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        // Status filter: all | unread | read
+        $status = $request->query('status', 'all');
+        if (!in_array($status, ['all', 'unread', 'read'])) {
+            $status = 'all';
+        }
 
-        return view('pharmacy.messages', compact('pharmacy', 'messages'));
+        $query = Message::where('pharmacy_id', $pharmacy->id)->with('consumer');
+
+        if ($status === 'unread') {
+            $query->where('is_read', false);
+        } elseif ($status === 'read') {
+            $query->where('is_read', true);
+        }
+
+        $messages = $query->orderBy('created_at', 'desc')->get();
+
+        return view('pharmacy.messages', compact('pharmacy', 'messages', 'status'));
     }
 
     public function replyMessage(Request $request, $id)

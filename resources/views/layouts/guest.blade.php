@@ -14,8 +14,13 @@
         <!-- Font Awesome -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-        <!-- Scripts -->
+<!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+        <!-- For development only - remove this in production -->
+        @if(app()->environment('local'))
+            <script src="https://cdn.tailwindcss.com"></script>
+        @endif
 
         <style>
             * {

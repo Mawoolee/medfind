@@ -17,11 +17,33 @@
         </a>
     </div>
 
-    @if(session('success'))
+@if(session('success'))
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4">
             {{ session('success') }}
         </div>
     @endif
+
+    {{-- Status filter tabs --}}
+    @php $currentStatus = $status ?? 'all'; @endphp
+    <div class="flex flex-wrap gap-2 mb-6">
+        <a href="{{ route('pharmacy.messages', ['status' => 'all']) }}"
+           class="px-4 py-2 rounded-lg text-sm font-medium transition duration-200 {{ $currentStatus === 'all' ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+            All
+        </a>
+        <a href="{{ route('pharmacy.messages', ['status' => 'unread']) }}"
+           class="px-4 py-2 rounded-lg text-sm font-medium transition duration-200 {{ $currentStatus === 'unread' ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+            Unread
+        </a>
+        <a href="{{ route('pharmacy.messages', ['status' => 'read']) }}"
+           class="px-4 py-2 rounded-lg text-sm font-medium transition duration-200 {{ $currentStatus === 'read' ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+            Read
+        </a>
+        @if($currentStatus === 'unread' || $currentStatus === 'read')
+            <span class="ml-auto text-sm text-gray-500 self-center">
+                Showing {{ $currentStatus }} messages ({{ $messages->count() }})
+            </span>
+        @endif
+    </div>
 
     @if(isset($messages) && $messages->count() > 0)
         <div class="space-y-4">

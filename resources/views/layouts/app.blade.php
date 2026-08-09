@@ -93,8 +93,11 @@
         </main>
     </div>
 
-    <!-- Leaflet JS -->
+<!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Alpine.js for interactive dropdowns -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <!-- MedFind Custom JS -->
     <script>
@@ -112,5 +115,6 @@
     </script>
     <script src="{{ asset('js/medfind.js') }}"></script>
 
+    @stack('scripts')
 </body>
 </html>

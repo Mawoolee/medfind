@@ -8,6 +8,7 @@ use App\Models\Medicine;
 use App\Models\InventoryItem;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Database\Seeders\SearchLogSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -270,6 +271,11 @@ class DatabaseSeeder extends Seeder
             ]
         );
         echo "✅ Consumer user: " . $consumer->email . "\n";
+
+// ============================================
+        // 11. SEED SEARCH LOGS (demo data for dashboard)
+        // ============================================
+        $this->call(SearchLogSeeder::class);
 
         // ============================================
         // SUMMARY

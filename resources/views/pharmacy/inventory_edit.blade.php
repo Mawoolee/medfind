@@ -31,6 +31,37 @@
                     <label class="block text-sm font-medium text-gray-700">Stock Quantity</label>
                     <input type="number" name="stockQuantity" value="{{ $item->stockQuantity }}" min="0" class="mt-1 block w-full border border-gray-300 rounded px-2 py-2" required />
                 </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Par Level (min stock)</label>
+                    <input type="number" name="par_level" min="0" value="{{ $item->par_level ?? 0 }}" class="mt-1 block w-full border border-gray-300 rounded px-2 py-2" />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Batch Number</label>
+                    <input type="text" name="batch_number" value="{{ $item->batch_number }}" class="mt-1 block w-full border border-gray-300 rounded px-2 py-2" />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Expiry Date</label>
+                    <input type="date" name="expiry_date" value="{{ optional($item->expiry_date)->format('Y-m-d') }}" class="mt-1 block w-full border border-gray-300 rounded px-2 py-2" />
+                </div>
+
+                <div class="flex items-end">
+                    <label class="flex items-center text-sm font-medium text-gray-700">
+                        <input type="checkbox" name="cold_chain" value="1" {{ $item->cold_chain ? 'checked' : '' }} class="mr-2"> Cold Chain
+                    </label>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Supplier</label>
+                    <select name="supplier_id" class="mt-1 block w-full border border-gray-300 rounded px-2 py-2">
+                        <option value="">-- Select --</option>
+                        @foreach($suppliers ?? [] as $sp)
+                            <option value="{{ $sp->id }}" {{ $item->supplier_id == $sp->id ? 'selected' : '' }}>{{ $sp->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
 
             <div class="mt-4">

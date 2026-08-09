@@ -71,6 +71,9 @@ Route::middleware(['auth', 'role:pharmacy,pharmacy_operator'])->prefix('pharmacy
     Route::get('/suppliers', [\App\Http\Controllers\SupplierController::class, 'index'])->name('suppliers.index');
     Route::get('/suppliers/create', [\App\Http\Controllers\SupplierController::class, 'create'])->name('suppliers.create');
     Route::post('/suppliers', [\App\Http\Controllers\SupplierController::class, 'store'])->name('suppliers.store');
+    Route::get('/suppliers/{id}/edit', [\App\Http\Controllers\SupplierController::class, 'edit'])->name('suppliers.edit');
+    Route::put('/suppliers/{id}', [\App\Http\Controllers\SupplierController::class, 'update'])->name('suppliers.update');
+    Route::delete('/suppliers/{id}', [\App\Http\Controllers\SupplierController::class, 'destroy'])->name('suppliers.destroy');
     Route::get('/messages', [PharmacyDashboardController::class, 'messages'])->name('messages');
     Route::post('/message/reply/{id}', [PharmacyDashboardController::class, 'replyMessage'])->name('message.reply');
     Route::get('/message/mark-read/{id}', [PharmacyDashboardController::class, 'markRead'])->name('message.mark-read');
@@ -80,6 +83,32 @@ Route::middleware(['auth', 'role:pharmacy,pharmacy_operator'])->prefix('pharmacy
     Route::post('/message/mark-read-ajax/{id}', [MessageController::class, 'markReadAjax'])->name('message.mark-read-ajax');
     Route::post('/message/mark-unread-ajax/{id}', [MessageController::class, 'markUnreadAjax'])->name('message.mark-unread-ajax');
     Route::post('/message/verify-ajax/{id}', [MessageController::class, 'verifyAjax'])->name('message.verify-ajax');
+
+    // Inventory Analysis (ABC/VED)
+    Route::get('/analysis', [\App\Http\Controllers\AnalysisController::class, 'index'])->name('analysis');
+
+    // Cycle counts
+    Route::get('/cycle-counts', [\App\Http\Controllers\CycleCountController::class, 'index'])->name('cycle-counts.index');
+    Route::get('/cycle-counts/create', [\App\Http\Controllers\CycleCountController::class, 'create'])->name('cycle-counts.create');
+    Route::post('/cycle-counts', [\App\Http\Controllers\CycleCountController::class, 'store'])->name('cycle-counts.store');
+    Route::get('/cycle-counts/{id}/count', [\App\Http\Controllers\CycleCountController::class, 'show'])->name('cycle-counts.show');
+    Route::post('/cycle-counts/{id}/complete', [\App\Http\Controllers\CycleCountController::class, 'complete'])->name('cycle-counts.complete');
+
+    // Returns & recalls
+    Route::get('/returns', [\App\Http\Controllers\ReturnRecallController::class, 'index'])->name('returns.index');
+    Route::get('/returns/create', [\App\Http\Controllers\ReturnRecallController::class, 'create'])->name('returns.create');
+    Route::post('/returns', [\App\Http\Controllers\ReturnRecallController::class, 'store'])->name('returns.store');
+    Route::post('/returns/{id}/status', [\App\Http\Controllers\ReturnRecallController::class, 'updateStatus'])->name('returns.status');
+
+    // Controlled substance logbook
+    Route::get('/controlled-substances', [\App\Http\Controllers\ControlledSubstanceController::class, 'index'])->name('controlled-substances.index');
+
+    // Pharmacy profile
+    Route::get('/profile', [\App\Http\Controllers\PharmacyProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [\App\Http\Controllers\PharmacyProfileController::class, 'update'])->name('profile.update');
+
+    // Inventory CSV export
+    Route::get('/inventory/export', [InventoryController::class, 'export'])->name('inventory.export');
 });
 
 // ============================================

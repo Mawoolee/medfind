@@ -634,16 +634,11 @@ function selectMedicine(medicineName) {
 // EVENT LISTENERS
 // ============================================
 document.addEventListener("DOMContentLoaded", function() {
-    console.log('DOM loaded - Initializing MedFind');
-    console.log('allMedicineNames:', (typeof allMedicineNames !== 'undefined') ? allMedicineNames : null);
-    
+    // DOM loaded - initialize core behaviors
     initMap();
-    
+
     const input = document.getElementById("medicineSearch");
     const btn = document.getElementById("searchBtn");
-
-    console.log('Input element:', input);
-    console.log('Button element:', btn);
 
     if (btn) {
         btn.addEventListener("click", function(e) {
