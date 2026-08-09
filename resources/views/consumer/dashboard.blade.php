@@ -89,6 +89,49 @@
             }, 1200);
         }
     });
+
+    // -------------------------------------------------------
+    // REAL-TIME: Listen for inventory updates via Reverb/Echo
+    // Updates the in-memory pharmaciesData and re-renders map.
+    // -------------------------------------------------------
+    document.addEventListener('DOMContentLoaded', function () {
+        if (!window.Echo) return;
+
+        window.Echo.channel('inventory')
+            .listen('.inventory.updated', function (e) {
+                if (!e || !e.pharmacyId) return;
+
+                // Update pharmaciesData in place
+                if (typeof pharmaciesData === 'undefined') return;
+                const pharmacy = pharmaciesData.find(p => p.id === e.pharmacyId);
+                if (!pharmacy) return;
+
+                if (!pharmacy.medicines) pharmacy.medicines = [];
+                const med = pharmacy.medicines.find(m => m.id === e.medicineId);
+                if (med) {
+                    med.stock = e.stock;
+                    med.price = e.price;
+                } else if (e.stock > 0) {
+                    // New medicine added to this pharmacy's stock
+                    pharmacy.medicines.push({
+                        id: e.medicineId,
+                        name: e.medicineName,
+                        stock: e.stock,
+                        price: e.price,
+                        prescription: e.prescription,
+                    });
+                }
+
+                // Re-draw map markers with fresh data
+                if (typeof window.performSearch === 'function') {
+                    window.performSearch();
+                }
+
+                console.info('[MedFind] Real-time: stock updated for pharmacy', e.pharmacyId, '→', e.medicineName, e.stock);
+            });
+
+        console.info('[MedFind] Listening on inventory channel for real-time updates');
+    });
 </script>
 
 <style>

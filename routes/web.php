@@ -4,9 +4,11 @@
 use App\Http\Controllers\ConsumerController;
 use App\Http\Controllers\PharmacyDashboardController;
 use App\Http\Controllers\AdminDashboardController;
-use App\Http\Controllers\MedicineSearchController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\AdminInventoryController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 // ============================================
@@ -37,6 +39,16 @@ Route::get('/dashboard', function () {
 // AUTH ROUTES (Laravel Breeze)
 // ============================================
 require __DIR__.'/auth.php';
+
+// ============================================
+// NOTIFICATION ROUTES (all authenticated users)
+// ============================================
+Route::middleware(['auth'])->prefix('notifications')->name('notifications.')->group(function () {
+    Route::get('/', [NotificationController::class, 'index'])->name('index');
+    Route::post('/mark-all-read', [NotificationController::class, 'markAllRead'])->name('mark-all-read');
+    Route::post('/{id}/mark-read', [NotificationController::class, 'markRead'])->name('mark-read');
+    Route::get('/unread-count', [NotificationController::class, 'unreadCount'])->name('unread-count');
+});
 
 // ============================================
 // CONSUMER ROUTES
@@ -83,6 +95,8 @@ Route::middleware(['auth', 'role:pharmacy,pharmacy_operator'])->prefix('pharmacy
     Route::post('/message/mark-read-ajax/{id}', [MessageController::class, 'markReadAjax'])->name('message.mark-read-ajax');
     Route::post('/message/mark-unread-ajax/{id}', [MessageController::class, 'markUnreadAjax'])->name('message.mark-unread-ajax');
     Route::post('/message/verify-ajax/{id}', [MessageController::class, 'verifyAjax'])->name('message.verify-ajax');
+    // Secure prescription image viewer (decrypts on-the-fly, never serves raw public URL)
+    Route::get('/prescription/{message}', [MessageController::class, 'servePrescription'])->name('prescription.serve');
 
     // Inventory Analysis (ABC/VED)
     Route::get('/analysis', [\App\Http\Controllers\AnalysisController::class, 'index'])->name('analysis');
@@ -102,6 +116,11 @@ Route::middleware(['auth', 'role:pharmacy,pharmacy_operator'])->prefix('pharmacy
 
     // Controlled substance logbook
     Route::get('/controlled-substances', [\App\Http\Controllers\ControlledSubstanceController::class, 'index'])->name('controlled-substances.index');
+    Route::get('/controlled-substances/log', [\App\Http\Controllers\ControlledSubstanceController::class, 'create'])->name('controlled-substances.create');
+    Route::post('/controlled-substances/log', [\App\Http\Controllers\ControlledSubstanceController::class, 'store'])->name('controlled-substances.store');
+
+    // Inventory audit log
+    Route::get('/audit-log', [AuditLogController::class, 'index'])->name('audit-log');
 
     // Pharmacy profile
     Route::get('/profile', [\App\Http\Controllers\PharmacyProfileController::class, 'edit'])->name('profile.edit');
@@ -145,5 +164,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Activity Log
     Route::get('/activity', [AdminDashboardController::class, 'activity'])->name('activity');
+
+    // Inventory overview
+    Route::get('/inventory', [AdminInventoryController::class, 'index'])->name('inventory');
 });
 

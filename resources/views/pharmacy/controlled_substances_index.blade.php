@@ -6,9 +6,15 @@
 <div class="container mx-auto px-4 py-8">
     <div class="flex items-center justify-between mb-6">
         <h1 class="text-2xl font-bold text-gray-800">🛡️ Controlled Substances Logbook</h1>
-        <a href="{{ route('pharmacy.dashboard') }}" class="text-blue-600 hover:text-blue-800">
-            <i class="fas fa-arrow-left mr-2"></i>Back
-        </a>
+        <div class="flex items-center gap-3">
+            <a href="{{ route('pharmacy.controlled-substances.create') }}"
+               class="bg-[#9400D3] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#7a00b0] transition">
+                <i class="fas fa-plus mr-2"></i>Log Entry
+            </a>
+            <a href="{{ route('pharmacy.dashboard') }}" class="text-[#9400D3] hover:text-[#7a00b0] text-sm font-medium">
+                <i class="fas fa-arrow-left mr-2"></i>Back
+            </a>
+        </div>
     </div>
 
     <!-- Controlled items snapshot -->

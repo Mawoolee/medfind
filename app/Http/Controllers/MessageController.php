@@ -6,6 +6,8 @@ namespace App\Http\Controllers;
 use App\Models\Message;
 use App\Models\Pharmacy;
 use App\Models\User;
+use App\Events\MessageSent;
+use App\Services\PrescriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -62,9 +64,9 @@ class MessageController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'pharmacy_id' => 'required|exists:pharmacies,id',
-            'message' => 'required|string|max:1000',
-            'prescription_image' => 'nullable|image|max:5120', // 5MB max
+            'pharmacy_id'        => 'required|exists:pharmacies,id',
+            'message'            => 'required|string|max:1000',
+            'prescription_image' => 'nullable|file|mimes:jpeg,jpg,png,gif,webp,pdf|max:5120',
         ]);
 
         $user = Auth::user();
@@ -75,15 +77,26 @@ class MessageController extends Controller
         $message = new Message();
         $message->consumer_id = $user->id;
         $message->pharmacy_id = $request->pharmacy_id;
-        $message->message = $request->message;
-        $message->is_read = false;
+        $message->message     = $request->message;
+        $message->is_read     = false;
 
         if ($request->hasFile('prescription_image')) {
-            $path = $request->file('prescription_image')->store('prescriptions', 'public');
-            $message->prescription_image = $path;
+            // Encrypt and store to private disk — never in public storage
+            $svc = app(PrescriptionService::class);
+            $message->prescription_image = $svc->store($request->file('prescription_image'));
         }
 
         $message->save();
+
+        // Broadcast real-time new-message notification to the pharmacy channel
+        MessageSent::dispatch(
+            $message->id,
+            $user->id,
+            $request->pharmacy_id,
+            $request->message,
+            $user->name,
+            'consumer_to_pharmacy'
+        );
 
         return redirect()->back()->with('success', 'Message sent successfully! The pharmacy will respond shortly.');
     }
@@ -194,6 +207,17 @@ class MessageController extends Controller
         $message->is_read = true;
         $message->save();
 
+        // Broadcast reply to consumer
+        MessageSent::dispatch(
+            $message->id,
+            $message->consumer_id,
+            $pharmacy->id,
+            $request->reply,
+            auth()->user()->name,
+            'pharmacy_to_consumer',
+            $request->reply
+        );
+
         return redirect()->back()->with('success', 'Reply sent successfully!');
     }
 
@@ -229,6 +253,41 @@ class MessageController extends Controller
         $message->save();
 
         return response()->json(['success' => true, 'status' => $message->verification_status, 'verifier' => $user->name, 'verified_at' => $message->verified_at->toDateTimeString()]);
+    }
+
+    /**
+     * Securely serve a decrypted prescription image to authorised pharmacy staff.
+     * The file is NEVER written to a public URL.
+     */
+    public function servePrescription(Request $request, $messageId)
+    {
+        $user = Auth::user();
+        if (!$user->isPharmacy() && $user->role !== 'admin') {
+            abort(403, 'Unauthorised.');
+        }
+
+        $message = Message::findOrFail($messageId);
+
+        // Pharmacy staff can only view prescriptions sent to their own pharmacy
+        if ($user->isPharmacy()) {
+            $pharmacy = Pharmacy::where('user_id', $user->id)->first();
+            if (!$pharmacy || $message->pharmacy_id !== $pharmacy->id) {
+                abort(403, 'Unauthorised.');
+            }
+        }
+
+        if (empty($message->prescription_image)) {
+            abort(404, 'No prescription attached to this message.');
+        }
+
+        $svc      = app(\App\Services\PrescriptionService::class);
+        $rawBytes = $svc->retrieve($message->prescription_image);
+        $mime     = $svc->mimeType($rawBytes);
+
+        return response($rawBytes, 200)->header('Content-Type', $mime)
+            ->header('Content-Disposition', 'inline; filename="prescription"')
+            ->header('X-Content-Type-Options', 'nosniff')
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate');
     }
 
     /**

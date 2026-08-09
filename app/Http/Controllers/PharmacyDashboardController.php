@@ -212,6 +212,16 @@ public function messages(Request $request)
         $message->is_read = true;
         $message->save();
 
+        \App\Events\MessageSent::dispatch(
+            $message->id,
+            $message->consumer_id,
+            $pharmacy->id,
+            $request->reply,
+            auth()->user()->name,
+            'pharmacy_to_consumer',
+            $request->reply
+        );
+
         return redirect()->back()->with('success', 'Reply sent successfully!');
     }
 

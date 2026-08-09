@@ -68,9 +68,11 @@
                             
                             @if($message->prescription_image)
                                 <div class="mt-2 flex items-center gap-4">
-                                    <a href="{{ asset('storage/' . $message->prescription_image) }}" target="_blank" 
+                                    {{-- Secure serve route — decrypts on-the-fly, no public URL --}}
+                                    <a href="{{ route('pharmacy.prescription.serve', $message->id) }}" target="_blank"
                                        class="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-2">
-                                        <img src="{{ asset('storage/' . $message->prescription_image) }}" alt="prescription" class="w-24 h-auto rounded border" />
+                                        <img src="{{ route('pharmacy.prescription.serve', $message->id) }}" alt="prescription"
+                                             class="w-24 h-auto rounded border" />
                                         <span><i class="fas fa-file-prescription mr-1"></i>View Prescription</span>
                                     </a>
 
@@ -160,3 +162,41 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+/**
+ * Real-time: when a consumer sends a new message to THIS pharmacy,
+ * bump the unread badge and show a toast — no page reload required.
+ */
+document.addEventListener('DOMContentLoaded', function () {
+    if (!window.Echo) return;
+
+    const pharmacyId = {{ $pharmacy->id }};
+
+    window.Echo.channel('pharmacy.' + pharmacyId)
+        .listen('.message.sent', function (e) {
+            if (!e || e.direction !== 'consumer_to_pharmacy') return;
+
+            // Bump unread badge
+            const badge = document.getElementById('pharmacyUnreadCountBadge');
+            if (badge) {
+                const current = parseInt(badge.textContent || '0', 10);
+                badge.textContent = current + 1;
+                badge.classList.remove('hidden');
+            }
+
+            // Show a toast notification
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-20 right-4 z-[99999] bg-[#191970] text-white text-sm px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 animate-pulse';
+            toast.innerHTML = '<i class="fas fa-envelope"></i> New message from ' + (e.consumerName || 'a customer') + ' <a href="" class="underline font-bold ml-1">Refresh</a>';
+            document.body.appendChild(toast);
+            setTimeout(function () { toast.remove(); }, 6000);
+
+            console.info('[MedFind] Real-time: new message from consumer', e.consumerId);
+        });
+
+    console.info('[MedFind] Listening on pharmacy.' + pharmacyId + ' channel');
+});
+</script>
+@endpush

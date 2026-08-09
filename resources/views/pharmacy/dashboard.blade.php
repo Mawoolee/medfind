@@ -145,6 +145,22 @@
                 @endif
             </a>
         </div>
+        <!-- Audit Log -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">📋 Audit Log</h2>
+            <p class="text-gray-600 mb-4">Review every stock change — who changed what and when.</p>
+            <a href="{{ route('pharmacy.audit-log') }}" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg transition duration-200">
+                <i class="fas fa-history mr-2"></i>View Audit Log
+            </a>
+        </div>
+        <!-- Controlled Substances -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">🛡️ Controlled Substances</h2>
+            <p class="text-gray-600 mb-4">Logbook for dispensing, wastage, and transfer entries.</p>
+            <a href="{{ route('pharmacy.controlled-substances.create') }}" class="inline-block bg-rose-600 hover:bg-rose-700 text-white px-6 py-3 rounded-lg transition duration-200">
+                <i class="fas fa-shield-halved mr-2"></i>Log Entry
+            </a>
+        </div>
     </div>
 
 <!-- Quick Stats Table -->

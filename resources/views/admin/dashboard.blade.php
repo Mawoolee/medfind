@@ -47,7 +47,7 @@
         </div>
     </div>
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div class="bg-white rounded-lg shadow-lg p-6">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">Manage Users</h2>
             <p class="text-gray-600 mb-4">View and manage all system users.</p>
@@ -60,6 +60,13 @@
             <p class="text-gray-600 mb-4">Add, edit, or remove pharmacies.</p>
             <a href="{{ route('admin.pharmacies') }}" class="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition duration-200">
                 <i class="fas fa-store-alt mr-2"></i>Manage Pharmacies
+            </a>
+        </div>
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Inventory Overview</h2>
+            <p class="text-gray-600 mb-4">View real-time stock across all pharmacies.</p>
+            <a href="{{ route('admin.inventory') }}" class="inline-block bg-[#9400D3] hover:bg-[#7a00b0] text-white px-6 py-2 rounded-lg transition duration-200">
+                <i class="fas fa-boxes-stacked mr-2"></i>View Inventory
             </a>
         </div>
         <div class="bg-white rounded-lg shadow-lg p-6">

@@ -25,12 +25,14 @@
     <!-- Vite for Tailwind CSS (para sa production-ready) -->
 
     <script>
-    // Pusher guard early: place before any bundled scripts so inlined/compiled code won't throw when no key is present
+    // Pusher guard: only needed when Pusher is used instead of Reverb.
+    // With Reverb (current setup) Pusher is used only as a protocol adapter —
+    // the guard ensures no real Pusher connection attempt happens when no key is set.
     (function(){
         try {
             var _pusherKey = "{{ env('PUSHER_APP_KEY', '') }}";
             if (!_pusherKey) {
-                window.Pusher = function() { console.debug && console.debug('Pusher stub used (no app key)'); };
+                window.Pusher = function() {};
                 window.Pusher.prototype = {};
             }
         } catch(e) {}
@@ -104,19 +106,6 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <!-- MedFind Custom JS -->
-    <script>
-    // Pusher guard: if no PUSHER_APP_KEY is configured, install a harmless stub so pages that call Pusher won't throw.
-    (function(){
-        try {
-            var _pusherKey = "{{ env('PUSHER_APP_KEY', '') }}";
-            if (!_pusherKey) {
-                // Minimal stub that mimics Pusher constructor so code calling `new Pusher()` doesn't throw.
-                window.Pusher = function() { console.debug && console.debug('Pusher stub used (no app key)'); };
-                window.Pusher.prototype = {};
-            }
-        } catch(e) { /* swallow */ }
-    })();
-    </script>
     <script src="{{ asset('js/medfind.js') }}"></script>
 
     @stack('scripts')

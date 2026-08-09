@@ -961,6 +961,7 @@ window.selectInventoryMedicineFromAutocomplete = selectInventoryMedicineFromAuto
 window.selectInventoryMedicineFromAutocomplete = selectInventoryMedicineFromAutocomplete;
 window.getDirections = getDirections;
 window.clearRoute = clearRoute;
+window.startUnreadSync = startUnreadSync;
 
 function getCsrfToken() {
     const m = document.querySelector('meta[name="csrf-token"]');
@@ -972,6 +973,10 @@ function updateUnreadBadge(count) {
     if (badge) badge.textContent = count;
 }
 
+/**
+ * Unread count — prefer real-time Echo; fall back to 10-second AJAX poll
+ * only when WebSockets aren't available.
+ */
 function pollUnreadCount() {
     if (!document.getElementById('pharmacyUnreadCountBadge')) return;
     fetch('/pharmacy/unread-count', { credentials: 'same-origin' })
@@ -979,11 +984,18 @@ function pollUnreadCount() {
         .then(data => {
             if (data && typeof data.count !== 'undefined') {
                 updateUnreadBadge(data.count);
-                if (data.count === 0) {
-                    document.querySelectorAll('.message-new').forEach(el => el.style.display = 'none');
-                }
             }
-        }).catch(err => console.log('Unread count poll error', err));
+        }).catch(err => console.debug('Unread count poll error', err));
+}
+
+function startUnreadSync() {
+    // Always do one initial fetch on page load
+    pollUnreadCount();
+
+    // Only fall back to polling when Echo isn't wired (no Reverb key)
+    if (!window.Echo || window.Echo === null) {
+        setInterval(pollUnreadCount, 10000);
+    }
 }
 
 // Event delegation for mark-as-read buttons and verify buttons
@@ -1098,8 +1110,7 @@ document.addEventListener('click', function(e) {
 
 // Start polling when on pages that have the badge
 document.addEventListener('DOMContentLoaded', function() {
-    pollUnreadCount();
-    setInterval(pollUnreadCount, 10000);
+    startUnreadSync();
 });
 
 console.log('MedFind JS loaded - All functions ready');

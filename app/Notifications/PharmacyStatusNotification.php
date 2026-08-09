@@ -42,7 +42,15 @@ class PharmacyStatusNotification extends Notification
 
     public function toArray(object $notifiable): array
     {
+        $titles = [
+            'approved' => '✅ Pharmacy Approved',
+            'rejected' => '❌ Pharmacy Rejected',
+            'pending'  => '⏳ Pharmacy Pending Review',
+        ];
+
         return [
+            'type'          => $this->status,
+            'title'         => $titles[$this->status] ?? 'Pharmacy Status Update',
             'pharmacy_id'   => $this->pharmacy->id,
             'pharmacy_name' => $this->pharmacy->pharmacy_name,
             'status'        => $this->status,
