@@ -6,12 +6,34 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-8">
-    <div class="flex items-center justify-between mb-6">
+<div class="flex items-center justify-between mb-6">
         <h1 class="text-2xl font-bold text-gray-800">Manage Users</h1>
         <a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:text-blue-800">
             <i class="fas fa-arrow-left mr-2"></i>Back
         </a>
     </div>
+
+    <!-- Search & Filter -->
+    <form method="GET" action="{{ route('admin.users') }}" class="bg-white rounded-lg shadow-lg p-4 mb-6 flex flex-wrap gap-3 items-end">
+        <div class="flex-1 min-w-[200px]">
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Search</label>
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by name or email..."
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Role</label>
+            <select name="role" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                <option value="all">All Roles</option>
+                @foreach(['consumer', 'pharmacy', 'pharmacy_operator', 'admin'] as $role)
+                    <option value="{{ $role }}" {{ request('role') === $role ? 'selected' : '' }}>{{ str_replace('_', ' ', ucfirst($role)) }}</option>
+                @endforeach
+            </select>
+        </div>
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold">
+            <i class="fas fa-search mr-1"></i>Search
+        </button>
+        <a href="{{ route('admin.users') }}" class="text-gray-500 hover:text-gray-700 text-sm px-2 py-2">Reset</a>
+    </form>
 
     <div class="bg-white rounded-lg shadow-lg overflow-hidden">
         <div class="p-6">
@@ -43,20 +65,29 @@
                                     </span>
                                 </td>
                                 <td class="px-4 py-3">{{ $user->created_at->format('M d, Y') }}</td>
-                                <td class="px-4 py-3">
-                                    <form action="{{ route('admin.user.delete', $user->id) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" onclick="return confirm('Are you sure?')" 
-                                                class="text-red-600 hover:text-red-800">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
+<td class="px-4 py-3">
+                                    <div class="flex gap-3">
+                                        <a href="{{ route('admin.user.edit', $user->id) }}" class="text-blue-600 hover:text-blue-800">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form action="{{ route('admin.user.delete', $user->id) }}" method="POST" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" onclick="return confirm('Are you sure?')" 
+                                                    class="text-red-600 hover:text-red-800">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
-                        @endforeach
+@endforeach
                     </tbody>
                 </table>
+            </div>
+
+            <div class="mt-4">
+                {{ $users->links() }}
             </div>
         </div>
     </div>

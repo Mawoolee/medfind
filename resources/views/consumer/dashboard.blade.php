@@ -32,12 +32,22 @@
         <div id="autocompleteList" class="autocomplete-items" style="display: none;"></div>
     </div>
 
-    <!-- Chat Button - Fixed position -->
+<!-- Chat Button - Fixed position -->
     <div class="chat-float-fixed">
         <button onclick="toggleChat()" class="chat-toggle-btn">
             <i class="fas fa-comment"></i>
         </button>
     </div>
+
+<!-- Clear Route Button - shows when a route is active -->
+    <div id="clearRouteBtn" class="clear-route-fixed" style="display: none;">
+        <button onclick="window.clearRoute()" class="clear-route-btn">
+            <i class="fas fa-times mr-1"></i> Clear Route
+        </button>
+    </div>
+
+    <!-- Route Summary - shows distance & ETA above the routing panel -->
+    <div id="routeSummary" class="route-summary-fixed" style="display: none;"></div>
 
     <!-- Chat Modal -->
     <div id="chatModal" class="chat-modal-fixed">
@@ -63,6 +73,22 @@
 <script>
     const pharmaciesData = @json($formattedPharmacies ?? []);
     const allMedicineNames = @json($medicineNames ?? []);
+
+    // Auto-trigger directions when arriving from pharmacy details with ?dir=1&lat=..&lng=..
+    document.addEventListener('DOMContentLoaded', function() {
+        const params = new URLSearchParams(window.location.search);
+        const dir = params.get('dir');
+        const lat = params.get('lat');
+        const lng = params.get('lng');
+        if (dir === '1' && lat && lng) {
+            // Wait for the map to initialize before routing
+            setTimeout(function() {
+                if (typeof window.getDirections === 'function') {
+                    window.getDirections(parseFloat(lat), parseFloat(lng));
+                }
+            }, 1200);
+        }
+    });
 </script>
 
 <style>
@@ -201,6 +227,59 @@
     
     .autocomplete-item:last-child {
         border-bottom: none !important;
+    }
+    
+/* Clear Route Button - Fixed position */
+    .clear-route-fixed {
+        position: fixed !important;
+        bottom: 84px !important;
+        right: 24px !important;
+        z-index: 9999 !important;
+    }
+    
+    .clear-route-btn {
+        background: #9400D3 !important;
+        color: #ffffff !important;
+        border: none !important;
+        padding: 10px 16px !important;
+        border-radius: 9999px !important;
+        font-weight: 700 !important;
+        font-size: 12px !important;
+        cursor: pointer !important;
+        box-shadow: 0 4px 16px rgba(148, 0, 211, 0.3) !important;
+        transition: 0.2s !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+        font-family: system-ui, -apple-system, sans-serif !important;
+    }
+    
+.clear-route-btn:hover {
+        background: #7a00b0 !important;
+        transform: scale(1.03) !important;
+    }
+    
+    /* Route Summary - Fixed position above routing panel */
+    .route-summary-fixed {
+        position: fixed !important;
+        bottom: 84px !important;
+        right: 180px !important;
+        z-index: 9999 !important;
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 8px 16px !important;
+        box-shadow: 0 4px 16px rgba(25, 25, 112, 0.12) !important;
+        border: 1px solid rgba(148, 0, 211, 0.15) !important;
+        font-size: 12px !important;
+        font-weight: 700 !important;
+        color: #191970 !important;
+        font-family: system-ui, -apple-system, sans-serif !important;
+        align-items: center !important;
+        gap: 6px !important;
+    }
+    
+    .route-summary-fixed i {
+        color: #9400D3 !important;
     }
     
     /* Chat Button - Fixed position with highest z-index */

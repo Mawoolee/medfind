@@ -173,7 +173,7 @@ function createPopupContent(pharmacy) {
                     💬 Chat & Prescription
                 </button>
                 
-                <button onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${pharmacy.lat},${pharmacy.lng}','_blank')" 
+<button onclick="window.getDirections(${pharmacy.lat}, ${pharmacy.lng})" 
                         style="flex:1;background:#9400D3;color:#ffffff;border:none;padding:10px 6px;border-radius:9999px;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;outline:none;box-shadow:0 2px 4px rgba(148,0,211,0.15);z-index:9999;pointer-events:auto;position:relative;">
                     🗺️ Directions
                 </button>
@@ -291,6 +291,157 @@ function toggleChat() {
     chatVisible = !chatVisible;
     modal.style.display = chatVisible ? "flex" : "none";
     modal.classList.toggle('active', chatVisible);
+}
+
+// ============================================
+// DIRECTIONS (Leaflet Routing Machine)
+// ============================================
+let routingControl = null;
+let routeActive = false;
+
+function getDirections(pharmacyLat, pharmacyLng) {
+    // If a route is already showing, remove it first
+    clearRoute();
+
+    // Ensure the routing plugin is loaded
+    if (typeof L.Routing === 'undefined') {
+        alert('Directions are not available right now. Please try again.');
+        return;
+    }
+
+    closePopup();
+
+    // Fallback location (Legazpi City center) in case geolocation is denied
+    const fallbackLat = userLat;
+    const fallbackLng = userLng;
+
+    const startRoute = function(startLat, startLng) {
+routingControl = L.Routing.control({
+            waypoints: [
+                L.latLng(startLat, startLng),
+                L.latLng(pharmacyLat, pharmacyLng)
+            ],
+            router: L.Routing.osrmv1({
+                serviceUrl: 'https://routing.openstreetmap.de/routed-car/route/v1',
+                profile: 'driving'
+            }),
+            lineOptions: {
+                styles: [{ color: '#191970', weight: 5, opacity: 0.9 }]
+            },
+            createMarker: function(i, wp) {
+                const html = i === 0
+                    ? '<div style="background:#191970;color:#D9F855;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid #D9F855;box-shadow:0 2px 6px rgba(25,25,112,0.3);">📍</div>'
+                    : '<div style="background:#9400D3;color:#fff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid #D9F855;box-shadow:0 2px 6px rgba(148,0,211,0.3);">🏪</div>';
+                return L.marker(wp.latLng, {
+                    icon: L.divIcon({
+                        html: html,
+                        className: 'route-marker',
+                        iconSize: [26, 26],
+                        iconAnchor: [13, 13]
+                    })
+                });
+            },
+            showAlternatives: true,
+            altLineOptions: {
+                styles: [{ color: '#9400D3', weight: 3, opacity: 0.5 }]
+            },
+            routeWhileDragging: true,
+            fitSelectedRoutes: true,
+            show: true,
+            collapsible: true
+        }).addTo(map);
+
+        routeActive = true;
+
+        // Show the clear-route button
+        const clearBtn = document.getElementById("clearRouteBtn");
+        if (clearBtn) clearBtn.style.display = "block";
+
+// Auto-fit bounds to the route once it's calculated + show summary
+        routingControl.on('routesfound', function(e) {
+            const routes = e.routes;
+            if (routes && routes.length) {
+                const selected = routingControl.getRouter().route ? null : routes[0];
+                const route = routes[0];
+                const bounds = L.latLngBounds(route.coordinates);
+                map.fitBounds(bounds, { padding: [40, 40] });
+
+                // Show distance / ETA summary above the routing panel
+                if (route.summary) {
+                    const km = (route.summary.totalDistance / 1000).toFixed(1);
+                    const min = Math.round(route.summary.totalTime / 60);
+                    const summaryEl = document.getElementById('routeSummary');
+                    if (summaryEl) {
+                        summaryEl.innerHTML = '<i class="fas fa-route"></i> ' + km + ' km &nbsp;·&nbsp; <i class="fas fa-clock"></i> approx ' + min + ' min';
+                        summaryEl.style.display = 'flex';
+                    }
+                }
+            }
+        });
+
+        // Hide summary when the routing control is removed from the map
+        routingControl.on('routeselected', function(e) {
+            const route = e.route;
+            if (route && route.summary) {
+                const km = (route.summary.totalDistance / 1000).toFixed(1);
+                const min = Math.round(route.summary.totalTime / 60);
+                const summaryEl = document.getElementById('routeSummary');
+                if (summaryEl) {
+                    summaryEl.innerHTML = '<i class="fas fa-route"></i> ' + km + ' km &nbsp;·&nbsp; <i class="fas fa-clock"></i> approx ' + min + ' min';
+                    summaryEl.style.display = 'flex';
+                }
+            }
+        });
+
+        // Update the user location marker after starting
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(pos) {
+                userLat = pos.coords.latitude;
+                userLng = pos.coords.longitude;
+                // Re-add route with actual location if it differs meaningfully
+                routingControl.setWaypoints([
+                    L.latLng(userLat, userLng),
+                    L.latLng(pharmacyLat, pharmacyLng)
+                ]);
+            }, function() {
+                // Geolocation denied - keep fallback location
+            });
+        }
+    };
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function(pos) {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+                userLat = lat;
+                userLng = lng;
+                startRoute(lat, lng);
+            },
+            function() {
+                // Denied - use fallback (Legazpi center)
+                startRoute(fallbackLat, fallbackLng);
+            }
+        );
+    } else {
+        startRoute(fallbackLat, fallbackLng);
+    }
+}
+
+function clearRoute() {
+    if (routingControl) {
+        map.removeControl(routingControl);
+        routingControl = null;
+    }
+    routeActive = false;
+
+// Hide the clear-route button
+    const clearBtn = document.getElementById("clearRouteBtn");
+    if (clearBtn) clearBtn.style.display = "none";
+
+    // Hide the route summary
+    const summaryEl = document.getElementById("routeSummary");
+    if (summaryEl) summaryEl.style.display = "none";
 }
 
 function openChatFromPopup(name) {
@@ -808,6 +959,8 @@ window.selectMedicine = selectMedicine;
 window.selectMedicineFromAutocomplete = selectMedicineFromAutocomplete;
 window.selectInventoryMedicineFromAutocomplete = selectInventoryMedicineFromAutocomplete;
 window.selectInventoryMedicineFromAutocomplete = selectInventoryMedicineFromAutocomplete;
+window.getDirections = getDirections;
+window.clearRoute = clearRoute;
 
 function getCsrfToken() {
     const m = document.querySelector('meta[name="csrf-token"]');
