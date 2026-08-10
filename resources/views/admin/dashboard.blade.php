@@ -78,6 +78,25 @@
         </div>
     </div>
 
+    {{-- ISO Survey Card --}}
+    <div class="bg-gradient-to-r from-[#191970] to-[#2a2a8a] rounded-lg shadow-lg p-6 mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-widest text-[#D9F855] mb-1">ISO/IEC 25010 Software Quality</p>
+            <h2 class="text-xl font-bold text-white mb-1">System Evaluation Survey</h2>
+            <p class="text-blue-200 text-sm">Collect feedback on Functional Suitability, Usability, and Security from your respondents.</p>
+        </div>
+        <div class="flex gap-3 flex-shrink-0">
+            <a href="{{ route('survey.show') }}" target="_blank"
+               class="inline-block bg-[#D9F855] text-[#191970] font-bold px-5 py-2 rounded-lg text-sm hover:bg-yellow-300 transition">
+                <i class="fas fa-external-link-alt mr-2"></i>Open Survey
+            </a>
+            <a href="{{ route('admin.survey.results') }}"
+               class="inline-block bg-white/20 text-white font-semibold px-5 py-2 rounded-lg text-sm hover:bg-white/30 transition">
+                <i class="fas fa-chart-bar mr-2"></i>View Results
+            </a>
+        </div>
+    </div>
+
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="bg-white rounded-lg shadow-lg overflow-hidden">
             <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">

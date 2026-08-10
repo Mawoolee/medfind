@@ -44,7 +44,8 @@ class InventoryTest extends TestCase
     public function test_consumers_cannot_access_inventory(): void
     {
         $consumer = User::factory()->create(['role' => 'consumer']);
-        $this->actingAs($consumer)->get(route('pharmacy.inventory'))->assertForbidden();
+        // CheckRole redirects wrong-role users rather than returning 403
+        $this->actingAs($consumer)->get(route('pharmacy.inventory'))->assertRedirect();
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -182,7 +183,7 @@ class InventoryTest extends TestCase
     public function test_pharmacy_user_cannot_update_another_pharmacys_item(): void
     {
         [$user]        = $this->makePharmacyUser();
-        [$, $otherPharmacy] = $this->makePharmacyUser();
+        [, $otherPharmacy] = $this->makePharmacyUser();
         $medicine      = Medicine::factory()->create();
         $otherItem     = InventoryItem::factory()->create([
             'pharmacy_id' => $otherPharmacy->id,

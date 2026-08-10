@@ -31,8 +31,8 @@ class InventoryController extends Controller
 
         if (!empty($q)) {
             $query->whereHas('medicine', function($mq) use ($q) {
-                $mq->where('medicine_name', 'ilike', "%{$q}%")
-                   ->orWhere('manufacturer', 'ilike', "%{$q}%");
+                $mq->where('medicine_name', 'like', "%{$q}%")
+                   ->orWhere('manufacturer', 'like', "%{$q}%");
             });
         }
 

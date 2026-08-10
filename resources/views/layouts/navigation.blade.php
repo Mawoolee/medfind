@@ -67,6 +67,7 @@
                                 <div class="border-t border-gray-100 my-1"></div>
                                 <a href="{{ route('admin.logs') }}"        class="block px-4 py-2 text-sm text-gray-700 hover:bg-[#9400D3]/5"><i class="fas fa-clipboard-list mr-2 text-[#9400D3]"></i>System Logs</a>
                                 <a href="{{ route('admin.activity') }}"    class="block px-4 py-2 text-sm text-gray-700 hover:bg-[#9400D3]/5"><i class="fas fa-history mr-2 text-[#9400D3]"></i>Activity Log</a>
+                                <a href="{{ route('admin.survey.results') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-[#9400D3]/5"><i class="fas fa-star-half-alt mr-2 text-[#9400D3]"></i>Survey Results</a>
                             </div>
                         </div>
                     @endif

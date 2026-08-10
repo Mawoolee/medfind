@@ -67,15 +67,16 @@ class ConsumerController extends Controller
 public function search(Request $request)
     {
         $query = $request->get('query');
-        
+
         $results = InventoryItem::with(['pharmacy', 'medicine'])
-            ->whereHas('medicine', function($q) use ($query) {
-                $q->where('medicine_name', 'ILIKE', "%{$query}%");
+            ->whereHas('medicine', function ($q) use ($query) {
+                $q->where('medicine_name', 'like', "%{$query}%");
             })
-            ->whereHas('pharmacy', function($q) {
+            ->whereHas('pharmacy', function ($q) {
                 $q->where('status', 'approved');
             })
-            ->get();
+            ->paginate(20)
+            ->withQueryString();
 
         // Record search logs for each matched pharmacy (track store interest)
         if (!empty($query)) {
@@ -85,13 +86,13 @@ public function search(Request $request)
                 if ($pharmacyId && !in_array($pharmacyId, $loggedPharmacyIds)) {
                     SearchLog::create([
                         'pharmacy_id' => $pharmacyId,
-                        'query' => $query,
+                        'query'       => $query,
                     ]);
                     $loggedPharmacyIds[] = $pharmacyId;
                 }
             }
         }
-            
+
         return view('consumer.search', compact('results', 'query'));
     }
 }
