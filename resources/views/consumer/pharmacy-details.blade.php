@@ -69,8 +69,7 @@
                     💬 Chat & Prescription
                 </button>
                 
-                <a href="https://www.google.com/maps/search/?api=1&query={{ $pharmacy->latitude }},{{ $pharmacy->longitude }}" 
-                   target="_blank"
+<a href="{{ route('consumer.dashboard') }}?dir=1&lat={{ $pharmacy->latitude }}&lng={{ $pharmacy->longitude }}" 
                    class="flex-1 bg-[#9400D3] hover:bg-[#7a00b0] text-white font-bold py-2.5 px-2 rounded-full text-[10px] flex items-center justify-center gap-1 shadow-md transition-all active:scale-95">
                     🗺️ Directions
                 </a>

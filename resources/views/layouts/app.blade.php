@@ -14,8 +14,10 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- Leaflet CSS -->
+<!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet Routing Machine CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
 
     <!-- MedFind Custom CSS -->
     <link rel="stylesheet" href="{{ asset('css/medfind.css') }}">
@@ -23,12 +25,14 @@
     <!-- Vite for Tailwind CSS (para sa production-ready) -->
 
     <script>
-    // Pusher guard early: place before any bundled scripts so inlined/compiled code won't throw when no key is present
+    // Pusher guard: only needed when Pusher is used instead of Reverb.
+    // With Reverb (current setup) Pusher is used only as a protocol adapter —
+    // the guard ensures no real Pusher connection attempt happens when no key is set.
     (function(){
         try {
             var _pusherKey = "{{ env('PUSHER_APP_KEY', '') }}";
             if (!_pusherKey) {
-                window.Pusher = function() { console.debug && console.debug('Pusher stub used (no app key)'); };
+                window.Pusher = function() {};
                 window.Pusher.prototype = {};
             }
         } catch(e) {}
@@ -82,37 +86,26 @@
     @endif
 </head>
 <body>
-    <div class="h-screen overflow-hidden">
+<div class="h-screen overflow-hidden">
         <!-- Navigation with fixed position -->
         <div class="navigation-wrapper">
             @include('layouts.navigation')
         </div>
 
-        <main class="h-full pt-16">
+        <main class="h-full pt-16 overflow-y-auto">
             @yield('content')
         </main>
     </div>
 
 <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Leaflet Routing Machine JS -->
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 
     <!-- Alpine.js for interactive dropdowns -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <!-- MedFind Custom JS -->
-    <script>
-    // Pusher guard: if no PUSHER_APP_KEY is configured, install a harmless stub so pages that call Pusher won't throw.
-    (function(){
-        try {
-            var _pusherKey = "{{ env('PUSHER_APP_KEY', '') }}";
-            if (!_pusherKey) {
-                // Minimal stub that mimics Pusher constructor so code calling `new Pusher()` doesn't throw.
-                window.Pusher = function() { console.debug && console.debug('Pusher stub used (no app key)'); };
-                window.Pusher.prototype = {};
-            }
-        } catch(e) { /* swallow */ }
-    })();
-    </script>
     <script src="{{ asset('js/medfind.js') }}"></script>
 
     @stack('scripts')

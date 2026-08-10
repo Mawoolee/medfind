@@ -30,6 +30,13 @@ return [
 
     'disks' => [
 
+        'prescriptions' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/prescriptions'),
+            'visibility' => 'private',
+            'throw' => false,
+        ],
+
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),

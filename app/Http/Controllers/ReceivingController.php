@@ -8,6 +8,7 @@ use App\Models\InventoryItem;
 use App\Models\Medicine;
 use App\Models\Supplier;
 use App\Models\ControlledSubstanceLog;
+use App\Events\InventoryUpdated;
 use Illuminate\Support\Facades\DB;
 
 class ReceivingController extends Controller
@@ -92,8 +93,18 @@ class ReceivingController extends Controller
                     ]
                 );
 
-                $after = $inv->stockQuantity;
+$after = $inv->stockQuantity;
                 $inv->recordAudit($before, $after, 'Received via shipment (PO: ' . ($data['purchase_order'] ?? 'N/A') . ')');
+
+                // Broadcast real-time inventory update to public map & pharmacy channel
+                InventoryUpdated::dispatch(
+                    $pharmacy->id,
+                    $inv->medicine_id,
+                    $inv->medicine->medicine_name ?? null,
+                    (int) $inv->stockQuantity,
+                    (float) $inv->price,
+                    (bool) optional($inv->medicine)->requiresPrescription
+                );
 
                 // Controlled substance handling: create a separate logbook entry.
                 if (!empty($it['is_controlled']) || $inv->is_controlled) {

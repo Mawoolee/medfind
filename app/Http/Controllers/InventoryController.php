@@ -6,6 +6,7 @@ use App\Models\InventoryItem;
 use App\Models\Medicine;
 use App\Models\Pharmacy;
 use App\Models\Supplier;
+use App\Events\InventoryUpdated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -30,8 +31,8 @@ class InventoryController extends Controller
 
         if (!empty($q)) {
             $query->whereHas('medicine', function($mq) use ($q) {
-                $mq->where('medicine_name', 'ilike', "%{$q}%")
-                   ->orWhere('manufacturer', 'ilike', "%{$q}%");
+                $mq->where('medicine_name', 'like', "%{$q}%")
+                   ->orWhere('manufacturer', 'like', "%{$q}%");
             });
         }
 
@@ -176,7 +177,17 @@ class InventoryController extends Controller
             ]
         );
 
-        $item->recordAudit($before, $item->stockQuantity, 'Added/updated inventory item');
+$item->recordAudit($before, $item->stockQuantity, 'Added/updated inventory item');
+
+        // Broadcast real-time inventory update to public map & pharmacy channel
+        InventoryUpdated::dispatch(
+            $pharmacy->id,
+            $item->medicine_id,
+            $item->medicine->medicine_name ?? null,
+            (int) $item->stockQuantity,
+            (float) $item->price,
+            (bool) optional($item->medicine)->requiresPrescription
+        );
 
         return redirect()->route('pharmacy.inventory')->with('success', 'Inventory item added/updated successfully.');
     }
@@ -223,7 +234,17 @@ class InventoryController extends Controller
         $item->supplier_id = $data['supplier_id'] ?? null;
         $item->save();
 
-        $item->recordAudit($before, $item->stockQuantity, 'Manual stock update');
+$item->recordAudit($before, $item->stockQuantity, 'Manual stock update');
+
+        // Broadcast real-time inventory update to public map & pharmacy channel
+        InventoryUpdated::dispatch(
+            $pharmacy->id,
+            $item->medicine_id,
+            $item->medicine->medicine_name ?? null,
+            (int) $item->stockQuantity,
+            (float) $item->price,
+            (bool) optional($item->medicine)->requiresPrescription
+        );
 
         return redirect()->route('pharmacy.inventory')->with('success', 'Inventory item updated.');
     }
@@ -235,8 +256,24 @@ class InventoryController extends Controller
             return redirect()->back()->with('error', 'No pharmacy assigned.');
         }
 
-        $item = InventoryItem::where('id', $id)->where('pharmacy_id', $pharmacy->id)->first();
-        if ($item) $item->delete();
+$item = InventoryItem::where('id', $id)->where('pharmacy_id', $pharmacy->id)->first();
+        if ($item) {
+            $medicineId = $item->medicine_id;
+            $medicineName = $item->medicine->medicine_name ?? null;
+            $price = (float) $item->price;
+            $prescription = (bool) optional($item->medicine)->requiresPrescription;
+            $item->delete();
+
+            // Broadcast real-time inventory update (stock 0) to public map & pharmacy channel
+            InventoryUpdated::dispatch(
+                $pharmacy->id,
+                $medicineId,
+                $medicineName,
+                0,
+                $price,
+                $prescription
+            );
+        }
 
         return redirect()->route('pharmacy.inventory')->with('success', 'Inventory item deleted.');
     }

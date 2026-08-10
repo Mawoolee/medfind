@@ -32,7 +32,7 @@
                                autofocus 
                                autocomplete="username"
                                class="w-full px-4 py-2.5 bg-[#f8f4ff] border border-[#9400D3]/20 rounded-lg text-sm text-[#191970] focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30 focus:border-[#9400D3] transition"
-                               placeholder="you@example.com">
+                               placeholder="Email or mobile number">
                         <x-input-error :messages="$errors->get('email')" class="mt-1" />
                     </div>
 

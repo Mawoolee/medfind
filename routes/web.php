@@ -4,9 +4,12 @@
 use App\Http\Controllers\ConsumerController;
 use App\Http\Controllers\PharmacyDashboardController;
 use App\Http\Controllers\AdminDashboardController;
-use App\Http\Controllers\MedicineSearchController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\AdminInventoryController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\SurveyController;
 use Illuminate\Support\Facades\Route;
 
 // ============================================
@@ -37,6 +40,24 @@ Route::get('/dashboard', function () {
 // AUTH ROUTES (Laravel Breeze)
 // ============================================
 require __DIR__.'/auth.php';
+
+// ============================================
+// SURVEY ROUTES (ISO/IEC 25010 Evaluation)
+// ============================================
+// Public form — anyone can fill it out
+Route::get('/survey', [SurveyController::class, 'show'])->name('survey.show');
+Route::post('/survey', [SurveyController::class, 'store'])->name('survey.store');
+Route::get('/survey/thankyou', [SurveyController::class, 'thankyou'])->name('survey.thankyou');
+
+// ============================================
+// NOTIFICATION ROUTES (all authenticated users)
+// ============================================
+Route::middleware(['auth'])->prefix('notifications')->name('notifications.')->group(function () {
+    Route::get('/', [NotificationController::class, 'index'])->name('index');
+    Route::post('/mark-all-read', [NotificationController::class, 'markAllRead'])->name('mark-all-read');
+    Route::post('/{id}/mark-read', [NotificationController::class, 'markRead'])->name('mark-read');
+    Route::get('/unread-count', [NotificationController::class, 'unreadCount'])->name('unread-count');
+});
 
 // ============================================
 // CONSUMER ROUTES
@@ -83,6 +104,8 @@ Route::middleware(['auth', 'role:pharmacy,pharmacy_operator'])->prefix('pharmacy
     Route::post('/message/mark-read-ajax/{id}', [MessageController::class, 'markReadAjax'])->name('message.mark-read-ajax');
     Route::post('/message/mark-unread-ajax/{id}', [MessageController::class, 'markUnreadAjax'])->name('message.mark-unread-ajax');
     Route::post('/message/verify-ajax/{id}', [MessageController::class, 'verifyAjax'])->name('message.verify-ajax');
+    // Secure prescription image viewer (decrypts on-the-fly, never serves raw public URL)
+    Route::get('/prescription/{message}', [MessageController::class, 'servePrescription'])->name('prescription.serve');
 
     // Inventory Analysis (ABC/VED)
     Route::get('/analysis', [\App\Http\Controllers\AnalysisController::class, 'index'])->name('analysis');
@@ -102,6 +125,11 @@ Route::middleware(['auth', 'role:pharmacy,pharmacy_operator'])->prefix('pharmacy
 
     // Controlled substance logbook
     Route::get('/controlled-substances', [\App\Http\Controllers\ControlledSubstanceController::class, 'index'])->name('controlled-substances.index');
+    Route::get('/controlled-substances/log', [\App\Http\Controllers\ControlledSubstanceController::class, 'create'])->name('controlled-substances.create');
+    Route::post('/controlled-substances/log', [\App\Http\Controllers\ControlledSubstanceController::class, 'store'])->name('controlled-substances.store');
+
+    // Inventory audit log
+    Route::get('/audit-log', [AuditLogController::class, 'index'])->name('audit-log');
 
     // Pharmacy profile
     Route::get('/profile', [\App\Http\Controllers\PharmacyProfileController::class, 'edit'])->name('profile.edit');
@@ -116,12 +144,40 @@ Route::middleware(['auth', 'role:pharmacy,pharmacy_operator'])->prefix('pharmacy
 // ============================================
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+// Users
     Route::get('/users', [AdminDashboardController::class, 'users'])->name('users');
-    Route::delete('/user/{id}', [AdminDashboardController::class, 'deleteUser'])->name('user.delete');
+    Route::get('/user/{user}/edit', [AdminDashboardController::class, 'editUser'])->name('user.edit');
+    Route::put('/user/{user}', [AdminDashboardController::class, 'updateUser'])->name('user.update');
+    Route::delete('/user/{user}', [AdminDashboardController::class, 'deleteUser'])->name('user.delete');
+
+    // Pharmacies
     Route::get('/pharmacies', [AdminDashboardController::class, 'pharmacies'])->name('pharmacies');
     Route::get('/pharmacy/add', [AdminDashboardController::class, 'addPharmacy'])->name('pharmacy.add');
     Route::post('/pharmacy/store', [AdminDashboardController::class, 'storePharmacy'])->name('pharmacy.store');
-    Route::delete('/pharmacy/{id}', [AdminDashboardController::class, 'deletePharmacy'])->name('pharmacy.delete');
+    Route::get('/pharmacy/{pharmacy}/edit', [AdminDashboardController::class, 'editPharmacy'])->name('pharmacy.edit');
+    Route::put('/pharmacy/{pharmacy}', [AdminDashboardController::class, 'updatePharmacy'])->name('pharmacy.update');
+    Route::post('/pharmacy/{pharmacy}/approve', [AdminDashboardController::class, 'approvePharmacy'])->name('pharmacy.approve');
+    Route::delete('/pharmacy/{pharmacy}', [AdminDashboardController::class, 'deletePharmacy'])->name('pharmacy.delete');
+
+    // Medicines
+    Route::get('/medicines', [AdminDashboardController::class, 'medicinesPage'])->name('medicines');
+    Route::get('/medicine/add', [AdminDashboardController::class, 'addMedicine'])->name('medicine.add');
+    Route::post('/medicine/store', [AdminDashboardController::class, 'storeMedicine'])->name('medicine.store');
+    Route::get('/medicine/{medicine}/edit', [AdminDashboardController::class, 'editMedicine'])->name('medicine.edit');
+    Route::put('/medicine/{medicine}', [AdminDashboardController::class, 'updateMedicine'])->name('medicine.update');
+    Route::delete('/medicine/{medicine}', [AdminDashboardController::class, 'destroyMedicine'])->name('medicine.delete');
+
+// Logs
     Route::get('/logs', [AdminDashboardController::class, 'logs'])->name('logs');
+
+    // Activity Log
+    Route::get('/activity', [AdminDashboardController::class, 'activity'])->name('activity');
+
+    // Inventory overview
+    Route::get('/inventory', [AdminInventoryController::class, 'index'])->name('inventory');
+
+    // Survey results
+    Route::get('/survey/results', [SurveyController::class, 'results'])->name('survey.results');
 });
 

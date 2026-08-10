@@ -11,6 +11,7 @@ class ControlledSubstanceController extends Controller
 {
     public function index(Request $request)
     {
+
         $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
         if (!$pharmacy) {
             return redirect()->back()->with('error', 'No pharmacy assigned.');
@@ -49,5 +50,87 @@ class ControlledSubstanceController extends Controller
             'actions',
             'action'
         ));
+    }
+
+    public function create()
+    {
+        $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
+        if (!$pharmacy) {
+            return redirect()->back()->with('error', 'No pharmacy assigned.');
+        }
+
+        $controlledItems = InventoryItem::with('medicine')
+            ->where('pharmacy_id', $pharmacy->id)
+            ->get()
+            ->filter(fn($item) => $item->is_controlled)
+            ->values();
+
+        return view('pharmacy.controlled_substance_log', compact('pharmacy', 'controlledItems'));
+    }
+
+    public function store(Request $request)
+    {
+        $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
+        if (!$pharmacy) {
+            return redirect()->back()->with('error', 'No pharmacy assigned.');
+        }
+
+        $data = $request->validate([
+            'inventory_item_id' => 'required|exists:inventory_items,id',
+            'action'            => 'required|in:dispensed,wastage,transferred,adjustment',
+            'quantity'          => 'required|integer|min:1',
+            'patient_reference' => 'nullable|string|max:255',
+            'notes'             => 'nullable|string|max:1000',
+        ]);
+
+        $item = InventoryItem::where('id', $data['inventory_item_id'])
+            ->where('pharmacy_id', $pharmacy->id)
+            ->firstOrFail();
+
+        if (!$item->is_controlled) {
+            return back()->withErrors(['inventory_item_id' => 'Selected item is not a controlled substance.'])->withInput();
+        }
+
+        $before = $item->stockQuantity;
+
+        if ($data['action'] === 'adjustment') {
+            $item->stockQuantity = $data['quantity'];
+        } else {
+            // dispensed, wastage, transferred all decrease stock
+            if ($data['quantity'] > $item->stockQuantity) {
+                return back()->withErrors(['quantity' => 'Quantity exceeds current stock (' . $item->stockQuantity . ').' ])->withInput();
+            }
+            $item->stockQuantity -= $data['quantity'];
+        }
+
+        $item->save();
+        $item->recordAudit($before, $item->stockQuantity, ucfirst($data['action']) . ' — controlled substance log');
+
+        $notes = $data['notes'] ?? '';
+        if (!empty($data['patient_reference'])) {
+            $notes = 'Ref: ' . $data['patient_reference'] . ($notes ? ' | ' . $notes : '');
+        }
+
+        ControlledSubstanceLog::create([
+            'inventory_item_id' => $item->id,
+            'user_id'           => auth()->id(),
+            'action'            => $data['action'],
+            'quantity'          => $data['quantity'],
+            'notes'             => $notes ?: null,
+            'logged_at'         => now(),
+        ]);
+
+        // Broadcast real-time update
+        \App\Events\InventoryUpdated::dispatch(
+            $pharmacy->id,
+            $item->medicine_id,
+            $item->medicine->medicine_name ?? null,
+            (int) $item->stockQuantity,
+            (float) $item->price,
+            (bool) optional($item->medicine)->requiresPrescription
+        );
+
+        return redirect()->route('pharmacy.controlled-substances.index')
+            ->with('success', 'Controlled substance log entry saved. Stock updated.');
     }
 }
