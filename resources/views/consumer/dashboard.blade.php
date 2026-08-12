@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('content')
 <div class="map-container" style="height: 100vh; width: 100%; position: relative; overflow: hidden;">
@@ -32,11 +32,42 @@
         <div id="autocompleteList" class="autocomplete-items" style="display: none;"></div>
     </div>
 
-<!-- Chat Button - Fixed position -->
-    <div class="chat-float-fixed">
-        <button onclick="toggleChat()" class="chat-toggle-btn">
-            <i class="fas fa-comment"></i>
-        </button>
+<!-- Messenger-style Chat Heads -->
+    <div id="chatHeadsContainer" style="position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;align-items:flex-end;gap:10px;"></div>
+
+    <!-- Active Chat Window -->
+    <div id="activeChatWindow" style="display:none;position:fixed;bottom:24px;right:24px;z-index:10000;width:320px;background:#fff;border-radius:18px;box-shadow:0 8px 40px rgba(25,25,112,0.15);border:1px solid rgba(148,0,211,0.12);overflow:hidden;font-family:system-ui,-apple-system,sans-serif;">
+        <!-- Chat Window Header -->
+        <div style="background:#191970;padding:10px 14px;display:flex;align-items:center;gap:10px;">
+            <div style="width:32px;height:32px;border-radius:50%;background:rgba(217,248,85,0.15);display:flex;align-items:center;justify-content:center;shrink:0;">
+                <i class="fas fa-store" style="color:#D9F855;font-size:13px;"></i>
+            </div>
+            <div style="flex:1;min-width:0;">
+                <p id="activeChatName" style="color:#fff;font-weight:800;font-size:13px;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></p>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;">
+                <button onclick="minimizeChatWindow()" title="Minimize"
+                    style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:26px;height:26px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <button onclick="closeChatWindow()" title="Close"
+                    style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:26px;height:26px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Messages area -->
+        <div id="activeChatMessages" style="height:280px;overflow-y:auto;padding:12px;background:#f8f4ff;display:flex;flex-direction:column;gap:10px;"></div>
+        <!-- Input -->
+        <div style="padding:10px;background:#fff;border-top:1px solid rgba(148,0,211,0.08);display:flex;gap:8px;align-items:center;">
+            <input type="text" id="activeChatInput" placeholder="Type a message..."
+                style="flex:1;border:1px solid rgba(148,0,211,0.2);border-radius:10px;padding:8px 12px;font-size:12px;outline:none;color:#191970;background:#f8f4ff;"
+                onkeypress="if(event.key==='Enter')sendActiveChatMessage()">
+            <button onclick="sendActiveChatMessage()"
+                style="background:#191970;border:none;color:#D9F855;width:34px;height:34px;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
     </div>
 
 <!-- Clear Route Button - shows when a route is active -->
@@ -49,24 +80,7 @@
     <!-- Route Summary - shows distance & ETA above the routing panel -->
     <div id="routeSummary" class="route-summary-fixed" style="display: none;"></div>
 
-    <!-- Chat Modal -->
-    <div id="chatModal" class="chat-modal-fixed">
-        <div class="chat-header" onclick="toggleChat()">
-            <span>MedFind</span>
-            <span>✕</span>
-        </div>
-        <div id="chatMessages" class="chat-messages">
-            <div class="message received">
-                <div class="bubble">Hi! How can I help you today?</div>
-            </div>
-        </div>
-        <div class="chat-input-area">
-            <input type="text" id="chatInput" placeholder="Type a message...">
-            <button onclick="sendChatMessage()">
-                <i class="fas fa-paper-plane"></i>
-            </button>
-        </div>
-    </div>
+
 </div>
 
 <!-- Pass PHP data to JavaScript -->
@@ -518,4 +532,263 @@
         }
     }
 </style>
-@endsection
+
+<script>
+// ============================================
+// MESSENGER-STYLE CHAT HEADS
+// ============================================
+let activeChatPharmacyId = null;
+let conversationsData = [];
+let chatWindowMinimized = false;
+
+// Dismissed heads: { pharmacyId: lastMessageTimestamp }
+// A head is dismissed until a newer message/reply arrives.
+function getDismissed() {
+    try { return JSON.parse(localStorage.getItem('mf_dismissed_heads') || '{}'); } catch(e) { return {}; }
+}
+function saveDismissed(obj) {
+    try { localStorage.setItem('mf_dismissed_heads', JSON.stringify(obj)); } catch(e) {}
+}
+function dismissHead(pharmacyId, latestTs) {
+    const d = getDismissed();
+    d[pharmacyId] = latestTs;
+    saveDismissed(d);
+}
+function isDismissed(conv) {
+    const d = getDismissed();
+    if (!d[conv.pharmacy_id]) return false;
+    // Find the latest timestamp in this conversation (message or reply)
+    let latest = '';
+    conv.messages.forEach(function(m) {
+        if (m.replied_at && m.replied_at > latest) latest = m.replied_at;
+        if (m.created_at && m.created_at > latest) latest = m.created_at;
+    });
+    // Dismissed if the stored timestamp matches or is newer than latest activity
+    return d[conv.pharmacy_id] >= latest;
+}
+
+function loadChatHeads() {
+    @auth
+    fetch('{{ route("consumer.messages.json") }}', { credentials: 'same-origin' })
+        .then(r => r.json())
+        .then(function(data) {
+            // Only show heads that are NOT dismissed
+            conversationsData = data.filter(function(conv) {
+                return !isDismissed(conv);
+            });
+            renderChatHeads();
+        })
+        .catch(function() {});
+    @endauth
+}
+
+function renderChatHeads() {
+    const container = document.getElementById('chatHeadsContainer');
+    if (!container) return;
+
+    // Don't render heads if chat window is open
+    if (activeChatPharmacyId && !chatWindowMinimized) {
+        container.innerHTML = '';
+        return;
+    }
+
+    container.innerHTML = '';
+    conversationsData.forEach(function(conv) {
+        const head = document.createElement('div');
+        head.style.cssText = 'position:relative;cursor:pointer;width:50px;height:50px;';
+        head.title = conv.pharmacy_name;
+        head.onclick = function() { openChatWindow(conv.pharmacy_id); };
+
+        const circle = document.createElement('div');
+        circle.style.cssText = 'width:50px;height:50px;border-radius:50%;background:#191970;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(25,25,112,0.25);border:2.5px solid #D9F855;transition:transform 0.15s;';
+        circle.innerHTML = '<i class="fas fa-store" style="color:#D9F855;font-size:18px;"></i>';
+
+        head.appendChild(circle);
+
+        // Top-right corner overlay: unread badge OR close button on hover
+        const cornerBtn = document.createElement('span');
+        const baseStyle = 'position:absolute;top:-4px;right:-4px;border-radius:9999px;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid #fff;line-height:1;font-size:10px;font-weight:800;cursor:pointer;transition:background 0.15s,color 0.15s;';
+
+        if (conv.unread > 0) {
+            // Show unread count by default
+            cornerBtn.style.cssText = baseStyle + 'background:#e53e3e;color:#fff;';
+            cornerBtn.textContent = conv.unread > 9 ? '9+' : conv.unread;
+            // On hover: switch to close ✕
+            head.onmouseenter = function() {
+                cornerBtn.textContent = '✕';
+                cornerBtn.style.background = '#6b7280';
+                cornerBtn.style.color = '#fff';
+                circle.style.transform = 'scale(1.1)';
+            };
+            head.onmouseleave = function() {
+                cornerBtn.textContent = conv.unread > 9 ? '9+' : conv.unread;
+                cornerBtn.style.background = '#e53e3e';
+                cornerBtn.style.color = '#fff';
+                circle.style.transform = 'scale(1)';
+            };
+        } else {
+            // No unread — show close only on hover, hidden otherwise
+            cornerBtn.style.cssText = baseStyle + 'background:#6b7280;color:#fff;opacity:0;';
+            cornerBtn.textContent = '✕';
+            head.onmouseenter = function() {
+                cornerBtn.style.opacity = '1';
+                circle.style.transform = 'scale(1.1)';
+            };
+            head.onmouseleave = function() {
+                cornerBtn.style.opacity = '0';
+                circle.style.transform = 'scale(1)';
+            };
+        }
+
+        // Close button dismisses this head and persists across refresh
+        cornerBtn.onclick = function(e) {
+            e.stopPropagation();
+            // Save latest timestamp so it only reappears on newer activity
+            let latest = '';
+            conv.messages.forEach(function(m) {
+                if (m.replied_at && m.replied_at > latest) latest = m.replied_at;
+                if (m.created_at && m.created_at > latest) latest = m.created_at;
+            });
+            dismissHead(conv.pharmacy_id, latest);
+            conversationsData = conversationsData.filter(c => c.pharmacy_id != conv.pharmacy_id);
+            renderChatHeads();
+        };
+
+        head.appendChild(cornerBtn);
+        container.appendChild(head);
+    });
+}
+
+function openChatWindow(pharmacyId) {
+    const conv = conversationsData.find(c => c.pharmacy_id == pharmacyId);
+    if (!conv) return;
+
+    activeChatPharmacyId = pharmacyId;
+    chatWindowMinimized = false;
+
+    const win = document.getElementById('activeChatWindow');
+    document.getElementById('activeChatName').textContent = conv.pharmacy_name;
+    renderActiveChatMessages(conv);
+    win.style.display = 'block';
+
+    // Hide chat heads while window is open
+    document.getElementById('chatHeadsContainer').innerHTML = '';
+
+    // Scroll to bottom
+    setTimeout(function() {
+        const msgs = document.getElementById('activeChatMessages');
+        if (msgs) msgs.scrollTop = msgs.scrollHeight;
+    }, 50);
+}
+
+function renderActiveChatMessages(conv) {
+    const container = document.getElementById('activeChatMessages');
+    if (!container) return;
+    container.innerHTML = '';
+
+    conv.messages.forEach(function(msg) {
+        // Consumer message (right)
+        const consumerRow = document.createElement('div');
+        consumerRow.style.cssText = 'display:flex;justify-content:flex-end;gap:6px;align-items:flex-end;';
+        consumerRow.innerHTML =
+            '<div style="max-width:75%;">' +
+                '<div style="background:#191970;color:#D9F855;font-size:12px;font-weight:500;padding:8px 14px;border-radius:16px 16px 4px 16px;line-height:1.4;">' + escHtml(msg.message) + '</div>' +
+                '<p style="font-size:10px;color:#94a3b8;text-align:right;margin-top:2px;">You</p>' +
+            '</div>' +
+            '<div style="width:26px;height:26px;border-radius:50%;background:rgba(148,0,211,0.1);display:flex;align-items:center;justify-content:center;shrink:0;">' +
+                '<i class="fas fa-user" style="color:#9400D3;font-size:10px;"></i>' +
+            '</div>';
+        container.appendChild(consumerRow);
+
+        // Pharmacy reply (left)
+        if (msg.reply) {
+            const replyRow = document.createElement('div');
+            replyRow.style.cssText = 'display:flex;justify-content:flex-start;gap:6px;align-items:flex-end;';
+            replyRow.innerHTML =
+                '<div style="width:26px;height:26px;border-radius:50%;background:#191970;display:flex;align-items:center;justify-content:center;shrink:0;">' +
+                    '<i class="fas fa-store" style="color:#D9F855;font-size:10px;"></i>' +
+                '</div>' +
+                '<div style="max-width:75%;">' +
+                    '<div style="background:#fff;border:1px solid rgba(148,0,211,0.15);color:#191970;font-size:12px;font-weight:500;padding:8px 14px;border-radius:16px 16px 16px 4px;line-height:1.4;">' + escHtml(msg.reply) + '</div>' +
+                    '<p style="font-size:10px;color:#94a3b8;margin-top:2px;">' + escHtml(conv.pharmacy_name) + '</p>' +
+                '</div>';
+            container.appendChild(replyRow);
+        }
+    });
+}
+
+function minimizeChatWindow() {
+    const win = document.getElementById('activeChatWindow');
+    win.style.display = 'none';
+    chatWindowMinimized = true;
+    renderChatHeads();
+}
+
+function closeChatWindow() {
+    const win = document.getElementById('activeChatWindow');
+    win.style.display = 'none';
+    if (activeChatPharmacyId) {
+        // Persist dismiss so head does not reappear on refresh
+        const conv = conversationsData.find(c => c.pharmacy_id == activeChatPharmacyId);
+        if (conv) {
+            let latest = '';
+            conv.messages.forEach(function(m) {
+                if (m.replied_at && m.replied_at > latest) latest = m.replied_at;
+                if (m.created_at && m.created_at > latest) latest = m.created_at;
+            });
+            dismissHead(activeChatPharmacyId, latest);
+        }
+        conversationsData = conversationsData.filter(c => c.pharmacy_id != activeChatPharmacyId);
+    }
+    activeChatPharmacyId = null;
+    chatWindowMinimized = false;
+    renderChatHeads();
+}
+
+function sendActiveChatMessage() {
+    const input = document.getElementById('activeChatInput');
+    if (!input || !activeChatPharmacyId) return;
+    const msg = input.value.trim();
+    if (!msg) return;
+
+    const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    const fd = new FormData();
+    fd.append('_token', token);
+    fd.append('pharmacy_id', activeChatPharmacyId);
+    fd.append('message', msg);
+
+    input.value = '';
+
+    fetch('{{ route("consumer.message.send") }}', {
+        method: 'POST',
+        body: fd,
+        credentials: 'same-origin',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    }).then(function() {
+        // Reload conversations and re-render
+        loadChatHeads();
+        setTimeout(function() {
+            const conv = conversationsData.find(c => c.pharmacy_id == activeChatPharmacyId);
+            if (conv) {
+                renderActiveChatMessages(conv);
+                const msgs = document.getElementById('activeChatMessages');
+                if (msgs) msgs.scrollTop = msgs.scrollHeight;
+            }
+        }, 600);
+    });
+}
+
+function escHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    @auth
+    if ('{{ auth()->user()->role }}' === 'consumer') {
+        loadChatHeads();
+        setInterval(loadChatHeads, 15000);
+    }
+    @endauth
+});
+</script>@endsection

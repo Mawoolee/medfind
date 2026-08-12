@@ -17,6 +17,12 @@ class Pharmacy extends Model
         'contactNumber',
         'user_id',
         'status',
+        'logo_path',
+        'requirements',
+    ];
+
+    protected $casts = [
+        'requirements' => 'array',
     ];
 
     /**

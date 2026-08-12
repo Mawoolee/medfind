@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\ActivityLog;
 use App\Models\InventoryItem;
 use App\Models\Medicine;
-use App\Models\Message;
 use App\Models\Pharmacy;
 use App\Models\User;
 use App\Notifications\PharmacyStatusNotification;
@@ -16,19 +15,10 @@ class AdminDashboardController extends Controller
 {
     public function index(): View
     {
-        $userCount = User::count();
-        $pharmacyCount = Pharmacy::count();
-        $medicineCount = Medicine::count();
-        $messageCount = Message::count();
-
         $recentUsers = User::latest()->take(5)->get();
         $recentPharmacies = Pharmacy::latest()->take(5)->get();
 
         return view('admin.dashboard', compact(
-            'userCount',
-            'pharmacyCount',
-            'medicineCount',
-            'messageCount',
             'recentUsers',
             'recentPharmacies'
         ));

@@ -68,30 +68,39 @@
                                 <td class="px-4 py-3">{{ $pharmacy->contactNumber }}</td>
 <td class="px-4 py-3">{{ $pharmacy->user->name ?? 'No owner' }}</td>
                                 <td class="px-4 py-3">
-                                    <span class="px-2 py-1 rounded text-xs
-                                        {{ $pharmacy->status === 'approved' ? 'bg-green-100 text-green-700' : '' }}
-                                        {{ $pharmacy->status === 'pending' ? 'bg-yellow-100 text-yellow-700' : '' }}
-                                        {{ $pharmacy->status === 'rejected' ? 'bg-red-100 text-red-700' : '' }}">
-                                        {{ ucfirst($pharmacy->status) }}
-                                    </span>
+                                    <form action="{{ route('admin.pharmacy.update', $pharmacy->id) }}" method="POST">
+                                        @csrf
+                                        @method('PUT')
+                                        {{-- hidden fields to carry over unchanged values --}}
+                                        <input type="hidden" name="pharmacy_name"   value="{{ $pharmacy->pharmacy_name }}">
+                                        <input type="hidden" name="pharmacyAddress" value="{{ $pharmacy->pharmacyAddress }}">
+                                        <input type="hidden" name="latitude"        value="{{ $pharmacy->latitude }}">
+                                        <input type="hidden" name="longitude"       value="{{ $pharmacy->longitude }}">
+                                        <input type="hidden" name="contactNumber"   value="{{ $pharmacy->contactNumber }}">
+                                        <input type="hidden" name="user_id"         value="{{ $pharmacy->user_id }}">
+                                        <div class="flex items-center gap-2">
+                                            <select name="status"
+                                                    onchange="this.form.submit()"
+                                                    class="text-xs border rounded-lg px-2 py-1 font-semibold cursor-pointer focus:outline-none
+                                                        {{ $pharmacy->status === 'approved' ? 'border-green-400 bg-green-50 text-green-700' : '' }}
+                                                        {{ $pharmacy->status === 'pending'  ? 'border-yellow-400 bg-yellow-50 text-yellow-700' : '' }}
+                                                        {{ $pharmacy->status === 'rejected' ? 'border-red-400 bg-red-50 text-red-700' : '' }}">
+                                                <option value="pending"  {{ $pharmacy->status === 'pending'  ? 'selected' : '' }}>Pending</option>
+                                                <option value="approved" {{ $pharmacy->status === 'approved' ? 'selected' : '' }}>Approved</option>
+                                                <option value="rejected" {{ $pharmacy->status === 'rejected' ? 'selected' : '' }}>Rejected</option>
+                                            </select>
+                                        </div>
+                                    </form>
                                 </td>
                                 <td class="px-4 py-3">
                                     <div class="flex gap-3 items-center">
                                         <a href="{{ route('admin.pharmacy.edit', $pharmacy->id) }}" class="text-blue-600 hover:text-blue-800">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        @if($pharmacy->status !== 'approved')
-                                            <form action="{{ route('admin.pharmacy.approve', $pharmacy->id) }}" method="POST" class="inline">
-                                                @csrf
-                                                <button type="submit" class="text-green-600 hover:text-green-800" title="Approve">
-                                                    <i class="fas fa-check"></i>
-                                                </button>
-                                            </form>
-                                        @endif
                                         <form action="{{ route('admin.pharmacy.delete', $pharmacy->id) }}" method="POST" class="inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" onclick="return confirm('Remove this pharmacy?')" 
+                                            <button type="submit" onclick="return confirm('Remove this pharmacy?')"
                                                     class="text-red-600 hover:text-red-800">
                                                 <i class="fas fa-trash"></i>
                                             </button>

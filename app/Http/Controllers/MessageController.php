@@ -300,11 +300,66 @@ class MessageController extends Controller
             return redirect()->back()->with('error', 'Unauthorized.');
         }
 
+        // Get all messages grouped by pharmacy, latest message per pharmacy first
         $messages = Message::where('consumer_id', $user->id)
             ->with('pharmacy')
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->get()
+            ->groupBy('pharmacy_id');
 
         return view('consumer.messages', compact('messages'));
     }
+
+    /**
+     * Delete all messages in a conversation between consumer and pharmacy
+     */
+    public function deleteConversation($pharmacyId)
+    {
+        $user = Auth::user();
+        if ($user->role !== 'consumer') {
+            return redirect()->back()->with('error', 'Unauthorized.');
+        }
+        Message::where('consumer_id', $user->id)
+               ->where('pharmacy_id', $pharmacyId)
+               ->delete();
+        return redirect()->route('consumer.messages')->with('success', 'Conversation deleted.');
+    }
+
+    /**
+     * Return conversations as JSON for the chat heads widget
+     */
+    public function consumerMessagesJson()
+    {
+        $user = Auth::user();
+        if (!$user || $user->role !== 'consumer') {
+            return response()->json([]);
+        }
+        $messages = Message::where('consumer_id', $user->id)
+            ->with('pharmacy')
+            ->orderBy('updated_at', 'desc')
+            ->get()
+            ->groupBy('pharmacy_id')
+            ->map(function($thread) {
+                $pharmacy = $thread->first()->pharmacy;
+                $unread = $thread->whereNotNull('reply')->filter(function($m) {
+                    return !$m->consumer_read_at;
+                })->count();
+                return [
+                    'pharmacy_id'   => $thread->first()->pharmacy_id,
+                    'pharmacy_name' => $pharmacy->pharmacy_name ?? 'Pharmacy',
+                    'unread'        => $unread,
+                    'messages'      => $thread->sortBy('created_at')->map(function($m) {
+                        return [
+                            'id'         => $m->id,
+                            'message'    => $m->message,
+                            'reply'      => $m->reply,
+                            'replied_at' => $m->replied_at?->toDateTimeString(),
+                            'created_at' => $m->created_at->toDateTimeString(),
+                        ];
+                    })->values(),
+                ];
+            })->values();
+        return response()->json($messages);
+    }
+
 }

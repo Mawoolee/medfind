@@ -8,7 +8,7 @@
 <div class="container mx-auto px-4 py-8">
     <h1 class="text-3xl font-bold text-gray-800 mb-6">Admin Dashboard</h1>
 
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div class="bg-white rounded-lg shadow-lg p-6">
             <div class="flex items-center justify-between">
                 <div>
@@ -36,18 +36,9 @@
                 <i class="fas fa-capsules text-4xl text-purple-200"></i>
             </div>
         </div>
-        <div class="bg-white rounded-lg shadow-lg p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-500 text-sm">Messages</p>
-                    <p class="text-2xl font-bold text-orange-600">{{ \App\Models\Message::count() }}</p>
-                </div>
-                <i class="fas fa-envelope text-4xl text-orange-200"></i>
-            </div>
-        </div>
     </div>
 
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div class="bg-white rounded-lg shadow-lg p-6">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">Manage Users</h2>
             <p class="text-gray-600 mb-4">View and manage all system users.</p>
@@ -60,39 +51,6 @@
             <p class="text-gray-600 mb-4">Add, edit, or remove pharmacies.</p>
             <a href="{{ route('admin.pharmacies') }}" class="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition duration-200">
                 <i class="fas fa-store-alt mr-2"></i>Manage Pharmacies
-            </a>
-        </div>
-        <div class="bg-white rounded-lg shadow-lg p-6">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Inventory Overview</h2>
-            <p class="text-gray-600 mb-4">View real-time stock across all pharmacies.</p>
-            <a href="{{ route('admin.inventory') }}" class="inline-block bg-[#9400D3] hover:bg-[#7a00b0] text-white px-6 py-2 rounded-lg transition duration-200">
-                <i class="fas fa-boxes-stacked mr-2"></i>View Inventory
-            </a>
-        </div>
-        <div class="bg-white rounded-lg shadow-lg p-6">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">System Logs</h2>
-            <p class="text-gray-600 mb-4">View system activity logs.</p>
-            <a href="{{ route('admin.logs') }}" class="inline-block bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition duration-200">
-                <i class="fas fa-clipboard-list mr-2"></i>View Logs
-            </a>
-        </div>
-    </div>
-
-    {{-- ISO Survey Card --}}
-    <div class="bg-gradient-to-r from-[#191970] to-[#2a2a8a] rounded-lg shadow-lg p-6 mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-            <p class="text-xs font-semibold uppercase tracking-widest text-[#D9F855] mb-1">ISO/IEC 25010 Software Quality</p>
-            <h2 class="text-xl font-bold text-white mb-1">System Evaluation Survey</h2>
-            <p class="text-blue-200 text-sm">Collect feedback on Functional Suitability, Usability, and Security from your respondents.</p>
-        </div>
-        <div class="flex gap-3 flex-shrink-0">
-            <a href="{{ route('survey.show') }}" target="_blank"
-               class="inline-block bg-[#D9F855] text-[#191970] font-bold px-5 py-2 rounded-lg text-sm hover:bg-yellow-300 transition">
-                <i class="fas fa-external-link-alt mr-2"></i>Open Survey
-            </a>
-            <a href="{{ route('admin.survey.results') }}"
-               class="inline-block bg-white/20 text-white font-semibold px-5 py-2 rounded-lg text-sm hover:bg-white/30 transition">
-                <i class="fas fa-chart-bar mr-2"></i>View Results
             </a>
         </div>
     </div>

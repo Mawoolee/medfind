@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Pharmacy;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -30,22 +31,51 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+        $role = $request->input('role', 'consumer');
+
+        $rules = [
+            'name'     => ['required', 'string', 'max:255'],
+            'email'    => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
+            'role'     => ['required', 'in:consumer,pharmacy'],
+        ];
+
+        if ($role === 'pharmacy') {
+            $rules['pharmacy_name']    = ['required', 'string', 'max:255'];
+            $rules['pharmacyAddress']  = ['required', 'string', 'max:500'];
+            $rules['contactNumber']    = ['nullable', 'string', 'max:50'];
+            $rules['latitude']         = ['nullable', 'numeric', 'between:-90,90'];
+            $rules['longitude']        = ['nullable', 'numeric', 'between:-180,180'];
+        }
+
+        $request->validate($rules);
 
         $user = User::create([
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
-            'role'     => 'consumer',
+            'role'     => $role === 'pharmacy' ? 'pharmacy' : 'consumer',
         ]);
+
+        if ($role === 'pharmacy') {
+            Pharmacy::create([
+                'pharmacy_name'   => $request->pharmacy_name,
+                'pharmacyAddress' => $request->pharmacyAddress,
+                'contactNumber'   => $request->contactNumber,
+                'latitude'        => $request->latitude,
+                'longitude'       => $request->longitude,
+                'user_id'         => $user->id,
+                'status'          => 'pending',
+            ]);
+        }
 
         event(new Registered($user));
 
         Auth::login($user);
+
+        if ($role === 'pharmacy') {
+            return redirect()->route('pharmacy.requirements');
+        }
 
         return redirect()->route('home');
     }

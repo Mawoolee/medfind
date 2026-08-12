@@ -1,10 +1,10 @@
-<nav class="bg-white/95 backdrop-blur-sm border-b border-[#9400D3]/10 fixed top-0 left-0 right-0 z-[10000]">
+﻿<nav class="bg-white/95 backdrop-blur-sm border-b border-[#9400D3]/10 fixed top-0 left-0 right-0 z-[10000]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             {{-- Logo --}}
             <div class="flex items-center">
                 <a href="{{ route('home') }}" class="flex items-center gap-2">
-                    <span class="text-2xl font-extrabold text-[#191970]">Med<span class="text-[#9400D3]">Find</span></span>
+                    <img src="{{ asset('images/Medfind text logo.png') }}" alt="MedFind" class="h-28 w-auto">
                 </a>
             </div>
 
@@ -22,6 +22,27 @@
                             </span>
                         @endif
                     </a>
+
+                    {{-- Consumer Dropdown --}}
+                    @if(Auth::user()->role === 'consumer')
+                        <div class="relative" x-data="{ open: false }">
+                            <button type="button" @click="open = !open"
+                                class="text-sm text-[#191970] font-medium hover:text-[#9400D3] transition flex items-center gap-1">
+                                <i class="fas fa-user-circle mr-1"></i> Menu
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </button>
+                            <div x-show="open" @click.away="open = false" @click="open = false"
+                                class="absolute right-0 mt-2 w-52 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-[10001]">
+                                <a href="{{ route('consumer.dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-[#9400D3]/5"><i class="fas fa-map-location-dot mr-2 text-[#9400D3]"></i>Map</a>
+                                <a href="{{ route('consumer.messages') }}"  class="block px-4 py-2 text-sm text-gray-700 hover:bg-[#9400D3]/5"><i class="fas fa-comments mr-2 text-[#9400D3]"></i>My Messages</a>
+                                <a href="{{ route('consumer.search') }}"    class="block px-4 py-2 text-sm text-gray-700 hover:bg-[#9400D3]/5"><i class="fas fa-search mr-2 text-[#9400D3]"></i>Search Medicines</a>
+                                <div class="border-t border-gray-100 my-1"></div>
+                                <a href="{{ route('consumer.profile.settings') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-[#9400D3]/5"><i class="fas fa-user-cog mr-2 text-[#9400D3]"></i>Profile Settings</a>
+                            </div>
+                        </div>
+                    @endif
 
                     {{-- Pharmacy Dropdown --}}
                     @if(in_array(Auth::user()->role, ['pharmacy', 'pharmacy_operator']))
@@ -67,7 +88,6 @@
                                 <div class="border-t border-gray-100 my-1"></div>
                                 <a href="{{ route('admin.logs') }}"        class="block px-4 py-2 text-sm text-gray-700 hover:bg-[#9400D3]/5"><i class="fas fa-clipboard-list mr-2 text-[#9400D3]"></i>System Logs</a>
                                 <a href="{{ route('admin.activity') }}"    class="block px-4 py-2 text-sm text-gray-700 hover:bg-[#9400D3]/5"><i class="fas fa-history mr-2 text-[#9400D3]"></i>Activity Log</a>
-                                <a href="{{ route('admin.survey.results') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-[#9400D3]/5"><i class="fas fa-star-half-alt mr-2 text-[#9400D3]"></i>Survey Results</a>
                             </div>
                         </div>
                     @endif

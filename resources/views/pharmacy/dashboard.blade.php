@@ -11,6 +11,16 @@
         <span class="text-sm text-gray-500">{{ $pharmacy->pharmacy_name ?? 'No pharmacy assigned' }}</span>
     </div>
 
+@if($pharmacy->status === 'pending')
+<div class="bg-amber-50 border border-amber-300 rounded-xl px-5 py-4 mb-6 flex items-start gap-3">
+    <span class="text-amber-500 text-xl mt-0.5">&#x23F3;</span>
+    <div>
+        <p class="font-bold text-amber-800 text-sm">Account Pending Approval</p>
+        <p class="text-amber-700 text-xs mt-0.5">Your pharmacy is currently under review. You have limited access until approved by an admin. <a href="{{ route('pharmacy.requirements') }}" class="underline font-semibold">View / upload requirements &rarr;</a></p>
+    </div>
+</div>
+@endif
+
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div class="bg-white rounded-lg shadow-lg p-6">
             <div class="flex items-center justify-between">

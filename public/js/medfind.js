@@ -1,4 +1,4 @@
-// ============================================
+﻿// ============================================
 // MEDFIND - FULL JS LOGIC WITH WORKING AUTOCOMPLETE
 // ============================================
 
@@ -96,92 +96,44 @@ function performSearch() {
 }
 
 function createPopupContent(pharmacy) {
-    const distance = calculateDistance(
-        userLat,
-        userLng,
-        pharmacy.lat,
-        pharmacy.lng
-    );
+    const distance = calculateDistance(userLat, userLng, pharmacy.lat, pharmacy.lng);
+    const detailsUrl = '/consumer/pharmacy/' + pharmacy.id;
 
-    let displayMeds = [];
-    if (pharmacy.medicines) {
-        displayMeds = currentSearchQuery
-            ? pharmacy.medicines.filter(
-                  (m) =>
-                      m.name.toLowerCase().includes(currentSearchQuery) &&
-                      m.stock > 0
-              )
-            : pharmacy.medicines.filter((m) => m.stock > 0);
-    }
-
-    let medsHtml = "";
-    if (!displayMeds.length) {
-        medsHtml = `<div style="color:#94a3b8;font-size:12px;padding:8px 0;text-align:center;">No stock available</div>`;
+    let mostSearchedHtml = '';
+    if (pharmacy.mostSearched && pharmacy.mostSearched.length) {
+        mostSearchedHtml = pharmacy.mostSearched.map(function(q) {
+            return '<span style="display:inline-block;background:rgba(148,0,211,0.08);color:#9400D3;font-size:10px;font-weight:600;padding:2px 8px;border-radius:9999px;margin:2px 2px 2px 0;">' + q + '</span>';
+        }).join('');
     } else {
-        displayMeds.slice(0, 4).forEach((med) => {
-            const rxBadge = med.prescription
-                ? `<div style="font-size:10px;color:#9400D3;font-weight:600;margin-top:2px;">🔞 Prescription Required</div>`
-                : "";
-
-            medsHtml += `
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(148,0,211,0.1);">
-                    <div style="padding-right:8px;">
-                        <div style="color:#191970;font-weight:700;font-size:12px;line-height:1.2;">${med.name}</div>
-                        ${rxBadge}
-                    </div>
-                    <span style="background:#191970;color:#D9F855;font-weight:700;font-size:11px;padding:4px 10px;border-radius:9999px;white-space:nowrap;box-shadow:0 1px 2px rgba(25,25,112,0.1);display:inline-block;">
-                        ₱${med.price} | ${med.stock} pcs
-                    </span>
-                </div>
-            `;
-        });
-        if (displayMeds.length > 4) {
-            medsHtml += `<div style="font-size:10px;color:#9400D3;padding-top:6px;text-align:center;font-weight:600;">+${displayMeds.length - 4} more items</div>`;
-        }
+        mostSearchedHtml = '<span style="color:#94a3b8;font-size:11px;">No search data yet</span>';
     }
 
-    const escapedName = pharmacy.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    const escapedId = parseInt(pharmacy.id);
 
     return `
-        <div style="background:#ffffff;padding:18px;border-radius:24px;font-family:system-ui,-apple-system,sans-serif;position:relative;width:280px;box-sizing:border-box;border:1px solid rgba(148,0,211,0.1);">
-            
-            <button onclick="window.closePopup()" style="position:absolute;top:12px;right:14px;background:transparent;border:none;font-size:18px;color:#94a3b8;cursor:pointer;outline:none;padding:4px;line-height:1;z-index:9999;">✕</button>
-
+        <div style="background:#ffffff;padding:18px;border-radius:24px;font-family:system-ui,-apple-system,sans-serif;position:relative;width:290px;box-sizing:border-box;border:1px solid rgba(148,0,211,0.1);">
+            <button onclick="window.closePopup()" style="position:absolute;top:12px;right:14px;background:transparent;border:none;font-size:18px;color:#94a3b8;cursor:pointer;outline:none;padding:4px;line-height:1;z-index:9999;">&#x2715;</button>
             <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
-                <span style="font-size:16px;">🏪</span>
-                <span style="font-size:15px;font-weight:800;color:#191970;line-height:1.2;">${pharmacy.name}</span>
+                <span style="font-size:16px;">&#x1F3EA;</span>
+                <a href="${detailsUrl}" style="font-size:15px;font-weight:800;color:#191970;line-height:1.2;text-decoration:none;" onmouseover="this.style.color='#9400D3'" onmouseout="this.style.color='#191970'">${pharmacy.name}</a>
             </div>
-
-            <div style="font-size:11px;color:#64748b;margin-bottom:8px;padding-left:22px;">
-                📍 ${pharmacy.address || 'No address available'}
-            </div>
-
+            <div style="font-size:11px;color:#64748b;margin-bottom:8px;padding-left:22px;">&#x1F4CD; ${pharmacy.address || 'No address available'}</div>
             <div style="background:rgba(148,0,211,0.08);color:#191970;font-size:10px;font-weight:600;padding:4px 10px;border-radius:9999px;display:inline-flex;align-items:center;gap:4px;margin-bottom:12px;">
-                <span>✏️</span> Distance: ${distance.toFixed(1)} km from your location
+                &#x1F4CF; ${distance.toFixed(1)} km away
             </div>
-
             <div style="background:rgba(148,0,211,0.04);padding:10px 12px;border-radius:16px;margin-bottom:14px;border:1px solid rgba(148,0,211,0.06);">
-                <div style="font-size:11px;font-weight:800;color:#191970;margin-bottom:4px;display:flex;align-items:center;gap:4px;">
-                    <span>💊</span> Available Stock:
-                </div>
-                ${medsHtml}
+                <div style="font-size:11px;font-weight:800;color:#191970;margin-bottom:6px;">&#x1F525; Most Searched Medicines</div>
+                <div style="line-height:1.8;">${mostSearchedHtml}</div>
             </div>
-
-            <div style="display:flex;gap:8px;">
-                <button onclick="window.openChatFromPopup('${escapedName}')" 
-                        style="flex:1;background:#191970;color:#D9F855;border:none;padding:10px 6px;border-radius:9999px;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;outline:none;box-shadow:0 2px 4px rgba(25,25,112,0.15);z-index:9999;pointer-events:auto;position:relative;">
-                    💬 Chat & Prescription
-                </button>
-                
-<button onclick="window.getDirections(${pharmacy.lat}, ${pharmacy.lng})" 
-                        style="flex:1;background:#9400D3;color:#ffffff;border:none;padding:10px 6px;border-radius:9999px;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;outline:none;box-shadow:0 2px 4px rgba(148,0,211,0.15);z-index:9999;pointer-events:auto;position:relative;">
-                    🗺️ Directions
-                </button>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <a href="${detailsUrl}" style="flex:1;min-width:80px;background:#9400D3;color:#ffffff;border:none;padding:9px 4px;border-radius:9999px;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;text-decoration:none;box-shadow:0 2px 4px rgba(148,0,211,0.2);">&#x1F48A; View Products</a>
+                <button onclick="window.openContactPharmacy(${escapedId})" style="flex:1;min-width:80px;background:#191970;color:#D9F855;border:none;padding:9px 4px;border-radius:9999px;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;outline:none;pointer-events:auto;">&#x1F4AC; Message</button>
+                <button onclick="window.getDirections(${pharmacy.lat}, ${pharmacy.lng})" style="flex:1;min-width:80px;background:#0ea5e9;color:#ffffff;border:none;padding:9px 4px;border-radius:9999px;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;outline:none;pointer-events:auto;">&#x1F5FA;&#xFE0F; Directions</button>
             </div>
-
         </div>
     `;
 }
+
 
 function updateMapMarkers() {
     markers.forEach((m) => {
@@ -205,11 +157,15 @@ function updateMapMarkers() {
     }
 
     currentFilteredPharmacies.forEach((pharmacy) => {
+        const iconHtml = pharmacy.logo
+            ? `<div style="width:40px;height:40px;border-radius:50%;border:3px solid #D9F855;box-shadow:0 4px 6px -1px rgba(25,25,112,0.3);overflow:hidden;background:#fff;"><img src="${pharmacy.logo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></div>`
+            : `<div style="width:32px;height:32px;border-radius:50%;background:#191970;border:3px solid #D9F855;box-shadow:0 4px 6px -1px rgba(25,25,112,0.2);display:flex;align-items:center;justify-content:center;"><i class='fas fa-store' style='color:#D9F855;font-size:12px;'></i></div>`;
+
         const markerIcon = L.divIcon({
-            html: `<div style="width:16px;height:16px;border-radius:50%;background:#191970;border:3px solid #D9F855;box-shadow:0 4px 6px -1px rgba(25,25,112,0.2);"></div>`,
-            iconSize: [16, 16],
-            iconAnchor: [8, 8],
-            className: "marker-dot",
+            html: iconHtml,
+            iconSize: pharmacy.logo ? [40, 40] : [32, 32],
+            iconAnchor: pharmacy.logo ? [20, 20] : [16, 16],
+            className: 'marker-dot',
         });
 
         const marker = L.marker([pharmacy.lat, pharmacy.lng], {
@@ -943,6 +899,15 @@ function highlightItem(items, index) {
     });
 }
 
+
+
+
+
+function openContactPharmacy(pharmacyId) {
+    closePopup();
+    window.location.href = "/consumer/pharmacy/" + pharmacyId + "#contact";
+}
+
 // Make functions globally accessible
 window.closePopup = closePopup;
 window.openChatFromPopup = openChatFromPopup;
@@ -961,6 +926,8 @@ window.selectInventoryMedicineFromAutocomplete = selectInventoryMedicineFromAuto
 window.selectInventoryMedicineFromAutocomplete = selectInventoryMedicineFromAutocomplete;
 window.getDirections = getDirections;
 window.clearRoute = clearRoute;
+window.openContactPharmacy = openContactPharmacy;
+
 window.startUnreadSync = startUnreadSync;
 
 function getCsrfToken() {

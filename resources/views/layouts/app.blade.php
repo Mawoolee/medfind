@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
@@ -23,21 +23,6 @@
     <link rel="stylesheet" href="{{ asset('css/medfind.css') }}">
 
     <!-- Vite for Tailwind CSS (para sa production-ready) -->
-
-    <script>
-    // Pusher guard: only needed when Pusher is used instead of Reverb.
-    // With Reverb (current setup) Pusher is used only as a protocol adapter —
-    // the guard ensures no real Pusher connection attempt happens when no key is set.
-    (function(){
-        try {
-            var _pusherKey = "{{ env('PUSHER_APP_KEY', '') }}";
-            if (!_pusherKey) {
-                window.Pusher = function() {};
-                window.Pusher.prototype = {};
-            }
-        } catch(e) {}
-    })();
-    </script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 

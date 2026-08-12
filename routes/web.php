@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 // routes/web.php
 
 use App\Http\Controllers\ConsumerController;
@@ -42,6 +42,13 @@ Route::get('/dashboard', function () {
 require __DIR__.'/auth.php';
 
 // ============================================
+// PHARMACY PENDING APPROVAL PAGE
+// ============================================
+Route::get('/pharmacy/pending', function () {
+    return view('auth.pharmacy-pending');
+})->middleware('auth')->name('consumer.pharmacy.pending');
+
+// ============================================
 // SURVEY ROUTES (ISO/IEC 25010 Evaluation)
 // ============================================
 // Public form — anyone can fill it out
@@ -68,12 +75,15 @@ Route::middleware(['auth', 'role:consumer'])->prefix('consumer')->name('consumer
     Route::get('/pharmacy/{id}', [ConsumerController::class, 'pharmacyDetails'])->name('pharmacy.details');
     Route::post('/message/send', [MessageController::class, 'store'])->name('message.send');
     Route::get('/messages', [MessageController::class, 'consumerConversations'])->name('messages');
+    Route::delete('/messages/{pharmacyId}', [MessageController::class, 'deleteConversation'])->name('messages.delete');
+    Route::get('/messages/data', [MessageController::class, 'consumerMessagesJson'])->name('messages.json');
+    Route::get('/profile', function() { return view('consumer.profile'); })->name('profile.settings');
 });
 
 // ============================================
 // PHARMACY ROUTES
 // ============================================
-Route::middleware(['auth', 'role:pharmacy,pharmacy_operator'])->prefix('pharmacy')->name('pharmacy.')->group(function () {
+Route::middleware(['auth', 'role:pharmacy,pharmacy_operator', 'pharmacy.pending'])->prefix('pharmacy')->name('pharmacy.')->group(function () {
     Route::get('/dashboard', [PharmacyDashboardController::class, 'index'])->name('dashboard');
     // Inventory management (CRUD, search, pagination)
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory');
@@ -134,6 +144,10 @@ Route::middleware(['auth', 'role:pharmacy,pharmacy_operator'])->prefix('pharmacy
     // Pharmacy profile
     Route::get('/profile', [\App\Http\Controllers\PharmacyProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [\App\Http\Controllers\PharmacyProfileController::class, 'update'])->name('profile.update');
+
+    // Requirements upload
+    Route::get('/requirements', [\App\Http\Controllers\PharmacyRequirementsController::class, 'show'])->name('requirements');
+    Route::post('/requirements', [\App\Http\Controllers\PharmacyRequirementsController::class, 'store'])->name('requirements.store');
 
     // Inventory CSV export
     Route::get('/inventory/export', [InventoryController::class, 'export'])->name('inventory.export');
