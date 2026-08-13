@@ -99,13 +99,22 @@ function createPopupContent(pharmacy) {
     const distance = calculateDistance(userLat, userLng, pharmacy.lat, pharmacy.lng);
     const detailsUrl = '/consumer/pharmacy/' + pharmacy.id;
 
-    let mostSearchedHtml = '';
-    if (pharmacy.mostSearched && pharmacy.mostSearched.length) {
-        mostSearchedHtml = pharmacy.mostSearched.map(function(q) {
-            return '<span style="display:inline-block;background:rgba(148,0,211,0.08);color:#9400D3;font-size:10px;font-weight:600;padding:2px 8px;border-radius:9999px;margin:2px 2px 2px 0;">' + q + '</span>';
-        }).join('');
+    // Top 3 medicines with prices
+    let topMedsHtml = '';
+    if (pharmacy.medicines && pharmacy.medicines.length) {
+        const topMeds = pharmacy.medicines.filter(m => m.stock > 0).slice(0, 3);
+        if (topMeds.length) {
+            topMedsHtml = topMeds.map(function(m) {
+                return '<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid rgba(148,0,211,0.08);">'
+                    + '<span style="font-size:11px;color:#191970;font-weight:500;">' + m.name + '</span>'
+                    + '<span style="font-size:10px;font-weight:700;color:#9400D3;">&#x20B1;' + m.price + '</span>'
+                    + '</div>';
+            }).join('');
+        } else {
+            topMedsHtml = '<span style="color:#94a3b8;font-size:11px;">No stock available</span>';
+        }
     } else {
-        mostSearchedHtml = '<span style="color:#94a3b8;font-size:11px;">No search data yet</span>';
+        topMedsHtml = '<span style="color:#94a3b8;font-size:11px;">No stock data</span>';
     }
 
     const escapedId = parseInt(pharmacy.id);
@@ -121,9 +130,12 @@ function createPopupContent(pharmacy) {
             <div style="background:rgba(148,0,211,0.08);color:#191970;font-size:10px;font-weight:600;padding:4px 10px;border-radius:9999px;display:inline-flex;align-items:center;gap:4px;margin-bottom:12px;">
                 &#x1F4CF; ${distance.toFixed(1)} km away
             </div>
+            <div style="font-size:10px;color:#64748b;margin-bottom:10px;display:flex;align-items:center;gap:4px;">
+                ${pharmacy.hours ? '&#x1F552; ' + pharmacy.hours : ''}
+            </div>
             <div style="background:rgba(148,0,211,0.04);padding:10px 12px;border-radius:16px;margin-bottom:14px;border:1px solid rgba(148,0,211,0.06);">
-                <div style="font-size:11px;font-weight:800;color:#191970;margin-bottom:6px;">&#x1F525; Most Searched Medicines</div>
-                <div style="line-height:1.8;">${mostSearchedHtml}</div>
+                <div style="font-size:11px;font-weight:800;color:#191970;margin-bottom:6px;">&#x1F48A; Top Medicines</div>
+                <div style="line-height:1.6;">${topMedsHtml}</div>
             </div>
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
                 <a href="${detailsUrl}" style="flex:1;min-width:80px;background:#9400D3;color:#ffffff;border:none;padding:9px 4px;border-radius:9999px;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;text-decoration:none;box-shadow:0 2px 4px rgba(148,0,211,0.2);">&#x1F48A; View Products</a>

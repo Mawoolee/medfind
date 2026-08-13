@@ -6,30 +6,58 @@ use Illuminate\Http\Request;
 
 class PharmacyRequirementsController extends Controller
 {
+    // The 5 document slots ? key matches the form input name
+    const DOCS = [
+        'bir'          => ['label' => 'BIR Certificate of Registration', 'required' => true],
+        'business'     => ['label' => "Mayor's / Business Permit",        'required' => true],
+        'philhealth'   => ['label' => 'PhilHealth Accreditation',          'required' => false],
+        'fda'          => ['label' => 'FDA Certificate',                   'required' => false],
+        'pharmacist'   => ['label' => 'Pharmacist License',                'required' => true],
+    ];
+
     public function show()
     {
         $pharmacy = Pharmacy::where('user_id', auth()->id())->firstOrFail();
-        return view('pharmacy.requirements', compact('pharmacy'));
+        $docs     = self::DOCS;
+        $uploaded = $pharmacy->requirements ?? [];   // ['bir' => 'path', 'business' => 'path', ...]
+        return view('pharmacy.requirements', compact('pharmacy', 'docs', 'uploaded'));
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'requirements.*' => 'required|file|mimes:jpeg,jpg,png,pdf|max:10240',
-            'requirements'   => 'required|array|min:1',
-        ]);
-
         $pharmacy = Pharmacy::where('user_id', auth()->id())->firstOrFail();
+        $uploaded = $pharmacy->requirements ?? [];
 
-        $paths = [];
-        foreach ($request->file('requirements') as $file) {
-            $paths[] = $file->store('pharmacy-requirements/' . $pharmacy->id, 'private');
+        $rules = [];
+        foreach (array_keys(self::DOCS) as $key) {
+            $rules["doc_{$key}"] = 'nullable|file|mimes:jpeg,jpg,png,pdf|max:10240';
         }
 
-        $existing = $pharmacy->requirements ?? [];
-        $pharmacy->requirements = array_merge($existing, $paths);
+        $request->validate($rules);
+
+        $saved = false;
+        foreach (array_keys(self::DOCS) as $key) {
+            if ($request->hasFile("doc_{$key}")) {
+                // Delete old file for this slot if it exists
+                if (!empty($uploaded[$key])) {
+                    \Illuminate\Support\Facades\Storage::disk('local')->delete($uploaded[$key]);
+                }
+                $path = $request->file("doc_{$key}")->store(
+                    'pharmacy-requirements/' . $pharmacy->id, 'local'
+                );
+                $uploaded[$key] = $path;
+                $saved = true;
+            }
+        }
+
+        if (!$saved) {
+            return redirect()->back()->with('error', 'Please select at least one file to upload.');
+        }
+
+        $pharmacy->requirements = $uploaded;
         $pharmacy->save();
 
-        return redirect()->route('pharmacy.profile.edit')->with('success', 'Requirements uploaded successfully! The admin will review your documents.');
+        return redirect()->route('pharmacy.requirements')
+            ->with('success', 'Documents uploaded successfully!');
     }
 }

@@ -1,4 +1,4 @@
-<x-guest-layout>
+﻿<x-guest-layout>
     <div class="min-h-screen flex flex-col items-center justify-center bg-[#f0f0ff] px-4">
         <!-- Logo -->
         <div class="mb-8 text-center">
@@ -15,7 +15,7 @@
         <div class="w-full max-w-sm bg-white rounded-xl border border-[#9400D3]/10 shadow-lg overflow-hidden"
              x-data="{ role: 'consumer' }">
             <div class="p-6">
-                <form method="POST" action="{{ route('register') }}">
+                <form method="POST" action="{{ route('register') }}" onsubmit="var r=document.querySelector('input[name=role]');if(!r.value)r.value='consumer';">
                     @csrf
 
                     <!-- Role Selector -->
@@ -43,8 +43,8 @@
                                 Pharmacy Owner
                             </button>
                         </div>
-                        <!-- Hidden role input -->
-                        <input type="hidden" name="role" :value="role">
+                        <!-- Hidden role input — x-model ensures value is always synced -->
+                        <input type="hidden" name="role" x-model="role">
                     </div>
 
                     <!-- Name -->

@@ -35,6 +35,7 @@ class ConsumerController extends Controller
                 'lat'           => (float) $pharmacy->latitude,
                 'lng'           => (float) $pharmacy->longitude,
                 'contactNumber' => $pharmacy->contactNumber,
+                'hours'         => $pharmacy->operating_hours,
                 'logo'          => $pharmacy->logo_path ? asset('storage/' . $pharmacy->logo_path) : null,
                 'mostSearched'  => $topSearchedByPharmacy[$pharmacy->id] ?? [],
                 'medicines'     => $pharmacy->inventory->map(function($item) {

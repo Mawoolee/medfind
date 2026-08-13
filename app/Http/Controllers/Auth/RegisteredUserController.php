@@ -61,9 +61,9 @@ class RegisteredUserController extends Controller
             Pharmacy::create([
                 'pharmacy_name'   => $request->pharmacy_name,
                 'pharmacyAddress' => $request->pharmacyAddress,
-                'contactNumber'   => $request->contactNumber,
-                'latitude'        => $request->latitude,
-                'longitude'       => $request->longitude,
+                'contactNumber'   => $request->filled('contactNumber') ? $request->contactNumber : null,
+                'latitude'        => $request->filled('latitude')  ? (float) $request->latitude  : null,
+                'longitude'       => $request->filled('longitude') ? (float) $request->longitude : null,
                 'user_id'         => $user->id,
                 'status'          => 'pending',
             ]);

@@ -24,6 +24,11 @@
                         <i class="fas fa-phone text-[10px]"></i> {{ $pharmacy->contactNumber }}
                     </p>
                 @endif
+                @if($pharmacy->operating_hours)
+                    <p class="text-xs text-gray-500 flex items-center gap-1 ml-0.5 mb-2">
+                        <i class="fas fa-clock text-[10px] text-[#9400D3]"></i> {{ $pharmacy->operating_hours }}
+                    </p>
+                @endif
                 <div class="inline-flex items-center gap-1.5 bg-[#f8f4ff] text-[#191970] text-[11px] font-semibold px-3 py-1 rounded-full border border-[#9400D3]/10">
                     <span>📏</span> Distance calculated from your location
                 </div>
@@ -92,19 +97,60 @@
                 </div>
 
                 @auth
-                    <form id="contactForm" onsubmit="submitInquiry(event, {{ $pharmacy->id }})">
+                    <form method="POST" action="{{ route('consumer.message.send') }}" enctype="multipart/form-data">
                         @csrf
-                        <textarea id="inquiryMessage" rows="3"
+                        <input type="hidden" name="pharmacy_id" value="{{ $pharmacy->id }}">
+
+                        {{-- Message textarea --}}
+                        <textarea name="message" rows="3"
                             placeholder="Type your message or prescription inquiry..."
-                            class="w-full border border-[#9400D3]/20 rounded-xl px-3 py-2 text-xs text-[#191970] outline-none focus:border-[#9400D3] resize-none mb-2 bg-[#f8f4ff]"></textarea>
+                            class="w-full border border-[#9400D3]/20 rounded-xl px-3 py-2 text-xs text-[#191970] outline-none focus:border-[#9400D3] resize-none mb-3 bg-[#f8f4ff]"
+                            required></textarea>
+
+                        {{-- Prescription upload --}}
+                        <div class="mb-3">
+                            <label class="block text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                                📎 Attach Prescription <span class="font-normal text-gray-400">(optional — JPG, PNG, PDF · max 5MB)</span>
+                            </label>
+                            <div class="flex items-center gap-2 border border-dashed border-[#9400D3]/30 rounded-xl px-3 py-2 bg-[#f8f4ff]"
+                                 id="rxDropArea">
+                                <input type="file"
+                                    name="prescription_image"
+                                    id="prescriptionFile"
+                                    accept=".jpg,.jpeg,.png,.gif,.webp,.pdf"
+                                    class="hidden"
+                                    onchange="updatePrescriptionLabel(this)">
+                                <button type="button"
+                                    onclick="document.getElementById('prescriptionFile').click()"
+                                    class="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] font-bold text-white hover:opacity-90 transition"
+                                    style="background:#9400D3;">
+                                    <i class="fas fa-paperclip text-[9px]"></i> Choose File
+                                </button>
+                                <span id="rxFileName" class="text-[10px] text-gray-400 truncate flex-1">No file chosen</span>
+                                <button type="button" id="rxClearBtn"
+                                    onclick="clearPrescription()"
+                                    class="hidden text-gray-400 hover:text-red-500 transition text-sm leading-none flex-shrink-0">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            {{-- Preview thumbnail --}}
+                            <div id="rxPreview" class="hidden mt-2">
+                                <img id="rxPreviewImg" src="" alt="Prescription preview"
+                                    class="w-full max-h-32 object-contain rounded-xl border border-[#9400D3]/15 bg-white">
+                            </div>
+                        </div>
+
                         <button type="submit"
                             class="w-full bg-[#191970] hover:bg-[#2a2a8a] text-[#D9F855] font-bold py-2.5 rounded-full text-xs transition active:scale-95 shadow-md">
                             📨 Send Message
                         </button>
                     </form>
-                    <div id="contactSuccess" class="hidden text-green-600 text-xs font-semibold text-center mt-2">
-                        ✅ Message sent successfully!
-                    </div>
+
+                    @if(session('success'))
+                        <div class="mt-2 text-green-600 text-xs font-semibold text-center">
+                            ✅ {{ session('success') }}
+                        </div>
+                    @endif
                 @else
                     <p class="text-xs text-gray-500 text-center mb-2">Please log in to send inquiries.</p>
                     <a href="{{ route('login') }}" class="block w-full bg-[#191970] text-[#D9F855] font-bold py-2.5 rounded-full text-xs text-center">
@@ -222,32 +268,48 @@
         modal.classList.remove('flex');
     }
 
-    function submitInquiry(e, pharmacyId) {
-        e.preventDefault();
-        const message = document.getElementById('inquiryMessage').value.trim();
-        if (!message) return;
+    function updatePrescriptionLabel(input) {
+        const label = document.getElementById('rxFileName');
+        const clearBtn = document.getElementById('rxClearBtn');
+        const preview = document.getElementById('rxPreview');
+        const previewImg = document.getElementById('rxPreviewImg');
 
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '{{ route("consumer.message.send") }}';
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            label.textContent = file.name;
+            label.style.color = '#191970';
+            label.style.fontWeight = '600';
+            clearBtn.classList.remove('hidden');
 
-        const csrf = document.createElement('input');
-        csrf.type = 'hidden'; csrf.name = '_token';
-        csrf.value = '{{ csrf_token() }}';
-        form.appendChild(csrf);
+            // Show image preview if it is an image
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    preview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                // PDF — show a file icon placeholder instead
+                preview.classList.remove('hidden');
+                previewImg.src = '';
+                previewImg.style.display = 'none';
+                preview.innerHTML = '<div class="flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-[#9400D3]/15"><i class="fas fa-file-pdf text-red-500 text-lg"></i><span class="text-xs font-semibold text-[#191970]">' + file.name + '</span></div>';
+            }
+        }
+    }
 
-        const phInput = document.createElement('input');
-        phInput.type = 'hidden'; phInput.name = 'pharmacy_id';
-        phInput.value = pharmacyId;
-        form.appendChild(phInput);
-
-        const msgInput = document.createElement('input');
-        msgInput.type = 'hidden'; msgInput.name = 'message';
-        msgInput.value = message;
-        form.appendChild(msgInput);
-
-        document.body.appendChild(form);
-        form.submit();
+    function clearPrescription() {
+        const input = document.getElementById('prescriptionFile');
+        const label = document.getElementById('rxFileName');
+        const clearBtn = document.getElementById('rxClearBtn');
+        const preview = document.getElementById('rxPreview');
+        input.value = '';
+        label.textContent = 'No file chosen';
+        label.style.color = '';
+        label.style.fontWeight = '';
+        clearBtn.classList.add('hidden');
+        preview.classList.add('hidden');
     }
 </script>
 @endsection

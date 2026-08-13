@@ -1,0 +1,37 @@
+Login and Test
+
+Role	           Email	            Password	        Dashboard URL
+Pharmacy	pharmacy@medfind.com	    password	    /pharmacy/dashboard
+Consumer	consumer@medfind.com	    password	    /consumer/dashboard
+Admin	    admin@medfind.com	        password	    /admin/dashboard
+  
+
+  
+How to run this project
+Open terminals:
+    Terminal 1 - php artisan serve              (Web Server)    -   Starts the app at http://127.0.0.1:8000                        
+    Terminal 2 - php artisan reverb:start       (WebSocket Server(Real-time))   -   Powers live inventory updates and message notifications
+    Terminal 3 - php artisan queue:work         (Queue Worker (Broadcasting))   -   Processes background jobs (sending notifications when pharmacy status changes)
+    Terminal 4 - npm run dev                    (Vite (Frontend assets - only needed if editing the CSS/JS))    -   Skip this if you're not making frontend changes
+
+
+One-time setup steps (only needed if running on a fresh machine):
+# Install PHP dependencies
+composer install
+# Install JS dependencies
+npm install
+# Copy environment file
+copy .env.example .env
+# Generate app key
+php artisan key:generate
+# Run database migrations
+php artisan migrate
+# Create storage symlink (for pharmacy logos)
+php artisan storage:link
+
+
+Checklist before opening the browser:
+    PostgreSQL is running on port 5432
+    .env has correct DB_PASSWORD set to root123
+    Terminals 1, 2, and 3 are all running
+    Open http://127.0.0.1:8000

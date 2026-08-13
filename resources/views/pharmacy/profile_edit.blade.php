@@ -146,6 +146,19 @@
                     @enderror
                 </div>
 
+                <div>
+                    <label class="block text-sm font-medium mb-1" style="color:#191970;">
+                        Operating Hours
+                    </label>
+                    <input type="text" name="operating_hours"
+                        value="{{ old('operating_hours', $pharmacy->operating_hours) }}"
+                        placeholder="e.g. Mon-Sat 8:00 AM - 9:00 PM"
+                        class="mt-1 block w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 transition-shadow">
+                    @error('operating_hours')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <div class="md:col-span-2">
                     <label class="block text-sm font-medium mb-1" style="color:#191970;">
                         Email Address

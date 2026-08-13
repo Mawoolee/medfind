@@ -1,4 +1,4 @@
-{{-- resources/views/pharmacy/messages.blade.php --}}
+﻿{{-- resources/views/pharmacy/messages.blade.php --}}
 
 @extends('layouts.app')
 
@@ -67,37 +67,37 @@
                             </div>
                             
                             @if($message->prescription_image)
-                                <div class="mt-2 flex items-center gap-4">
-                                    {{-- Secure serve route — decrypts on-the-fly, no public URL --}}
-                                    <a href="{{ route('pharmacy.prescription.serve', $message->id) }}" target="_blank"
-                                       class="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-2">
-                                        <img src="{{ route('pharmacy.prescription.serve', $message->id) }}" alt="prescription"
-                                             class="w-24 h-auto rounded border" />
-                                        <span><i class="fas fa-file-prescription mr-1"></i>View Prescription</span>
-                                    </a>
-
-                                    {{-- Verify controls --}}
-                                    <div class="ml-2">
-                                        @if(!$message->verification_status)
-                                           <button type="button" class="js-verify-button bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm" data-id="{{ $message->id }}">Verify</button>
-                                        @else
-                                           <div class="text-sm">
-                                               <span class="px-2 py-1 rounded-full text-white text-xs font-semibold {{ $message->verification_status === 'approved' ? 'bg-green-600' : 'bg-red-600' }}">{{ ucfirst($message->verification_status) }}</span>
-                                               <div class="text-xs text-gray-500">By: {{ $message->verifier->name ?? '-' }} at {{ optional($message->verified_at)->format('M d, Y g:i A') }}</div>
-                                               @if($message->verification_notes)
-                                                   <div class="mt-1 text-xs text-gray-700">Notes: {{ $message->verification_notes }}</div>
-                                               @endif
-                                           </div>
-                                        @endif
-                                    </div>
+                                @php $rxUrl = route('pharmacy.prescription.serve', $message->id); @endphp
+                                <div class="mt-3 flex flex-wrap items-center gap-3">
+                                    <button type="button"
+                                        onclick="openRxModal('{{ $rxUrl }}')"
+                                        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold border border-[#9400D3]/30 text-[#9400D3] hover:bg-[#9400D3] hover:text-white transition">
+                                        <i class="fas fa-file-prescription"></i> View Prescription
+                                    </button>
+                                    @if(!$message->verification_status)
+                                        <button type="button"
+                                            class="js-verify-button bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition"
+                                            data-id="{{ $message->id }}">
+                                            <i class="fas fa-check-circle mr-1"></i>Verify
+                                        </button>
+                                    @else
+                                        <div class="text-sm flex flex-col gap-0.5">
+                                            <span class="px-2 py-1 rounded-full text-white text-xs font-semibold {{ $message->verification_status === 'approved' ? 'bg-green-600' : 'bg-red-600' }}">
+                                                {{ ucfirst($message->verification_status) }}
+                                            </span>
+                                            <span class="text-xs text-gray-400">By: {{ $message->verifier->name ?? '-' }} at {{ optional($message->verified_at)->format('M d, Y g:i A') }}</span>
+                                            @if($message->verification_notes)
+                                                <span class="text-xs text-gray-600">Notes: {{ $message->verification_notes }}</span>
+                                            @endif
+                                        </div>
+                                    @endif
                                 </div>
                             @endif
-                            
                             @if($message->reply)
                                 <div class="mt-3 bg-purple-50 p-4 rounded-lg border-l-4 border-purple-500">
                                     <p class="text-sm text-gray-500 mb-1">Your Reply:</p>
                                     <p class="text-gray-700">{{ $message->reply }}</p>
-                                    <p class="text-xs text-gray-400 mt-1">{{ $message->replied_at->format('M d, Y g:i A') }}</p>
+                                    <p class="text-xs text-gray-400 mt-1">{{ $message->replied_at->format("M d, Y g:i A") }}</p>
                                 </div>
                             @else
                                 <div class="mt-4">
@@ -161,7 +161,79 @@
     </div>
 </div>
 
-@endsection
+
+{{-- Prescription Preview Modal --}}
+<div id="rxPreviewModal"
+     class="fixed inset-0 z-[99999] hidden items-center justify-center"
+     style="background:rgba(0,0,0,0.75);"
+     onclick="if(event.target===this)closeRxModal()">
+    <div class="bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+         style="width:90vw;max-width:860px;height:88vh;">
+        <div class="flex items-center justify-between px-5 py-3 border-b" style="background:#191970;">
+            <span class="text-sm font-bold text-white flex items-center gap-2">
+                <i class="fas fa-file-prescription text-[#D9F855]"></i> Prescription
+            </span>
+            <button onclick="closeRxModal()"
+                class="w-7 h-7 rounded-full flex items-center justify-center text-white hover:bg-white/20 text-sm">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="flex-1 overflow-auto relative flex items-center justify-center p-4" style="background:#f0f0ff;">
+            <img id="rxPreviewImg" src="" alt="Prescription" class="max-w-full max-h-full object-contain rounded-lg shadow" style="display:none;">
+            <iframe id="rxPreviewFrame" src="" class="w-full h-full border-0 rounded-lg" style="display:none;"></iframe>
+            <div id="rxSpinner" class="absolute inset-0 flex items-center justify-center">
+                <div class="flex flex-col items-center gap-3">
+                    <div class="w-10 h-10 border-4 border-[#9400D3] border-t-transparent rounded-full animate-spin"></div>
+                    <p class="text-sm font-semibold text-[#191970]">Loading prescription...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openRxModal(url) {
+    var modal = document.getElementById('rxPreviewModal');
+    var img = document.getElementById('rxPreviewImg');
+    var frame = document.getElementById('rxPreviewFrame');
+    var spinner = document.getElementById('rxSpinner');
+
+    img.style.display = 'none';
+    img.src = '';
+    frame.style.display = 'none';
+    frame.src = '';
+    spinner.style.display = 'flex';
+    modal.style.display = 'flex';
+    modal.classList.remove('hidden');
+
+    // Try loading as image first
+    img.onload = function() {
+        spinner.style.display = 'none';
+        img.style.display = 'block';
+    };
+    img.onerror = function() {
+        // Not an image or failed — try iframe (for PDF)
+        img.style.display = 'none';
+        frame.src = url;
+        frame.style.display = 'block';
+        frame.onload = function() { spinner.style.display = 'none'; };
+    };
+    img.src = url;
+}
+function closeRxModal() {
+    var modal = document.getElementById('rxPreviewModal');
+    var img = document.getElementById('rxPreviewImg');
+    var frame = document.getElementById('rxPreviewFrame');
+    if (img.src && img.src.startsWith('blob:')) URL.revokeObjectURL(img.src);
+    img.src = '';
+    img.style.display = 'none';
+    frame.src = '';
+    frame.style.display = 'none';
+    modal.style.display = 'none';
+    modal.classList.add('hidden');
+}
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeRxModal(); });
+</script>@endsection
 
 @push('scripts')
 <script>

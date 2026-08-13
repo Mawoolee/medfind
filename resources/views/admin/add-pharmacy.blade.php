@@ -45,6 +45,13 @@
                        class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             </div>
 
+            <div class="mb-4">
+                <label for="operating_hours" class="block text-gray-700 font-medium mb-2">Operating Hours</label>
+                <input type="text" id="operating_hours" name="operating_hours" value="{{ old('operating_hours') }}"
+                       placeholder="e.g. Mon-Sat 8:00 AM - 9:00 PM"
+                       class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                     <label for="latitude" class="block text-gray-700 font-medium mb-2">Latitude</label>

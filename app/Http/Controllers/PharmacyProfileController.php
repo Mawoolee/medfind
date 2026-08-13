@@ -34,6 +34,7 @@ class PharmacyProfileController extends Controller
             'pharmacy_name'   => 'required|string|max:255',
             'pharmacyAddress' => 'nullable|string|max:255',
             'contactNumber'   => 'nullable|string|max:50',
+            'operating_hours' => 'nullable|string|max:255',
             'email'           => 'nullable|email|max:255',
             'latitude'        => 'nullable|numeric',
             'longitude'       => 'nullable|numeric',

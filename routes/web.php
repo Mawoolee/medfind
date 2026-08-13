@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // routes/web.php
 
 use App\Http\Controllers\ConsumerController;
@@ -193,5 +193,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Survey results
     Route::get('/survey/results', [SurveyController::class, 'results'])->name('survey.results');
+
+    // Requirements review
+    Route::get('/requirements', [AdminDashboardController::class, 'requirements'])->name('requirements');
+    Route::post('/pharmacy/{pharmacy}/requirements/approve', [AdminDashboardController::class, 'approveRequirements'])->name('requirements.approve');
+    Route::post('/pharmacy/{pharmacy}/requirements/reject', [AdminDashboardController::class, 'rejectRequirements'])->name('requirements.reject');
+    // Serve a private requirement file securely
+    Route::get('/pharmacy/{pharmacy}/requirement/{key}', [AdminDashboardController::class, 'serveRequirement'])->name('requirement.file');
 });
 
