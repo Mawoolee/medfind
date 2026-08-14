@@ -117,6 +117,35 @@ function createPopupContent(pharmacy) {
         topMedsHtml = '<span style="color:#94a3b8;font-size:11px;">No stock data</span>';
     }
 
+    // Suggest other pharmacies when searched medicine not in stock
+    let suggestionHtml = "";
+    if (currentSearchQuery) {
+        const hasSearchedMed = pharmacy.medicines && pharmacy.medicines.some(
+            m => m.name.toLowerCase().includes(currentSearchQuery) && m.stock > 0
+        );
+        if (!hasSearchedMed) {
+            const data = typeof pharmaciesData !== "undefined" ? pharmaciesData : [];
+            const alternatives = data.filter(p => p.id !== pharmacy.id && p.medicines && p.medicines.some(
+                m => m.name.toLowerCase().includes(currentSearchQuery) && m.stock > 0
+            )).map(p => {
+                const med = p.medicines.find(m => m.name.toLowerCase().includes(currentSearchQuery) && m.stock > 0);
+                const dist = calculateDistance(userLat, userLng, p.lat, p.lng);
+                return { name: p.name, price: med ? med.price : 0, dist: dist, id: p.id };
+            }).sort((a, b) => a.dist - b.dist).slice(0, 3);
+            if (alternatives.length) {
+                suggestionHtml = '<div style="background:#fef3c7;padding:8px 10px;border-radius:12px;margin-bottom:12px;border:1px solid #fcd34d;">'
+                    + '<div style="font-size:10px;font-weight:700;color:#92400e;margin-bottom:4px;">Also available at:</div>';
+                alternatives.forEach(function(alt) {
+                    suggestionHtml += '<div style="display:flex;justify-content:space-between;align-items:center;padding:2px 0;">'
+                        + '<a href="/consumer/pharmacy/' + alt.id + '" style="font-size:10px;color:#191970;font-weight:600;text-decoration:none;">' + alt.name + '</a>'
+                        + '<span style="font-size:9px;color:#9400D3;font-weight:700;">P' + alt.price + ' | ' + alt.dist.toFixed(1) + 'km</span>'
+                        + '</div>';
+                });
+                suggestionHtml += '</div>';
+            }
+        }
+    }
+
     const escapedId = parseInt(pharmacy.id);
 
     return `
@@ -137,6 +166,7 @@ function createPopupContent(pharmacy) {
                 <div style="font-size:11px;font-weight:800;color:#191970;margin-bottom:6px;">&#x1F48A; Top Medicines</div>
                 <div style="line-height:1.6;">${topMedsHtml}</div>
             </div>
+            ${suggestionHtml}
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
                 <a href="${detailsUrl}" style="flex:1;min-width:80px;background:#9400D3;color:#ffffff;border:none;padding:9px 4px;border-radius:9999px;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;text-decoration:none;box-shadow:0 2px 4px rgba(148,0,211,0.2);">&#x1F48A; View Products</a>
                 <button onclick="window.openContactPharmacy(${escapedId})" style="flex:1;min-width:80px;background:#191970;color:#D9F855;border:none;padding:9px 4px;border-radius:9999px;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;outline:none;pointer-events:auto;">&#x1F4AC; Message</button>
