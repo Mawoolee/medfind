@@ -77,6 +77,9 @@ Route::middleware(['auth', 'role:consumer'])->prefix('consumer')->name('consumer
     Route::get('/messages', [MessageController::class, 'consumerConversations'])->name('messages');
     Route::delete('/messages/{pharmacyId}', [MessageController::class, 'deleteConversation'])->name('messages.delete');
     Route::get('/messages/data', [MessageController::class, 'consumerMessagesJson'])->name('messages.json');
+    Route::get('/messages/{pharmacyId}', [MessageController::class, 'consumerChat'])->name('messages.chat');
+    Route::get('/prescription/{message}', [MessageController::class, 'consumerPrescription'])->name('prescription.view');
+    Route::get('/attachment/{message}/{index}', [MessageController::class, 'consumerAttachment'])->name('attachment.view');
     Route::get('/profile', function() { return view('consumer.profile'); })->name('profile.settings');
 });
 
@@ -108,14 +111,17 @@ Route::middleware(['auth', 'role:pharmacy,pharmacy_operator', 'pharmacy.pending'
     Route::get('/messages', [PharmacyDashboardController::class, 'messages'])->name('messages');
     Route::post('/message/reply/{id}', [PharmacyDashboardController::class, 'replyMessage'])->name('message.reply');
     Route::get('/message/mark-read/{id}', [PharmacyDashboardController::class, 'markRead'])->name('message.mark-read');
+    Route::delete('/message/conversation/{consumerId}', [MessageController::class, 'pharmacyDeleteConversation'])->name('message.delete');
 
     // AJAX endpoints for pharmacy messaging (return JSON) - used by frontend polling and mark-as-read buttons
     Route::get('/unread-count', [MessageController::class, 'unreadCount'])->name('unread.count');
+    Route::get('/messages-data', [MessageController::class, 'pharmacyMessagesJson'])->name('messages.data');
     Route::post('/message/mark-read-ajax/{id}', [MessageController::class, 'markReadAjax'])->name('message.mark-read-ajax');
     Route::post('/message/mark-unread-ajax/{id}', [MessageController::class, 'markUnreadAjax'])->name('message.mark-unread-ajax');
     Route::post('/message/verify-ajax/{id}', [MessageController::class, 'verifyAjax'])->name('message.verify-ajax');
     // Secure prescription image viewer (decrypts on-the-fly, never serves raw public URL)
     Route::get('/prescription/{message}', [MessageController::class, 'servePrescription'])->name('prescription.serve');
+    Route::get('/attachment/{message}/{index}', [MessageController::class, 'pharmacyAttachment'])->name('attachment.view');
 
     // Inventory Analysis (ABC/VED)
     Route::get('/analysis', [\App\Http\Controllers\AnalysisController::class, 'index'])->name('analysis');

@@ -1,274 +1,435 @@
-﻿{{-- resources/views/pharmacy/messages.blade.php --}}
-
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('title', 'Pharmacy Messages')
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
-    <div class="flex items-center justify-between mb-6">
-        <div class="flex items-center">
-            <h1 class="text-2xl font-bold text-gray-800">💬 Customer Messages</h1>
-            @php $unreadCount = \App\Models\Message::where('pharmacy_id', $pharmacy->id)->where('is_read', false)->count(); @endphp
-            <span id="pharmacyUnreadCountBadge" class="ml-4 text-sm bg-red-600 text-white px-2 py-1 rounded-full">{{ $unreadCount }}</span>
+<div class="flex" style="height:calc(100vh - 120px);margin-top:10px;margin-bottom:20px;max-width:1280px;margin-left:auto;margin-right:auto;border-radius:16px;overflow:hidden;">
+
+    {{-- LEFT PANEL --}}
+    <div class="w-96 flex-shrink-0 border-r flex flex-col" style="background:#191970;border-color:rgba(148,0,211,0.3);">
+        <div class="px-5 py-4 border-b flex items-center justify-between" style="border-color:rgba(148,0,211,0.3);">
+            <h2 class="text-white font-bold text-lg">Messages</h2>
+            <a href="{{ route('pharmacy.dashboard') }}" class="text-gray-400 hover:text-[#D9F855] text-sm transition">
+                <i class="fas fa-arrow-left mr-1"></i> Back
+            </a>
         </div>
-        <a href="{{ route('pharmacy.dashboard') }}" class="text-blue-600 hover:text-blue-800">
-            <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
-        </a>
-    </div>
-
-@if(session('success'))
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    {{-- Status filter tabs --}}
-    @php $currentStatus = $status ?? 'all'; @endphp
-    <div class="flex flex-wrap gap-2 mb-6">
-        <a href="{{ route('pharmacy.messages', ['status' => 'all']) }}"
-           class="px-4 py-2 rounded-lg text-sm font-medium transition duration-200 {{ $currentStatus === 'all' ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
-            All
-        </a>
-        <a href="{{ route('pharmacy.messages', ['status' => 'unread']) }}"
-           class="px-4 py-2 rounded-lg text-sm font-medium transition duration-200 {{ $currentStatus === 'unread' ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
-            Unread
-        </a>
-        <a href="{{ route('pharmacy.messages', ['status' => 'read']) }}"
-           class="px-4 py-2 rounded-lg text-sm font-medium transition duration-200 {{ $currentStatus === 'read' ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
-            Read
-        </a>
-        @if($currentStatus === 'unread' || $currentStatus === 'read')
-            <span class="ml-auto text-sm text-gray-500 self-center">
-                Showing {{ $currentStatus }} messages ({{ $messages->count() }})
-            </span>
-        @endif
-    </div>
-
-    @if(isset($messages) && $messages->count() > 0)
-        <div class="space-y-4">
-            @foreach($messages as $message)
-                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200">
-                    <div class="flex items-start justify-between">
-                        <div class="flex-1">
-                            <div class="flex items-center mb-2">
-                                <h3 class="font-semibold text-gray-800">
-                                    <i class="fas fa-user mr-2 text-gray-400"></i>
-                                    From: {{ $message->consumer->name ?? 'Customer' }}
-                                </h3>
-                                @if(!$message->is_read)
-                                                                    <span class="ml-3 text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full message-new">New</span>
-                                @endif
-                                <span class="ml-3 text-xs text-gray-400">{{ $message->created_at->format('M d, Y g:i A') }}</span>
-                            </div>
-                            
-                            <div class="bg-gray-50 p-4 rounded-lg mb-3">
-                                <p class="text-gray-700">{{ $message->message }}</p>
-                            </div>
-                            
-                            @if($message->prescription_image)
-                                @php $rxUrl = route('pharmacy.prescription.serve', $message->id); @endphp
-                                <div class="mt-3 flex flex-wrap items-center gap-3">
-                                    <button type="button"
-                                        onclick="openRxModal('{{ $rxUrl }}')"
-                                        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold border border-[#9400D3]/30 text-[#9400D3] hover:bg-[#9400D3] hover:text-white transition">
-                                        <i class="fas fa-file-prescription"></i> View Prescription
-                                    </button>
-                                    @if(!$message->verification_status)
-                                        <button type="button"
-                                            class="js-verify-button bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition"
-                                            data-id="{{ $message->id }}">
-                                            <i class="fas fa-check-circle mr-1"></i>Verify
-                                        </button>
-                                    @else
-                                        <div class="text-sm flex flex-col gap-0.5">
-                                            <span class="px-2 py-1 rounded-full text-white text-xs font-semibold {{ $message->verification_status === 'approved' ? 'bg-green-600' : 'bg-red-600' }}">
-                                                {{ ucfirst($message->verification_status) }}
-                                            </span>
-                                            <span class="text-xs text-gray-400">By: {{ $message->verifier->name ?? '-' }} at {{ optional($message->verified_at)->format('M d, Y g:i A') }}</span>
-                                            @if($message->verification_notes)
-                                                <span class="text-xs text-gray-600">Notes: {{ $message->verification_notes }}</span>
-                                            @endif
-                                        </div>
-                                    @endif
-                                </div>
-                            @endif
-                            @if($message->reply)
-                                <div class="mt-3 bg-purple-50 p-4 rounded-lg border-l-4 border-purple-500">
-                                    <p class="text-sm text-gray-500 mb-1">Your Reply:</p>
-                                    <p class="text-gray-700">{{ $message->reply }}</p>
-                                    <p class="text-xs text-gray-400 mt-1">{{ $message->replied_at->format("M d, Y g:i A") }}</p>
-                                </div>
-                            @else
-                                <div class="mt-4">
-                                    <form action="{{ route('pharmacy.message.reply', $message->id) }}" method="POST" class="flex flex-col gap-3">
-                                        @csrf
-                                        <textarea name="reply" rows="3" 
-                                                  placeholder="Type your reply here..." 
-                                                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" 
-                                                  required></textarea>
-                                        <div class="flex gap-2">
-                                            <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition duration-200">
-                                                <i class="fas fa-reply mr-2"></i>Send Reply
-                                            </button>
-                                            <button type="button" data-id="{{ $message->id }}" class="js-mark-read bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg transition duration-200">
-                                                <i class="fas fa-check mr-2"></i>Mark as Read
-                                            </button>
-                                        </div>
-                                    </form>
-                                </div>
-                            @endif
+        <div class="flex-1 overflow-y-auto">
+            @php $grouped = $messages->groupBy('consumer_id'); @endphp
+            @forelse($grouped as $consumerId => $thread)
+                @php
+                    $consumer = $thread->first()->consumer;
+                    $lastMsg = $thread->sortByDesc('created_at')->first();
+                    $unread = $thread->where('is_read', false)->count();
+                    $lastText = $lastMsg->reply ? 'You: ' . Str::limit($lastMsg->reply, 25) : Str::limit($lastMsg->message, 30);
+                @endphp
+                <div class="conversation-item relative group" x-data="{ menuOpen: false }" data-consumer-id="{{ $consumerId }}">
+                    <div class="flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-white/5 transition border-b border-white/5" onclick="openConversation({{ $consumerId }})">
+                        <div class="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-[#D9F855]" style="background:#2a2a5a;">
+                            <span class="text-[#D9F855] font-bold text-sm">{{ strtoupper(substr($consumer->name ?? 'C', 0, 1)) }}</span>
                         </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between">
+                                <p class="text-white font-semibold text-sm truncate">{{ $consumer->name ?? 'Customer' }}</p>
+                                <span class="text-gray-400 text-xs flex-shrink-0">{{ $lastMsg->created_at->format('M d') }}</span>
+                            </div>
+                            <p class="text-gray-400 text-xs truncate mt-0.5">{{ $lastText }}</p>
+                        </div>
+                        @if($unread > 0)
+                            <span class="bg-[#9400D3] text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0">{{ $unread }}</span>
+                        @endif
+                    </div>
+                    <button @click.stop="menuOpen = !menuOpen" class="absolute top-3 right-3 text-gray-500 hover:text-white opacity-0 group-hover:opacity-100 transition p-1">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <div x-show="menuOpen" @click.away="menuOpen = false" x-cloak class="absolute top-10 right-3 bg-white rounded-lg shadow-lg py-1 z-50 w-44">
+                        <form method="POST" action="{{ route('pharmacy.message.delete', $consumerId) }}" onsubmit="return confirm('Delete this conversation?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition">
+                                <i class="fas fa-trash-alt mr-2"></i>Delete conversation
+                            </button>
+                        </form>
                     </div>
                 </div>
-            @endforeach
-        </div>
-    @else
-        <div class="bg-gray-50 rounded-lg p-12 text-center">
-            <i class="fas fa-inbox text-gray-400 text-6xl mb-4"></i>
-            <h3 class="text-xl font-semibold text-gray-600 mb-2">No Messages Yet</h3>
-            <p class="text-gray-500">Customer messages will appear here when consumers contact you.</p>
-        </div>
-    @endif
-</div>
-
-<!-- Verification Modal -->
-<div id="verifyModal" class="fixed inset-0 z-50 flex items-center justify-center" style="display:none;">
-    <div id="verifyModalBackdrop" class="absolute inset-0 bg-black opacity-50"></div>
-    <div class="relative bg-white rounded-lg shadow-lg w-11/12 max-w-md p-6 z-10">
-        <h2 class="text-lg font-semibold mb-4">Verify Prescription</h2>
-        <div class="mb-3">
-            <label class="block text-sm font-medium text-gray-700">Decision</label>
-            <div class="mt-2 flex gap-4">
-                <label class="inline-flex items-center">
-                    <input type="radio" name="verify_status" value="approved" checked class="form-radio text-green-600">
-                    <span class="ml-2 text-sm">Approve</span>
-                </label>
-                <label class="inline-flex items-center">
-                    <input type="radio" name="verify_status" value="rejected" class="form-radio text-red-600">
-                    <span class="ml-2 text-sm">Reject</span>
-                </label>
-            </div>
-        </div>
-        <div class="mb-4">
-            <label for="verifyNotes" class="block text-sm font-medium text-gray-700">Notes (optional)</label>
-            <textarea id="verifyNotes" rows="4" class="w-full mt-2 px-3 py-2 border border-gray-300 rounded-md"></textarea>
-        </div>
-        <div class="flex justify-end gap-2">
-            <button id="cancelVerifyBtn" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">Cancel</button>
-            <button id="confirmVerifyBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Confirm</button>
+            @empty
+                <div class="px-5 py-12 text-center">
+                    <i class="fas fa-inbox text-gray-500 text-3xl mb-3 block"></i>
+                    <p class="text-gray-400 text-sm">No messages yet</p>
+                </div>
+            @endforelse
         </div>
     </div>
-</div>
 
-
-{{-- Prescription Preview Modal --}}
-<div id="rxPreviewModal"
-     class="fixed inset-0 z-[99999] hidden items-center justify-center"
-     style="background:rgba(0,0,0,0.75);"
-     onclick="if(event.target===this)closeRxModal()">
-    <div class="bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
-         style="width:90vw;max-width:860px;height:88vh;">
-        <div class="flex items-center justify-between px-5 py-3 border-b" style="background:#191970;">
-            <span class="text-sm font-bold text-white flex items-center gap-2">
-                <i class="fas fa-file-prescription text-[#D9F855]"></i> Prescription
-            </span>
-            <button onclick="closeRxModal()"
-                class="w-7 h-7 rounded-full flex items-center justify-center text-white hover:bg-white/20 text-sm">
-                <i class="fas fa-times"></i>
-            </button>
+    {{-- RIGHT PANEL --}}
+    <div class="flex-1 flex flex-col" style="background:#1a1a2e;">
+        <div id="chatEmpty" class="flex-1 flex items-center justify-center">
+            <div class="text-center">
+                <i class="fas fa-comments text-gray-600 text-4xl mb-3 block"></i>
+                <p class="text-gray-500 text-sm">Select a conversation to start</p>
+            </div>
         </div>
-        <div class="flex-1 overflow-auto relative flex items-center justify-center p-4" style="background:#f0f0ff;">
-            <img id="rxPreviewImg" src="" alt="Prescription" class="max-w-full max-h-full object-contain rounded-lg shadow" style="display:none;">
-            <iframe id="rxPreviewFrame" src="" class="w-full h-full border-0 rounded-lg" style="display:none;"></iframe>
-            <div id="rxSpinner" class="absolute inset-0 flex items-center justify-center">
-                <div class="flex flex-col items-center gap-3">
-                    <div class="w-10 h-10 border-4 border-[#9400D3] border-t-transparent rounded-full animate-spin"></div>
-                    <p class="text-sm font-semibold text-[#191970]">Loading prescription...</p>
+
+        @foreach($grouped as $consumerId => $thread)
+            @php
+                $consumer = $thread->first()->consumer;
+                $lastUnreplied = $thread->whereNull('reply')->sortByDesc('created_at')->first();
+            @endphp
+            <div class="chat-view hidden flex-col h-full" id="chat-{{ $consumerId }}">
+                <div class="flex items-center gap-3 px-6 py-3 border-b flex-shrink-0" style="background:#191970;border-color:rgba(148,0,211,0.3);">
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center border-2 border-[#D9F855]" style="background:#2a2a5a;">
+                        <span class="text-[#D9F855] font-bold text-xs">{{ strtoupper(substr($consumer->name ?? 'C', 0, 1)) }}</span>
+                    </div>
+                    <div>
+                        <h3 class="text-white font-bold text-sm">{{ $consumer->name ?? 'Customer' }}</h3>
+                        <p class="text-gray-400 text-xs">{{ $consumer->email ?? '' }}</p>
+                    </div>
+                </div>
+                <div class="flex-1 overflow-y-auto px-6 py-4 space-y-3 chat-messages">
+                    @php
+                        // Build flat timeline
+                        $timeline = collect();
+                        foreach($thread->sortBy('created_at') as $msg) {
+                            $timeline->push((object)[
+                                'type' => 'consumer',
+                                'text' => $msg->message,
+                                'time' => $msg->created_at,
+                                'id' => $msg->id,
+                                'has_prescription' => !empty($msg->prescription_image),
+                                'has_attachments' => !empty($msg->attachments) && count($msg->attachments) > 0,
+                                'attachment_count' => !empty($msg->attachments) ? count($msg->attachments) : 0,
+                            ]);
+                            if ($msg->reply) {
+                                $timeline->push((object)[
+                                    'type' => 'pharmacy',
+                                    'text' => $msg->reply,
+                                    'time' => $msg->replied_at ?? $msg->created_at,
+                                    'id' => $msg->id,
+                                    'has_prescription' => false,
+                                    'has_attachments' => false,
+                                    'attachment_count' => 0,
+                                ]);
+                            }
+                        }
+                        $timeline = $timeline->sortBy('time');
+                    @endphp
+
+                    @foreach($timeline as $item)
+                        @if($item->type === 'consumer')
+                            {{-- Consumer message (LEFT) --}}
+                            <div class="flex justify-start">
+                                <div class="max-w-[70%]">
+                                    <div class="px-4 py-2.5 rounded-2xl rounded-bl-sm" style="background:#2a2a5a;">
+                                        <p class="text-gray-200 text-sm">{{ $item->text }}</p>
+                                    </div>
+                                    @if($item->has_prescription)
+                                        <div class="mt-2">
+                                            <img src="{{ route('pharmacy.prescription.serve', $item->id) }}" alt="Prescription" class="max-w-[180px] rounded-xl border border-white/20 cursor-pointer hover:opacity-90" onclick="window.open(this.src, '_blank')">
+                                        </div>
+                                    @endif
+                                    @if($item->has_attachments)
+                                        <div class="mt-2 flex flex-wrap gap-1">
+                                            @for($i = 0; $i < $item->attachment_count; $i++)
+                                                <img src="{{ route('pharmacy.attachment.view', [$item->id, $i]) }}"
+                                                     class="w-16 h-16 rounded-lg object-cover border border-white/20 cursor-pointer hover:opacity-80"
+                                                     onclick="window.open(this.src, '_blank')">
+                                            @endfor
+                                        </div>
+                                    @endif
+                                    <p class="text-gray-500 text-xs mt-1">{{ $consumer->name ?? 'Customer' }} · {{ $item->time->format('M d · g:i A') }}</p>
+                                </div>
+                            </div>
+                        @else
+                            {{-- Pharmacy reply (RIGHT) --}}
+                            <div class="flex justify-end">
+                                <div class="max-w-[70%]">
+                                    <div class="px-4 py-2.5 rounded-2xl rounded-br-sm" style="background:#9400D3;">
+                                        <p class="text-white text-sm">{{ $item->text }}</p>
+                                    </div>
+                                    <p class="text-gray-500 text-xs mt-1 text-right">You · {{ $item->time->format('M d · g:i A') }}</p>
+                                </div>
+                            </div>
+                        @endif
+                    @endforeach
+                </div>
+                <div class="px-6 py-3 border-t flex-shrink-0" style="background:#191970;border-color:rgba(148,0,211,0.3);">
+                    @if($lastUnreplied)
+                        <form method="POST" action="{{ route('pharmacy.message.reply', $lastUnreplied->id) }}" class="flex items-center gap-3" enctype="multipart/form-data" onsubmit="return sendReply(this, {{ $consumerId }})">
+                            @csrf
+                            <label for="phRx_{{ $consumerId }}" class="cursor-pointer text-gray-400 hover:text-[#D9F855] transition flex-shrink-0">
+                                <i class="fas fa-paperclip text-lg"></i>
+                            </label>
+                            <input type="file" name="attachments[]" id="phRx_{{ $consumerId }}" accept=".jpg,.jpeg,.png,.gif,.webp,.pdf" class="hidden" multiple>
+                            <input type="text" name="reply" placeholder="Reply..." required class="flex-1 px-5 py-3 rounded-full text-sm text-white outline-none placeholder-gray-400" style="background:#2a2a5a;border:1px solid rgba(148,0,211,0.3);">
+                            <button type="submit" class="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 transition hover:opacity-80" style="background:#9400D3;">
+                                <i class="fas fa-paper-plane text-white text-sm"></i>
+                            </button>
+                        </form>
+                    @else
+                        <p class="text-gray-400 text-sm text-center py-2">All messages replied</p>
+                    @endif
                 </div>
             </div>
-        </div>
+        @endforeach
     </div>
 </div>
 
 <script>
-function openRxModal(url) {
-    var modal = document.getElementById('rxPreviewModal');
-    var img = document.getElementById('rxPreviewImg');
-    var frame = document.getElementById('rxPreviewFrame');
-    var spinner = document.getElementById('rxSpinner');
+var activeConsumerId = null;
 
-    img.style.display = 'none';
-    img.src = '';
-    frame.style.display = 'none';
-    frame.src = '';
-    spinner.style.display = 'flex';
-    modal.style.display = 'flex';
-    modal.classList.remove('hidden');
-
-    // Try loading as image first
-    img.onload = function() {
-        spinner.style.display = 'none';
-        img.style.display = 'block';
-    };
-    img.onerror = function() {
-        // Not an image or failed — try iframe (for PDF)
-        img.style.display = 'none';
-        frame.src = url;
-        frame.style.display = 'block';
-        frame.onload = function() { spinner.style.display = 'none'; };
-    };
-    img.src = url;
+function openConversation(consumerId) {
+    activeConsumerId = consumerId;
+    document.getElementById('chatEmpty').style.display = 'none';
+    document.querySelectorAll('.chat-view').forEach(function(el) {
+        el.classList.add('hidden');
+        el.classList.remove('flex');
+    });
+    var chat = document.getElementById('chat-' + consumerId);
+    if (chat) {
+        chat.classList.remove('hidden');
+        chat.classList.add('flex');
+        var msgs = chat.querySelector('.chat-messages');
+        if (msgs) msgs.scrollTop = msgs.scrollHeight;
+        var input = chat.querySelector('input[name="reply"]');
+        if (input) input.focus();
+    }
+    document.querySelectorAll('.conversation-item').forEach(function(el) {
+        el.classList.remove('active-conv');
+    });
+    var item = document.querySelector('[data-consumer-id="' + consumerId + '"]');
+    if (item) item.classList.add('active-conv');
 }
-function closeRxModal() {
-    var modal = document.getElementById('rxPreviewModal');
-    var img = document.getElementById('rxPreviewImg');
-    var frame = document.getElementById('rxPreviewFrame');
-    if (img.src && img.src.startsWith('blob:')) URL.revokeObjectURL(img.src);
-    img.src = '';
-    img.style.display = 'none';
-    frame.src = '';
-    frame.style.display = 'none';
-    modal.style.display = 'none';
-    modal.classList.add('hidden');
+
+function sendReply(form, consumerId) {
+    var input = form.querySelector('input[name="reply"]');
+    var msg = input.value.trim();
+    if (!msg) return false;
+
+    var fd = new FormData(form);
+    var msgsDiv = document.getElementById('chat-' + consumerId).querySelector('.chat-messages');
+    var bubble = document.createElement('div');
+    bubble.className = 'flex justify-end';
+    bubble.innerHTML = '<div class="max-w-[70%]"><div class="px-4 py-2.5 rounded-2xl rounded-br-sm" style="background:#9400D3;"><p class="text-white text-sm">' + msg + '</p></div><p class="text-gray-500 text-xs mt-1 text-right">You · just now</p></div>';
+    msgsDiv.appendChild(bubble);
+    msgsDiv.scrollTop = msgsDiv.scrollHeight;
+    input.value = '';
+
+    fetch(form.action, {
+        method: 'POST',
+        body: fd,
+        credentials: 'same-origin',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    }).then(function() {
+        var item = document.querySelector('[data-consumer-id="' + consumerId + '"]');
+        if (item) {
+            var preview = item.querySelector('p.text-gray-400.text-xs');
+            if (preview) preview.textContent = 'You: ' + msg.substring(0, 25);
+        }
+    });
+    return false;
 }
-document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeRxModal(); });
-</script>@endsection
 
-@push('scripts')
-<script>
-/**
- * Real-time: when a consumer sends a new message to THIS pharmacy,
- * bump the unread badge and show a toast — no page reload required.
- */
-document.addEventListener('DOMContentLoaded', function () {
-    if (!window.Echo) return;
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        var el = e.target;
+        if (el.tagName === 'INPUT' && el.name === 'reply' && el.closest('.chat-view')) {
+            e.preventDefault();
+            var form = el.closest('form');
+            sendReply(form, activeConsumerId);
+        }
+    }
+});
 
-    const pharmacyId = {{ $pharmacy->id }};
+// Auto-refresh chat every 3 seconds
+setInterval(function() {
+    if (!activeConsumerId) return;
+    fetch('/pharmacy/messages-data', { credentials: 'same-origin' })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            var conv = data.find(function(c) { return c.consumer_id == activeConsumerId; });
+            if (!conv) return;
+            var chat = document.getElementById('chat-' + activeConsumerId);
+            if (!chat) return;
+            var chatMsgs = chat.querySelector('.chat-messages');
+            if (!chatMsgs) return;
 
-    window.Echo.channel('pharmacy.' + pharmacyId)
-        .listen('.message.sent', function (e) {
-            if (!e || e.direction !== 'consumer_to_pharmacy') return;
+            // Build flat sorted timeline
+            var items = [];
+            conv.messages.forEach(function(m) {
+                items.push({ type: 'consumer', text: m.message, time: m.created_at, hasPrescription: m.has_prescription || false, id: m.id, attachmentCount: m.attachment_count || 0 });
+                if (m.reply) {
+                    items.push({ type: 'pharmacy', text: m.reply, time: m.replied_at || m.created_at });
+                }
+            });
+            items.sort(function(a, b) { return new Date(a.time) - new Date(b.time); });
 
-            // Bump unread badge
-            const badge = document.getElementById('pharmacyUnreadCountBadge');
-            if (badge) {
-                const current = parseInt(badge.textContent || '0', 10);
-                badge.textContent = current + 1;
-                badge.classList.remove('hidden');
+            var currentBubbles = chatMsgs.querySelectorAll('.flex.justify-start, .flex.justify-end').length;
+            if (items.length === currentBubbles) return;
+
+            var html = '';
+            items.forEach(function(item) {
+                var dt = new Date(item.time);
+                var timeStr = dt.toLocaleDateString('en-US', {month:'short',day:'numeric'}) + ' · ' + dt.toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit'});
+                if (item.type === 'consumer') {
+                    html += '<div class="flex justify-start"><div class="max-w-[70%]"><div class="px-4 py-2.5 rounded-2xl rounded-bl-sm" style="background:#2a2a5a;"><p class="text-gray-200 text-sm">' + item.text + '</p></div>';
+                    if (item.attachmentCount > 0) {
+                        html += '<div class="mt-1 flex flex-wrap gap-1">';
+                        for (var i = 0; i < item.attachmentCount; i++) {
+                            html += '<img src="/pharmacy/attachment/' + item.id + '/' + i + '" class="w-16 h-16 rounded-lg object-cover border border-white/20 cursor-pointer" onclick="window.open(this.src, \'_blank\')">';
+                        }
+                        html += '</div>';
+                    }
+                    html += '<p class="text-gray-500 text-xs mt-1">' + conv.consumer_name + ' · ' + timeStr + '</p></div></div>';
+                } else {
+                    html += '<div class="flex justify-end"><div class="max-w-[70%]"><div class="px-4 py-2.5 rounded-2xl rounded-br-sm" style="background:#9400D3;"><p class="text-white text-sm">' + item.text + '</p></div><p class="text-gray-500 text-xs mt-1 text-right">You · ' + timeStr + '</p></div></div>';
+                }
+            });
+            chatMsgs.innerHTML = html;
+            chatMsgs.scrollTop = chatMsgs.scrollHeight;
+        }).catch(function() {});
+}, 3000);
+
+// Real-time: listen for consumer messages via WebSocket
+if (window.Echo) {
+    window.Echo.channel('pharmacy.{{ $pharmacy->id }}')
+        .listen('.message.sent', function(e) {
+            if (e.direction !== 'consumer_to_pharmacy') return;
+            // If this conversation is open, add the message bubble
+            if (activeConsumerId && e.consumerId == activeConsumerId) {
+                var msgsDiv = document.getElementById('chat-' + activeConsumerId);
+                if (!msgsDiv) return;
+                var chatMsgs = msgsDiv.querySelector('.chat-messages');
+                if (!chatMsgs) return;
+                var bubble = document.createElement('div');
+                bubble.className = 'flex justify-start';
+                bubble.innerHTML = '<div class="max-w-[70%]"><div class="px-4 py-2.5 rounded-2xl rounded-bl-sm" style="background:#2a2a5a;"><p class="text-gray-200 text-sm">' + e.message + '</p></div><p class="text-gray-500 text-xs mt-1">' + (e.consumerName || 'Customer') + ' · just now</p></div>';
+                chatMsgs.appendChild(bubble);
+                chatMsgs.scrollTop = chatMsgs.scrollHeight;
             }
-
-            // Show a toast notification
-            const toast = document.createElement('div');
-            toast.className = 'fixed top-20 right-4 z-[99999] bg-[#191970] text-white text-sm px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 animate-pulse';
-            toast.innerHTML = '<i class="fas fa-envelope"></i> New message from ' + (e.consumerName || 'a customer') + ' <a href="" class="underline font-bold ml-1">Refresh</a>';
-            document.body.appendChild(toast);
-            setTimeout(function () { toast.remove(); }, 6000);
-
-            console.info('[MedFind] Real-time: new message from consumer', e.consumerId);
+            // Update unread badge on left panel
+            var item = document.querySelector('[data-consumer-id="' + e.consumerId + '"]');
+            if (item) {
+                var badge = item.querySelector('.bg-\\[\\#9400D3\\]');
+                if (badge) {
+                    badge.textContent = parseInt(badge.textContent || '0') + 1;
+                } else {
+                    var row = item.querySelector('.flex.items-center.gap-3');
+                    if (row) {
+                        var newBadge = document.createElement('span');
+                        newBadge.className = 'bg-[#9400D3] text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0';
+                        newBadge.textContent = '1';
+                        row.appendChild(newBadge);
+                    }
+                }
+            }
         });
+    console.info('[MedFind] Real-time listening on pharmacy.{{ $pharmacy->id }}');
+}
 
-    console.info('[MedFind] Listening on pharmacy.' + pharmacyId + ' channel');
+// File preview popup for pharmacy
+var pendingFiles = [];
+var pendingConsumerId = null;
+
+function showFilePreview(files, consumerId) {
+    pendingFiles = Array.from(files);
+    pendingConsumerId = consumerId;
+    var popup = document.getElementById('filePreviewPopup');
+    var list = document.getElementById('filePreviewList');
+    document.getElementById('filePreviewTitle').textContent = 'Send ' + pendingFiles.length + ' file' + (pendingFiles.length > 1 ? 's' : '');
+    list.innerHTML = '';
+    pendingFiles.forEach(function(file, idx) {
+        var size = file.size < 1024*1024 ? (file.size/1024).toFixed(1) + ' KB' : (file.size/1024/1024).toFixed(1) + ' MB';
+        var row = document.createElement('div');
+        row.className = 'flex items-center gap-3 py-2 border-b border-white/5';
+        row.innerHTML = '<div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style="background:#9400D3;"><i class="fas fa-file text-white text-sm"></i></div><div class="flex-1 min-w-0"><p class="text-white text-xs font-medium truncate">' + file.name + '</p><p class="text-gray-400 text-xs">' + size + '</p></div><button onclick="removeFileFromPreview(' + idx + ')" class="text-gray-500 hover:text-red-400 transition"><i class="fas fa-times"></i></button>';
+        list.appendChild(row);
+    });
+    popup.style.display = 'flex';
+    popup.classList.remove('hidden');
+    document.getElementById('fileCaption').focus();
+}
+
+function addMoreFilesToPreview(input) {
+    if (input.files) {
+        for (var i = 0; i < input.files.length; i++) {
+            if (pendingFiles.length < 10) pendingFiles.push(input.files[i]);
+        }
+        showFilePreview(pendingFiles, pendingConsumerId);
+    }
+    input.value = '';
+}
+
+function removeFileFromPreview(idx) {
+    pendingFiles.splice(idx, 1);
+    if (pendingFiles.length === 0) { closeFilePreview(); return; }
+    showFilePreview(pendingFiles, pendingConsumerId);
+}
+
+function closeFilePreview() {
+    document.getElementById('filePreviewPopup').style.display = 'none';
+    document.getElementById('filePreviewPopup').classList.add('hidden');
+    pendingFiles = [];
+    pendingConsumerId = null;
+}
+
+function sendWithFiles() {
+    if (!pendingConsumerId || pendingFiles.length === 0) return;
+    var caption = document.getElementById('fileCaption').value.trim() || 'Sent ' + pendingFiles.length + ' file(s)';
+    var form = document.querySelector('#chat-' + pendingConsumerId + ' form');
+    if (!form) return;
+
+    var fd = new FormData(form);
+    fd.set('reply', caption);
+    pendingFiles.forEach(function(file) { fd.append('attachments[]', file); });
+
+    var msgsDiv = document.getElementById('chat-' + pendingConsumerId).querySelector('.chat-messages');
+    var bubble = document.createElement('div');
+    bubble.className = 'flex justify-end';
+    bubble.innerHTML = '<div class="max-w-[70%]"><div class="px-4 py-2.5 rounded-2xl rounded-br-sm" style="background:#9400D3;"><p class="text-white text-sm">' + caption + '</p></div><div class="mt-1 text-xs text-gray-300 text-right">' + pendingFiles.length + ' file(s) attached</div><p class="text-gray-500 text-xs mt-1 text-right">You - just now</p></div>';
+    msgsDiv.appendChild(bubble);
+    msgsDiv.scrollTop = msgsDiv.scrollHeight;
+
+    fetch(form.action, { method: 'POST', body: fd, credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+    closeFilePreview();
+    var msgInput = form.querySelector('input[name="reply"]');
+    if (msgInput) msgInput.value = '';
+}
+
+// Show popup when files are selected via paperclip
+document.addEventListener('change', function(e) {
+    if (e.target.name === 'attachments[]' && e.target.files && e.target.files.length > 0) {
+        var consumerId = activeConsumerId;
+        if (consumerId) showFilePreview(e.target.files, consumerId);
+        e.target.value = '';
+    }
 });
 </script>
-@endpush
+
+<style>
+.active-conv > div:first-child { background: rgba(148, 0, 211, 0.15) !important; }
+[x-cloak] { display: none !important; }
+</style>
+
+{{-- File Preview Popup --}}
+<div id="filePreviewPopup" class="fixed inset-0 z-[99999] hidden items-end justify-center pb-20" style="background:rgba(0,0,0,0.5);" onclick="if(event.target===this)closeFilePreview()">
+    <div class="bg-[#191970] rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-[#9400D3]/30">
+        <div class="flex items-center justify-between px-5 py-3 border-b border-white/10">
+            <span id="filePreviewTitle" class="text-white font-bold text-sm">Send files</span>
+            <div class="flex items-center gap-2">
+                <label for="addMoreFiles" class="cursor-pointer text-gray-400 hover:text-[#D9F855] transition"><i class="fas fa-plus"></i></label>
+                <input type="file" id="addMoreFiles" accept=".jpg,.jpeg,.png,.gif,.webp,.pdf" multiple class="hidden" onchange="addMoreFilesToPreview(this)">
+                <button onclick="closeFilePreview()" class="text-gray-400 hover:text-white transition"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+        <div id="filePreviewList" class="max-h-64 overflow-y-auto px-5 py-3 space-y-2"></div>
+        <div class="px-5 py-3 border-t border-white/10 flex items-center gap-3">
+            <input type="text" id="fileCaption" placeholder="Add a caption..."
+                   class="flex-1 px-4 py-2 rounded-full text-sm text-white outline-none placeholder-gray-400"
+                   style="background:#2a2a5a;border:1px solid rgba(148,0,211,0.3);"
+                   onkeydown="if(event.key==='Enter'){event.preventDefault();sendWithFiles();}">
+            <button onclick="sendWithFiles()" class="w-10 h-10 rounded-full flex items-center justify-center transition hover:opacity-80" style="background:#9400D3;">
+                <i class="fas fa-paper-plane text-white text-sm"></i>
+            </button>
+        </div>
+    </div>
+</div>
+@endsection

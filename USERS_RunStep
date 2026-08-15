@@ -35,3 +35,17 @@ Checklist before opening the browser:
     .env has correct DB_PASSWORD set to root123
     Terminals 1, 2, and 3 are all running
     Open http://127.0.0.1:8000
+
+
+
+Login credentials:
+
+Role	        Email	                Password
+Admin	    admin@medfind.com	        password
+Pharmacy	rose@demo.com	            password
+Pharmacy	generika@demo.com	        password
+Pharmacy	legazpicity@demo.com	    password
+Pharmacy	bicolultra@demo.com	        password
+Pharmacy	gracies@demo.com	        password
+Consumer	consumer1@demo.com	        password
+Consumer	consumer2@demo.com	        password

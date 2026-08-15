@@ -16,6 +16,7 @@ class Message extends Model
         'pharmacy_id',
         'message',
         'prescription_image',
+        'attachments',
         'reply',
         'replied_at',
         'is_read',
@@ -30,6 +31,7 @@ class Message extends Model
         'is_read' => 'boolean',
         'replied_at' => 'datetime',
         'verified_at' => 'datetime',
+        'attachments' => 'array',
     ];
 
     public function consumer(): BelongsTo

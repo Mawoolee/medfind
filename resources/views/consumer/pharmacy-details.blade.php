@@ -1,36 +1,50 @@
 ﻿@extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen bg-[#f0f0ff] py-6 px-4 flex justify-center items-start overflow-y-auto font-sans">
-    <div class="w-full max-w-lg bg-white rounded-[24px] p-5 shadow-xl border border-[#9400D3]/10 relative">
+<div class="min-h-screen bg-[#f0f0ff] py-6 px-4 font-sans">
+    <div class="w-full max-w-7xl mx-auto px-6">
 
         <!-- Back Button -->
-        <a href="{{ route('consumer.dashboard') }}" class="inline-flex items-center text-[#9400D3] hover:text-[#191970] text-xs font-semibold mb-3 transition">
-            <i class="fas fa-arrow-left mr-1.5"></i> Back to Map
-        </a>
+        <div class="flex items-center gap-2 mb-4">
+                <a href="{{ route('consumer.dashboard') }}" class="inline-flex items-center text-[#9400D3] hover:text-[#191970] text-xs font-semibold transition">
+                    <i class="fas fa-arrow-left mr-1.5"></i> Back to Map
+                </a>
+                <div class="ml-auto flex items-center gap-2">
+                    @auth
+                    <a href="{{ route('consumer.messages.chat', $pharmacy->id) }}"
+                       class="inline-flex items-center gap-1.5 bg-[#191970] hover:bg-[#2a2a8a] text-[#D9F855] font-bold px-4 py-2 rounded-full text-xs transition">
+                        <i class="fas fa-comments"></i> Message
+                    </a>
+                    @endauth
+                    <a href="{{ route('consumer.dashboard') }}?dir=1&lat={{ $pharmacy->latitude }}&lng={{ $pharmacy->longitude }}"
+                       class="inline-flex items-center gap-1.5 bg-[#9400D3] hover:bg-[#7a00b0] text-white font-bold px-4 py-2 rounded-full text-xs transition">
+                        <i class="fas fa-directions"></i> Directions
+                    </a>
+                </div>
+            </div>
 
         @if(isset($pharmacy))
             <!-- Pharmacy Header -->
             <div class="mb-3">
                 <div class="flex items-center gap-2 mb-0.5">
-                    <span class="text-xl">🏪</span>
-                    <h1 class="text-base font-extrabold text-[#191970] leading-tight">{{ $pharmacy->pharmacy_name }}</h1>
+                    <span class="text-xl"></span>
+                    <h1 class="text-lg font-extrabold text-[#191970] leading-tight">{{ $pharmacy->pharmacy_name }}</h1>
                 </div>
                 <p class="text-xs text-gray-500 flex items-center gap-1 ml-0.5 mb-1">
-                    <span>📍</span> {{ $pharmacy->pharmacyAddress }}
+                    <span></span> {{ $pharmacy->pharmacyAddress }}
                 </p>
                 @if($pharmacy->contactNumber)
                     <p class="text-xs text-[#9400D3] flex items-center gap-1 ml-0.5 mb-2">
-                        <i class="fas fa-phone text-[10px]"></i> {{ $pharmacy->contactNumber }}
+                        <i class="fas fa-phone text-base"></i> {{ $pharmacy->contactNumber }}
                     </p>
                 @endif
                 @if($pharmacy->operating_hours)
                     <p class="text-xs text-gray-500 flex items-center gap-1 ml-0.5 mb-2">
-                        <i class="fas fa-clock text-[10px] text-[#9400D3]"></i> {{ $pharmacy->operating_hours }}
+                        <i class="fas fa-clock text-base text-[#9400D3]"></i> {{ $pharmacy->operating_hours }}
                     </p>
                 @endif
-                <div class="inline-flex items-center gap-1.5 bg-[#f8f4ff] text-[#191970] text-[11px] font-semibold px-3 py-1 rounded-full border border-[#9400D3]/10">
-                    <span>📏</span> Distance calculated from your location
+                <div class="inline-flex items-center gap-1.5 bg-[#f8f4ff] text-[#191970] text-sm font-semibold px-3 py-1 rounded-full border border-[#9400D3]/10">
+                    <span></span> Distance calculated from your location
                 </div>
             </div>
 
@@ -40,10 +54,10 @@
             <!-- Products / Medicine List -->
             <div class="bg-[#f8f4ff] rounded-2xl p-3.5 mb-4 border border-[#9400D3]/10">
                 <div class="flex items-center justify-between mb-2.5">
-                    <div class="flex items-center gap-1.5 text-[#191970] font-extrabold text-xs">
-                        <span class="text-sm">💊</span> All Products
+                    <div class="flex items-center gap-1.5 text-[#191970] font-extrabold text-sm">
+                        <span class="text-base"></span> All Products
                     </div>
-                    <span class="text-[10px] text-[#9400D3] font-semibold">Tap item for details</span>
+                    <span class="text-xs text-[#9400D3] font-semibold">Tap item for details</span>
                 </div>
 
                 @if($pharmacy->inventory && $pharmacy->inventory->count() > 0)
@@ -61,114 +75,41 @@
                                      {{ $item->stockQuantity }}
                                  )">
                                 <div>
-                                    <p class="font-bold text-[#191970] text-xs leading-snug">
+                                    <p class="font-bold text-[#191970] text-base leading-snug">
                                         {{ $item->medicine->medicine_name }}
                                         @if($item->medicine->dosage)
                                             <span class="font-normal text-gray-500">{{ $item->medicine->dosage }}</span>
                                         @endif
                                     </p>
                                     @if($item->medicine->manufacturer)
-                                        <p class="text-[10px] text-gray-400 mt-0.5">{{ $item->medicine->manufacturer }}</p>
+                                        <p class="text-xs text-gray-400 mt-0.5">{{ $item->medicine->manufacturer }}</p>
                                     @endif
                                     @if($item->medicine->requiresPrescription)
-                                        <p class="text-[10px] text-[#9400D3] font-semibold flex items-center gap-1 mt-0.5">
-                                            <span>🔞</span> Prescription Required
+                                        <p class="text-xs text-[#9400D3] font-semibold flex items-center gap-1 mt-0.5">
+                                            <span></span> Prescription Required
                                         </p>
                                     @endif
                                 </div>
                                 <div class="shrink-0 flex flex-col items-end gap-1">
-                                    <span class="bg-[#191970] text-[#D9F855] text-[11px] font-bold px-3 py-1 rounded-full inline-block shadow-sm">
+                                    <span class="bg-[#191970] text-[#D9F855] text-sm font-bold px-3 py-1 rounded-full inline-block shadow-sm">
                                         ₱{{ number_format($item->price, 0) }}
                                     </span>
-                                    <span class="text-[10px] text-gray-400">{{ $item->stockQuantity }} pcs</span>
+                                    <span class="text-xs text-gray-400">{{ $item->stockQuantity }} pcs</span>
                                 </div>
                             </div>
                         @endforeach
                     </div>
                 @else
-                    <p class="text-gray-400 text-xs text-center py-3 font-medium">No medicines currently available.</p>
+                    <p class="text-gray-400 text-sm text-center py-3 font-medium">No medicines currently available.</p>
                 @endif
             </div>
 
-            <!-- Contact for Inquiries -->
-            <div id="contact" class="bg-white rounded-2xl p-4 mb-4 border border-[#9400D3]/15 shadow-sm">
-                <div class="flex items-center gap-1.5 text-[#191970] font-extrabold text-xs mb-3">
-                    <span class="text-sm">💬</span> Message Pharmacy
-                </div>
-
-                @auth
-                    <form method="POST" action="{{ route('consumer.message.send') }}" enctype="multipart/form-data">
-                        @csrf
-                        <input type="hidden" name="pharmacy_id" value="{{ $pharmacy->id }}">
-
-                        {{-- Message textarea --}}
-                        <textarea name="message" rows="3"
-                            placeholder="Type your message or prescription inquiry..."
-                            class="w-full border border-[#9400D3]/20 rounded-xl px-3 py-2 text-xs text-[#191970] outline-none focus:border-[#9400D3] resize-none mb-3 bg-[#f8f4ff]"
-                            required></textarea>
-
-                        {{-- Prescription upload --}}
-                        <div class="mb-3">
-                            <label class="block text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
-                                📎 Attach Prescription <span class="font-normal text-gray-400">(optional — JPG, PNG, PDF · max 5MB)</span>
-                            </label>
-                            <div class="flex items-center gap-2 border border-dashed border-[#9400D3]/30 rounded-xl px-3 py-2 bg-[#f8f4ff]"
-                                 id="rxDropArea">
-                                <input type="file"
-                                    name="prescription_image"
-                                    id="prescriptionFile"
-                                    accept=".jpg,.jpeg,.png,.gif,.webp,.pdf"
-                                    class="hidden"
-                                    onchange="updatePrescriptionLabel(this)">
-                                <button type="button"
-                                    onclick="document.getElementById('prescriptionFile').click()"
-                                    class="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] font-bold text-white hover:opacity-90 transition"
-                                    style="background:#9400D3;">
-                                    <i class="fas fa-paperclip text-[9px]"></i> Choose File
-                                </button>
-                                <span id="rxFileName" class="text-[10px] text-gray-400 truncate flex-1">No file chosen</span>
-                                <button type="button" id="rxClearBtn"
-                                    onclick="clearPrescription()"
-                                    class="hidden text-gray-400 hover:text-red-500 transition text-sm leading-none flex-shrink-0">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                            {{-- Preview thumbnail --}}
-                            <div id="rxPreview" class="hidden mt-2">
-                                <img id="rxPreviewImg" src="" alt="Prescription preview"
-                                    class="w-full max-h-32 object-contain rounded-xl border border-[#9400D3]/15 bg-white">
-                            </div>
-                        </div>
-
-                        <button type="submit"
-                            class="w-full bg-[#191970] hover:bg-[#2a2a8a] text-[#D9F855] font-bold py-2.5 rounded-full text-xs transition active:scale-95 shadow-md">
-                            📨 Send Message
-                        </button>
-                    </form>
-
-                    @if(session('success'))
-                        <div class="mt-2 text-green-600 text-xs font-semibold text-center">
-                            ✅ {{ session('success') }}
-                        </div>
-                    @endif
-                @else
-                    <p class="text-xs text-gray-500 text-center mb-2">Please log in to send inquiries.</p>
-                    <a href="{{ route('login') }}" class="block w-full bg-[#191970] text-[#D9F855] font-bold py-2.5 rounded-full text-xs text-center">
-                        Log in to Contact
-                    </a>
-                @endauth
-            </div>
-
-            <!-- Directions Button -->
-            <a href="{{ route('consumer.dashboard') }}?dir=1&lat={{ $pharmacy->latitude }}&lng={{ $pharmacy->longitude }}"
-               class="block w-full bg-[#9400D3] hover:bg-[#7a00b0] text-white font-bold py-2.5 rounded-full text-xs text-center shadow-md transition active:scale-95">
-                🗺️ Get Directions on Map
-            </a>
+            
 
         @else
             <div class="text-center py-10">
                 <i class="fas fa-store text-3xl text-gray-300 block mb-2"></i>
-                <p class="text-gray-500 font-semibold text-xs">Pharmacy not found.</p>
+                <p class="text-gray-500 font-semibold text-base">Pharmacy not found.</p>
             </div>
         @endif
     </div>
@@ -181,36 +122,36 @@
         <button onclick="closeMedicineModal()"
             class="absolute top-4 right-4 text-gray-400 hover:text-[#9400D3] text-lg leading-none bg-transparent border-none cursor-pointer">✕</button>
         <div class="flex items-center gap-2 mb-4">
-            <span class="text-2xl">💊</span>
+            <span class="text-2xl"></span>
             <h2 id="modalMedName" class="text-base font-extrabold text-[#191970]"></h2>
         </div>
-        <div class="space-y-2 text-sm">
+        <div class="space-y-2 text-base">
             <div class="flex justify-between border-b border-[#9400D3]/10 pb-2">
-                <span class="text-gray-500 font-semibold text-xs">Brand / Name</span>
-                <span id="modalBrand" class="text-[#191970] font-bold text-xs text-right"></span>
+                <span class="text-gray-500 font-semibold text-base">Brand / Name</span>
+                <span id="modalBrand" class="text-[#191970] font-bold text-base text-right"></span>
             </div>
             <div class="flex justify-between border-b border-[#9400D3]/10 pb-2">
-                <span class="text-gray-500 font-semibold text-xs">Dosage</span>
-                <span id="modalDosage" class="text-[#191970] font-bold text-xs text-right"></span>
+                <span class="text-gray-500 font-semibold text-base">Dosage</span>
+                <span id="modalDosage" class="text-[#191970] font-bold text-base text-right"></span>
             </div>
             <div class="flex justify-between border-b border-[#9400D3]/10 pb-2">
-                <span class="text-gray-500 font-semibold text-xs">Manufacturer / Generic</span>
-                <span id="modalManufacturer" class="text-[#191970] font-bold text-xs text-right"></span>
+                <span class="text-gray-500 font-semibold text-base">Manufacturer / Generic</span>
+                <span id="modalManufacturer" class="text-[#191970] font-bold text-base text-right"></span>
             </div>
             <div class="flex justify-between border-b border-[#9400D3]/10 pb-2">
-                <span class="text-gray-500 font-semibold text-xs">Category</span>
-                <span id="modalCategory" class="text-[#191970] font-bold text-xs text-right"></span>
+                <span class="text-gray-500 font-semibold text-base">Category</span>
+                <span id="modalCategory" class="text-[#191970] font-bold text-base text-right"></span>
             </div>
             <div class="flex justify-between border-b border-[#9400D3]/10 pb-2">
-                <span class="text-gray-500 font-semibold text-xs">Price</span>
-                <span id="modalPrice" class="text-[#191970] font-bold text-xs text-right"></span>
+                <span class="text-gray-500 font-semibold text-base">Price</span>
+                <span id="modalPrice" class="text-[#191970] font-bold text-base text-right"></span>
             </div>
             <div class="flex justify-between pb-2">
-                <span class="text-gray-500 font-semibold text-xs">Stock</span>
-                <span id="modalStock" class="text-[#191970] font-bold text-xs text-right"></span>
+                <span class="text-gray-500 font-semibold text-base">Stock</span>
+                <span id="modalStock" class="text-[#191970] font-bold text-base text-right"></span>
             </div>
-            <div id="modalRxRow" class="hidden text-[10px] text-[#9400D3] font-semibold text-center pt-1">
-                🔞 Prescription Required
+            <div id="modalRxRow" class="hidden text-base text-[#9400D3] font-semibold text-center pt-1">
+                 Prescription Required
             </div>
         </div>
     </div>
@@ -294,7 +235,7 @@
                 preview.classList.remove('hidden');
                 previewImg.src = '';
                 previewImg.style.display = 'none';
-                preview.innerHTML = '<div class="flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-[#9400D3]/15"><i class="fas fa-file-pdf text-red-500 text-lg"></i><span class="text-xs font-semibold text-[#191970]">' + file.name + '</span></div>';
+                preview.innerHTML = '<div class="flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-[#9400D3]/15"><i class="fas fa-file-pdf text-red-500 text-lg"></i><span class="text-sm font-semibold text-[#191970]">' + file.name + '</span></div>';
             }
         }
     }

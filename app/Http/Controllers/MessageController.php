@@ -67,6 +67,8 @@ class MessageController extends Controller
             'pharmacy_id'        => 'required|exists:pharmacies,id',
             'message'            => 'required|string|max:1000',
             'prescription_image' => 'nullable|file|mimes:jpeg,jpg,png,gif,webp,pdf|max:5120',
+            'attachments'        => 'nullable|array|max:10',
+            'attachments.*'      => 'file|mimes:jpeg,jpg,png,gif,webp,pdf|max:10240',
         ]);
 
         $user = Auth::user();
@@ -87,6 +89,19 @@ class MessageController extends Controller
         }
 
         $message->save();
+
+        // Handle multiple attachments
+        $attachmentPaths = [];
+        if ($request->hasFile('attachments')) {
+            $svc = app(PrescriptionService::class);
+            foreach ($request->file('attachments') as $file) {
+                $attachmentPaths[] = $svc->store($file);
+            }
+        }
+        if (!empty($attachmentPaths)) {
+            $message->attachments = $attachmentPaths;
+            $message->save();
+        }
 
         // Broadcast real-time new-message notification to the pharmacy channel
         MessageSent::dispatch(
@@ -326,6 +341,22 @@ class MessageController extends Controller
     }
 
     /**
+     * Delete all messages in a conversation between pharmacy and a consumer
+     */
+    public function pharmacyDeleteConversation($consumerId)
+    {
+        $user = Auth::user();
+        $pharmacy = \App\Models\Pharmacy::where('user_id', $user->id)->first();
+        if (!$pharmacy) return redirect()->back()->with('error', 'Unauthorized.');
+
+        Message::where('pharmacy_id', $pharmacy->id)
+               ->where('consumer_id', $consumerId)
+               ->delete();
+
+        return redirect()->route('pharmacy.messages')->with('success', 'Conversation deleted.');
+    }
+
+    /**
      * Return conversations as JSON for the chat heads widget
      */
     public function consumerMessagesJson()
@@ -355,11 +386,130 @@ class MessageController extends Controller
                             'reply'      => $m->reply,
                             'replied_at' => $m->replied_at?->toDateTimeString(),
                             'created_at' => $m->created_at->toDateTimeString(),
+                            'has_prescription' => !empty($m->prescription_image),
+                            'attachment_count' => !empty($m->attachments) ? count($m->attachments) : 0,
                         ];
                     })->values(),
                 ];
             })->values();
         return response()->json($messages);
+    }
+
+
+    /**
+     * Show chat page for a specific pharmacy conversation
+     */
+    public function consumerChat($pharmacyId)
+    {
+        $user = Auth::user();
+        if ($user->role !== "consumer") {
+            return redirect()->back()->with("error", "Unauthorized.");
+        }
+
+        $pharmacy = \App\Models\Pharmacy::findOrFail($pharmacyId);
+        $messages = Message::where("consumer_id", $user->id)
+            ->where("pharmacy_id", $pharmacyId)
+            ->orderBy("created_at", "asc")
+            ->get();
+
+        return view("consumer.chat", compact("pharmacy", "messages"));
+    }
+
+
+    /**
+     * Serve prescription image for the consumer who sent it
+     */
+    public function consumerPrescription(Request $request, $messageId)
+    {
+        $user = Auth::user();
+        $message = Message::findOrFail($messageId);
+
+        // Only the consumer who sent it can view it
+        if ($message->consumer_id !== $user->id) {
+            abort(403, "Unauthorized.");
+        }
+
+        if (empty($message->prescription_image)) {
+            abort(404, "No prescription attached.");
+        }
+
+        $svc = app(\App\Services\PrescriptionService::class);
+        $rawBytes = $svc->retrieve($message->prescription_image);
+        $mime = $svc->mimeType($rawBytes);
+
+        return response($rawBytes)
+            ->header("Content-Type", $mime)
+            ->header("Content-Length", strlen($rawBytes))
+            ->header("Content-Disposition", "inline")
+            ->header("Cache-Control", "no-store");
+    }
+
+
+    public function pharmacyMessagesJson()
+    {
+        $user = Auth::user();
+        if (!$user || !$user->isPharmacy()) return response()->json([]);
+        $pharmacy = \App\Models\Pharmacy::where("user_id", $user->id)->first();
+        if (!$pharmacy) return response()->json([]);
+
+        $messages = Message::where("pharmacy_id", $pharmacy->id)
+            ->with("consumer")
+            ->orderBy("created_at", "asc")
+            ->get()
+            ->groupBy("consumer_id")
+            ->map(function($thread) {
+                $consumer = $thread->first()->consumer;
+                return [
+                    "consumer_id" => $thread->first()->consumer_id,
+                    "consumer_name" => $consumer->name ?? "Customer",
+                    "messages" => $thread->map(function($m) {
+                        return [
+                            "id" => $m->id,
+                            "message" => $m->message,
+                            "reply" => $m->reply,
+                            "replied_at" => $m->replied_at?->toDateTimeString(),
+                            "created_at" => $m->created_at->toDateTimeString(),
+                            "has_prescription" => !empty($m->prescription_image),
+                            "attachment_count" => !empty($m->attachments) ? count($m->attachments) : 0,
+                        ];
+                    })->values(),
+                ];
+            })->values();
+
+        return response()->json($messages);
+    }
+
+    /**
+     * Serve an attachment file to the consumer who sent the message.
+     */
+    public function consumerAttachment($messageId, $index)
+    {
+        $user = Auth::user();
+        $message = Message::findOrFail($messageId);
+        if ($message->consumer_id !== $user->id) abort(403);
+        $attachments = $message->attachments ?? [];
+        if (!isset($attachments[$index])) abort(404);
+        $svc = app(\App\Services\PrescriptionService::class);
+        $rawBytes = $svc->retrieve($attachments[$index]);
+        $mime = $svc->mimeType($rawBytes);
+        return response($rawBytes)->header('Content-Type', $mime)->header('Content-Length', strlen($rawBytes))->header('Content-Disposition', 'inline')->header('Cache-Control', 'no-store');
+    }
+
+    /**
+     * Serve an attachment file to the pharmacy staff.
+     */
+    public function pharmacyAttachment($messageId, $index)
+    {
+        $user = Auth::user();
+        $message = Message::findOrFail($messageId);
+        $pharmacy = \App\Models\Pharmacy::where('user_id', $user->id)->first();
+        if (!$pharmacy || $message->pharmacy_id !== $pharmacy->id) abort(403);
+        $attachments = $message->attachments ?? [];
+        if (!isset($attachments[$index])) abort(404);
+        $svc = app(\App\Services\PrescriptionService::class);
+        $rawBytes = $svc->retrieve($attachments[$index]);
+        $mime = $svc->mimeType($rawBytes);
+        return response($rawBytes)->header('Content-Type', $mime)->header('Content-Length', strlen($rawBytes))->header('Content-Disposition', 'inline')->header('Cache-Control', 'no-store');
     }
 
 }
