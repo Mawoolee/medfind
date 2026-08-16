@@ -14,6 +14,7 @@ class Message extends Model
     protected $fillable = [
         'consumer_id',
         'pharmacy_id',
+        'sender',
         'message',
         'prescription_image',
         'attachments',

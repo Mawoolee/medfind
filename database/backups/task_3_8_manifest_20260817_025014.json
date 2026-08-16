@@ -1,0 +1,322 @@
+{
+    "manifest_version": 1,
+    "phase": "identity_sequence_repair_and_verification",
+    "task": "3.8",
+    "generated_at": "2026-08-17T02:50:14+00:00",
+    "depends_on_task": "3.7",
+    "all_sequences_repaired": true,
+    "all_probes_passed": true,
+    "row_counts_unchanged": true,
+    "abort_required": false,
+    "cutover_performed": false,
+    "runtime_change_permitted": false,
+    "source_mutation_permitted": false,
+    "target_application_traffic_permitted": false,
+    "sequences": {
+        "populated_tables": {
+            "users": {
+                "sequence_name": "public.users_id_seq",
+                "row_count": 3,
+                "max_id": 3,
+                "previous_state": {
+                    "last_value": 1,
+                    "is_called": false
+                },
+                "repaired_state": {
+                    "last_value": 3,
+                    "is_called": true
+                },
+                "next_generated_value": 4,
+                "probe_result": {
+                    "probed_value": 4,
+                    "exceeds_max_id": true,
+                    "collision_safe": true
+                }
+            },
+            "pharmacies": {
+                "sequence_name": "public.pharmacies_id_seq",
+                "row_count": 5,
+                "max_id": 5,
+                "previous_state": {
+                    "last_value": 1,
+                    "is_called": false
+                },
+                "repaired_state": {
+                    "last_value": 5,
+                    "is_called": true
+                },
+                "next_generated_value": 6,
+                "probe_result": {
+                    "probed_value": 6,
+                    "exceeds_max_id": true,
+                    "collision_safe": true
+                }
+            },
+            "medicines": {
+                "sequence_name": "public.medicines_id_seq",
+                "row_count": 6,
+                "max_id": 6,
+                "previous_state": {
+                    "last_value": 1,
+                    "is_called": false
+                },
+                "repaired_state": {
+                    "last_value": 6,
+                    "is_called": true
+                },
+                "next_generated_value": 7,
+                "probe_result": {
+                    "probed_value": 7,
+                    "exceeds_max_id": true,
+                    "collision_safe": true
+                }
+            },
+            "inventory_items": {
+                "sequence_name": "public.inventory_items_id_seq",
+                "row_count": 12,
+                "max_id": 12,
+                "previous_state": {
+                    "last_value": 1,
+                    "is_called": false
+                },
+                "repaired_state": {
+                    "last_value": 12,
+                    "is_called": true
+                },
+                "next_generated_value": 13,
+                "probe_result": {
+                    "probed_value": 13,
+                    "exceeds_max_id": true,
+                    "collision_safe": true
+                }
+            }
+        },
+        "empty_tables": {
+            "messages": {
+                "sequence_name": "public.messages_id_seq",
+                "row_count": 0,
+                "max_id": null,
+                "previous_state": {
+                    "last_value": 1,
+                    "is_called": false
+                },
+                "repaired_state": {
+                    "last_value": 1,
+                    "is_called": false
+                },
+                "next_generated_value": 1,
+                "probe_result": {
+                    "probed_value": 1,
+                    "exceeds_max_id": true,
+                    "collision_safe": true
+                }
+            },
+            "suppliers": {
+                "sequence_name": "public.suppliers_id_seq",
+                "row_count": 0,
+                "max_id": null,
+                "previous_state": {
+                    "last_value": 1,
+                    "is_called": false
+                },
+                "repaired_state": {
+                    "last_value": 1,
+                    "is_called": false
+                },
+                "next_generated_value": 1,
+                "probe_result": {
+                    "probed_value": 1,
+                    "exceeds_max_id": true,
+                    "collision_safe": true
+                }
+            },
+            "controlled_substance_logs": {
+                "sequence_name": "public.controlled_substance_logs_id_seq",
+                "row_count": 0,
+                "max_id": null,
+                "previous_state": {
+                    "last_value": 1,
+                    "is_called": false
+                },
+                "repaired_state": {
+                    "last_value": 1,
+                    "is_called": false
+                },
+                "next_generated_value": 1,
+                "probe_result": {
+                    "probed_value": 1,
+                    "exceeds_max_id": true,
+                    "collision_safe": true
+                }
+            },
+            "cycle_counts": {
+                "sequence_name": "public.cycle_counts_id_seq",
+                "row_count": 0,
+                "max_id": null,
+                "previous_state": {
+                    "last_value": 1,
+                    "is_called": false
+                },
+                "repaired_state": {
+                    "last_value": 1,
+                    "is_called": false
+                },
+                "next_generated_value": 1,
+                "probe_result": {
+                    "probed_value": 1,
+                    "exceeds_max_id": true,
+                    "collision_safe": true
+                }
+            },
+            "cycle_count_items": {
+                "sequence_name": "public.cycle_count_items_id_seq",
+                "row_count": 0,
+                "max_id": null,
+                "previous_state": {
+                    "last_value": 1,
+                    "is_called": false
+                },
+                "repaired_state": {
+                    "last_value": 1,
+                    "is_called": false
+                },
+                "next_generated_value": 1,
+                "probe_result": {
+                    "probed_value": 1,
+                    "exceeds_max_id": true,
+                    "collision_safe": true
+                }
+            },
+            "returns_recalls": {
+                "sequence_name": "public.returns_recalls_id_seq",
+                "row_count": 0,
+                "max_id": null,
+                "previous_state": {
+                    "last_value": 1,
+                    "is_called": false
+                },
+                "repaired_state": {
+                    "last_value": 1,
+                    "is_called": false
+                },
+                "next_generated_value": 1,
+                "probe_result": {
+                    "probed_value": 1,
+                    "exceeds_max_id": true,
+                    "collision_safe": true
+                }
+            },
+            "inventory_audits": {
+                "sequence_name": "public.inventory_audits_id_seq",
+                "row_count": 0,
+                "max_id": null,
+                "previous_state": {
+                    "last_value": 1,
+                    "is_called": false
+                },
+                "repaired_state": {
+                    "last_value": 1,
+                    "is_called": false
+                },
+                "next_generated_value": 1,
+                "probe_result": {
+                    "probed_value": 1,
+                    "exceeds_max_id": true,
+                    "collision_safe": true
+                }
+            },
+            "search_logs": {
+                "sequence_name": "public.search_logs_id_seq",
+                "row_count": 0,
+                "max_id": null,
+                "previous_state": {
+                    "last_value": 1,
+                    "is_called": false
+                },
+                "repaired_state": {
+                    "last_value": 1,
+                    "is_called": false
+                },
+                "next_generated_value": 1,
+                "probe_result": {
+                    "probed_value": 1,
+                    "exceeds_max_id": true,
+                    "collision_safe": true
+                }
+            },
+            "activity_logs": {
+                "sequence_name": "public.activity_logs_id_seq",
+                "row_count": 0,
+                "max_id": null,
+                "previous_state": {
+                    "last_value": 1,
+                    "is_called": false
+                },
+                "repaired_state": {
+                    "last_value": 1,
+                    "is_called": false
+                },
+                "next_generated_value": 1,
+                "probe_result": {
+                    "probed_value": 1,
+                    "exceeds_max_id": true,
+                    "collision_safe": true
+                }
+            },
+            "survey_responses": {
+                "sequence_name": "public.survey_responses_id_seq",
+                "row_count": 0,
+                "max_id": null,
+                "previous_state": {
+                    "last_value": 1,
+                    "is_called": false
+                },
+                "repaired_state": {
+                    "last_value": 1,
+                    "is_called": false
+                },
+                "next_generated_value": 1,
+                "probe_result": {
+                    "probed_value": 1,
+                    "exceeds_max_id": true,
+                    "collision_safe": true
+                }
+            }
+        },
+        "non_sequence_tables_skipped": [
+            "notifications (uuid primary key)",
+            "sessions (string primary key)",
+            "cache (string primary key)",
+            "cache_locks (string primary key)"
+        ],
+        "migrations_table_sequence": "retained_from_canonical_laravel_migrations"
+    },
+    "verification_summary": {
+        "total_sequences_repaired": 14,
+        "populated_tables_repaired": 4,
+        "empty_tables_confirmed": 10,
+        "all_probes_exceed_max_id": true,
+        "all_probes_collision_safe": true,
+        "row_counts_after_probes_unchanged": true,
+        "no_persistent_probe_records": true
+    },
+    "method": {
+        "populated_table_formula": "setval(pg_get_serial_sequence(table, 'id'), MAX(id), true)",
+        "empty_table_formula": "setval(pg_get_serial_sequence(table, 'id'), 1, false)",
+        "probe_method": "nextval() inside transaction, verified > MAX(id), then sequence restored to correct state",
+        "post_probe_restoration": "setval() re-applied after probes to restore sequences to intended state"
+    },
+    "stop_gate": {
+        "all_sequences_present": true,
+        "no_ambiguous_sequences": true,
+        "all_sequences_advanced_correctly": true,
+        "no_colliding_values_generated": true,
+        "gate_passed": true
+    },
+    "next_steps": [
+        "Task 3.9: Complete pre-cutover verification and acceptance gate",
+        "Do NOT enable target application traffic",
+        "Do NOT exit maintenance mode",
+        "Do NOT modify .env runtime selection"
+    ]
+}

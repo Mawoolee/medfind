@@ -382,6 +382,7 @@ class MessageController extends Controller
                     'messages'      => $thread->sortBy('created_at')->map(function($m) {
                         return [
                             'id'         => $m->id,
+                            'sender'     => $m->sender ?? 'consumer',
                             'message'    => $m->message,
                             'reply'      => $m->reply,
                             'replied_at' => $m->replied_at?->toDateTimeString(),
@@ -465,6 +466,7 @@ class MessageController extends Controller
                     "messages" => $thread->map(function($m) {
                         return [
                             "id" => $m->id,
+                            "sender" => $m->sender ?? "consumer",
                             "message" => $m->message,
                             "reply" => $m->reply,
                             "replied_at" => $m->replied_at?->toDateTimeString(),

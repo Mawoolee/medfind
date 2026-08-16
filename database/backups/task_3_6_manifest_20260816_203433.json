@@ -1,0 +1,314 @@
+{
+    "manifest_version": 1,
+    "phase": "production_backup_quiescence_and_inventory",
+    "task": "3.6",
+    "generated_at": "2026-08-16T18:34:33+00:00",
+    "preparation_passed": true,
+    "abort_required": false,
+    "cutover_performed": false,
+    "runtime_change_permitted": false,
+    "source_mutation_permitted": false,
+    "target_application_traffic_permitted": false,
+    "gates": {
+        "maintenance_mode_active": {
+            "passed": true,
+            "reason": "php artisan down executed"
+        },
+        "postgresql_reachable": {
+            "passed": true,
+            "reason": "connected_to_127.0.0.1:5432"
+        },
+        "postgresql_target_empty": {
+            "passed": false,
+            "reason": "target_contains_existing_data_from_prior_rehearsal"
+        },
+        "target_replacement_required": {
+            "passed": true,
+            "reason": "target_must_be_dropped_and_recreated_before_task_3.7"
+        },
+        "source_readable": {
+            "passed": true,
+            "reason": "verified"
+        },
+        "source_opened_read_only": {
+            "passed": true,
+            "reason": "query_only_mode_enabled"
+        },
+        "sqlite_integrity_valid": {
+            "passed": true,
+            "reason": "integrity_check_ok"
+        },
+        "no_pending_wal": {
+            "passed": true,
+            "reason": "no_wal_file"
+        },
+        "backup_created": {
+            "passed": true,
+            "reason": "verified"
+        },
+        "backup_checksum_matches_source": {
+            "passed": true,
+            "reason": "sha256_match"
+        },
+        "backup_integrity_valid": {
+            "passed": true,
+            "reason": "integrity_check_ok"
+        },
+        "source_checksum_unchanged_after_inventory": {
+            "passed": true,
+            "reason": "verified"
+        },
+        "schema_classification": {
+            "passed": true,
+            "reason": "no_unknown_tables_or_columns_in_source"
+        },
+        "schema_migration_level_note": {
+            "passed": true,
+            "reason": "source_at_older_schema_version_7_of_17_migrations_applied"
+        }
+    },
+    "source": {
+        "path": "database/database.sqlite",
+        "checksum_sha256": "b23589695ddddcc5437aed7fe75f45148f805627db39f34489c4b78ffca0617d",
+        "size_bytes": 81920,
+        "table_count": 9,
+        "total_row_count": 34,
+        "migrations_applied": 7,
+        "migrations_available_in_repository": 17
+    },
+    "backup": {
+        "path": "database/backups/database_20260817_023155.sqlite",
+        "checksum_sha256": "b23589695ddddcc5437aed7fe75f45148f805627db39f34489c4b78ffca0617d",
+        "size_bytes": 81920,
+        "created_at": "2026-07-20T14:02:02+00:00",
+        "integrity_verified": true,
+        "restoration_testable": true
+    },
+    "inventory": {
+        "tables": {
+            "cache": {
+                "row_count": 0,
+                "column_count": 3,
+                "columns": [
+                    "key",
+                    "value",
+                    "expiration"
+                ],
+                "primary_key_range": {
+                    "column": "key",
+                    "minimum_sha256": null,
+                    "maximum_sha256": null,
+                    "values_redacted": true
+                }
+            },
+            "cache_locks": {
+                "row_count": 0,
+                "column_count": 3,
+                "columns": [
+                    "key",
+                    "owner",
+                    "expiration"
+                ],
+                "primary_key_range": {
+                    "column": "key",
+                    "minimum_sha256": null,
+                    "maximum_sha256": null,
+                    "values_redacted": true
+                }
+            },
+            "inventory_items": {
+                "row_count": 12,
+                "column_count": 8,
+                "columns": [
+                    "id",
+                    "pharmacy_id",
+                    "medicine_id",
+                    "stockQuantity",
+                    "price",
+                    "status",
+                    "created_at",
+                    "updated_at"
+                ],
+                "primary_key_range": {
+                    "column": "id",
+                    "minimum": 1,
+                    "maximum": 12
+                }
+            },
+            "medicines": {
+                "row_count": 6,
+                "column_count": 8,
+                "columns": [
+                    "id",
+                    "medicine_name",
+                    "dosage",
+                    "manufacturer",
+                    "requiresPrescription",
+                    "category",
+                    "created_at",
+                    "updated_at"
+                ],
+                "primary_key_range": {
+                    "column": "id",
+                    "minimum": 1,
+                    "maximum": 6
+                }
+            },
+            "messages": {
+                "row_count": 0,
+                "column_count": 10,
+                "columns": [
+                    "id",
+                    "consumer_id",
+                    "pharmacy_id",
+                    "message",
+                    "prescription_image",
+                    "reply",
+                    "replied_at",
+                    "is_read",
+                    "created_at",
+                    "updated_at"
+                ],
+                "primary_key_range": {
+                    "column": "id",
+                    "minimum": null,
+                    "maximum": null
+                }
+            },
+            "migrations": {
+                "row_count": 7,
+                "column_count": 3,
+                "columns": [
+                    "id",
+                    "migration",
+                    "batch"
+                ],
+                "primary_key_range": {
+                    "column": "id",
+                    "minimum": 1,
+                    "maximum": 7
+                }
+            },
+            "pharmacies": {
+                "row_count": 5,
+                "column_count": 9,
+                "columns": [
+                    "id",
+                    "pharmacy_name",
+                    "pharmacyAddress",
+                    "latitude",
+                    "longitude",
+                    "contactNumber",
+                    "user_id",
+                    "created_at",
+                    "updated_at"
+                ],
+                "primary_key_range": {
+                    "column": "id",
+                    "minimum": 1,
+                    "maximum": 5
+                }
+            },
+            "sessions": {
+                "row_count": 1,
+                "column_count": 6,
+                "columns": [
+                    "id",
+                    "user_id",
+                    "ip_address",
+                    "user_agent",
+                    "payload",
+                    "last_activity"
+                ],
+                "primary_key_range": {
+                    "column": "id",
+                    "minimum_sha256": "bb06c9f9476d2f62a7f581caa7dbe24126e993edd6221b158b9bd022eab99e58",
+                    "maximum_sha256": "bb06c9f9476d2f62a7f581caa7dbe24126e993edd6221b158b9bd022eab99e58",
+                    "values_redacted": true
+                }
+            },
+            "users": {
+                "row_count": 3,
+                "column_count": 10,
+                "columns": [
+                    "id",
+                    "name",
+                    "email",
+                    "email_verified_at",
+                    "password",
+                    "role",
+                    "pharmacy_id",
+                    "remember_token",
+                    "created_at",
+                    "updated_at"
+                ],
+                "primary_key_range": {
+                    "column": "id",
+                    "minimum": 1,
+                    "maximum": 3
+                }
+            }
+        },
+        "migration_names": [
+            "2026_07_20_111005_create_pharmacies_table",
+            "2026_07_20_111009_create_medicines_table",
+            "2026_07_20_111013_create_inventory_items_table",
+            "2026_07_20_111018_create_messages_table",
+            "2026_07_20_111415_create_users_table",
+            "2026_07_20_112307_create_sessions_table",
+            "2026_07_20_140158_create_cache_table"
+        ],
+        "missing_tables_from_policy": [
+            "suppliers",
+            "controlled_substance_logs",
+            "cycle_counts",
+            "cycle_count_items",
+            "returns_recalls",
+            "inventory_audits",
+            "search_logs",
+            "notifications",
+            "activity_logs",
+            "survey_responses"
+        ],
+        "missing_columns_from_policy": {
+            "inventory_items": [
+                "expiry_date",
+                "batch_number",
+                "cold_chain",
+                "par_level",
+                "supplier_id"
+            ],
+            "messages": [
+                "verified_by",
+                "verification_status",
+                "verification_notes",
+                "verified_at",
+                "attachments",
+                "sender"
+            ],
+            "pharmacies": [
+                "status",
+                "logo_path",
+                "requirements",
+                "operating_hours"
+            ]
+        },
+        "unknown_tables": [],
+        "unknown_columns": [],
+        "schema_note": "Source SQLite has only 7/17 migrations applied. Missing tables and columns were added by later migrations that have not been run on SQLite. These will exist as empty tables in PostgreSQL after canonical migrations. No data is lost."
+    },
+    "target_condition": {
+        "status": "not_empty",
+        "action_required": "Drop and recreate medfind database, then run canonical migrations before task 3.7",
+        "contains_prior_rehearsal_data": true
+    },
+    "session_decision": {
+        "mode": "transfer",
+        "note": "sessions table has 1 row; will transfer if APP_KEY is retained"
+    },
+    "next_steps": [
+        "Before task 3.7: Drop medfind PostgreSQL database and recreate empty",
+        "Run canonical migrations (php artisan migrate --force) against empty target",
+        "Only then proceed with authoritative data transfer"
+    ]
+}

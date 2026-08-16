@@ -43,11 +43,16 @@
                                 <img src="{{ route('consumer.prescription.view', $message->id) }}"
                                      alt="Prescription"
                                      class="max-w-[200px] w-full rounded-xl border border-white/20 cursor-pointer hover:opacity-90 transition"
-                                     onclick="window.open(this.src, '_blank')"
-                                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-                                <div class="hidden items-center gap-2 mt-1 px-3 py-1.5 rounded-lg text-xs text-gray-300" style="background:#2a2a5a;">
-                                    <i class="fas fa-file-alt"></i> Prescription file attached
-                                </div>
+                                     onclick="window.open(this.src, '_blank')">
+                            </div>
+                        @endif
+                        @if($message->attachments && count($message->attachments) > 0)
+                            <div class="mt-2 flex flex-wrap gap-1">
+                                @for($i = 0; $i < count($message->attachments); $i++)
+                                    <img src="{{ route('consumer.attachment.view', [$message->id, $i]) }}"
+                                         class="w-16 h-16 rounded-lg object-cover border border-white/20 cursor-pointer hover:opacity-80"
+                                         onclick="window.open(this.src, '_blank')">
+                                @endfor
                             </div>
                         @endif
                         <p class="text-gray-500 text-xs mt-1 text-right">{{ $message->created_at->format('M d · g:i A') }}</p>
@@ -83,7 +88,7 @@
 
             {{-- Message input --}}
             <div class="flex-1 relative">
-                <input type="text" name="message" placeholder="Message..." required
+                <input type="text" name="message" placeholder="Message..." required autocomplete="off"
                     class="w-full px-5 py-3 rounded-full text-sm text-white outline-none placeholder-gray-400"
                     style="background:#2a2a5a;border:1px solid rgba(148,0,211,0.3);">
                 <span id="attachedFile" class="hidden absolute -top-6 left-2 text-xs text-[#D9F855]"></span>

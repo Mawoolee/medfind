@@ -20,7 +20,7 @@
                     $consumer = $thread->first()->consumer;
                     $lastMsg = $thread->sortByDesc('created_at')->first();
                     $unread = $thread->where('is_read', false)->count();
-                    $lastText = $lastMsg->reply ? 'You: ' . Str::limit($lastMsg->reply, 25) : Str::limit($lastMsg->message, 30);
+                    $lastText = $lastMsg->sender === 'pharmacy' ? 'You: ' . Str::limit($lastMsg->message, 25) : Str::limit($lastMsg->message, 30);
                 @endphp
                 <div class="conversation-item relative group" x-data="{ menuOpen: false }" data-consumer-id="{{ $consumerId }}">
                     <div class="flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-white/5 transition border-b border-white/5" onclick="openConversation({{ $consumerId }})">
@@ -86,31 +86,18 @@
                 </div>
                 <div class="flex-1 overflow-y-auto px-6 py-4 space-y-3 chat-messages">
                     @php
-                        // Build flat timeline
-                        $timeline = collect();
-                        foreach($thread->sortBy('created_at') as $msg) {
-                            $timeline->push((object)[
-                                'type' => 'consumer',
+                        // Build flat timeline using sender field
+                        $timeline = $thread->sortBy('created_at')->map(function($msg) {
+                            return (object)[
+                                'type' => $msg->sender ?? 'consumer',
                                 'text' => $msg->message,
                                 'time' => $msg->created_at,
                                 'id' => $msg->id,
                                 'has_prescription' => !empty($msg->prescription_image),
-                                'has_attachments' => !empty($msg->attachments) && count($msg->attachments) > 0,
-                                'attachment_count' => !empty($msg->attachments) ? count($msg->attachments) : 0,
-                            ]);
-                            if ($msg->reply) {
-                                $timeline->push((object)[
-                                    'type' => 'pharmacy',
-                                    'text' => $msg->reply,
-                                    'time' => $msg->replied_at ?? $msg->created_at,
-                                    'id' => $msg->id,
-                                    'has_prescription' => false,
-                                    'has_attachments' => false,
-                                    'attachment_count' => 0,
-                                ]);
-                            }
-                        }
-                        $timeline = $timeline->sortBy('time');
+                                'has_attachments' => !empty($msg->attachments) && is_array($msg->attachments) && count($msg->attachments) > 0,
+                                'attachment_count' => !empty($msg->attachments) && is_array($msg->attachments) ? count($msg->attachments) : 0,
+                            ];
+                        });
                     @endphp
 
                     @foreach($timeline as $item)
@@ -152,21 +139,18 @@
                     @endforeach
                 </div>
                 <div class="px-6 py-3 border-t flex-shrink-0" style="background:#191970;border-color:rgba(148,0,211,0.3);">
-                    @if($lastUnreplied)
-                        <form method="POST" action="{{ route('pharmacy.message.reply', $lastUnreplied->id) }}" class="flex items-center gap-3" enctype="multipart/form-data" onsubmit="return sendReply(this, {{ $consumerId }})">
+                    <form method="POST" action="{{ route('pharmacy.message.reply', $lastMsg->id) }}" class="flex items-center gap-3" enctype="multipart/form-data" onsubmit="return sendReply(this, {{ $consumerId }})">
                             @csrf
                             <label for="phRx_{{ $consumerId }}" class="cursor-pointer text-gray-400 hover:text-[#D9F855] transition flex-shrink-0">
                                 <i class="fas fa-paperclip text-lg"></i>
                             </label>
                             <input type="file" name="attachments[]" id="phRx_{{ $consumerId }}" accept=".jpg,.jpeg,.png,.gif,.webp,.pdf" class="hidden" multiple>
-                            <input type="text" name="reply" placeholder="Reply..." required class="flex-1 px-5 py-3 rounded-full text-sm text-white outline-none placeholder-gray-400" style="background:#2a2a5a;border:1px solid rgba(148,0,211,0.3);">
+                            <input type="text" name="reply" placeholder="Reply..." required autocomplete="off" class="flex-1 px-5 py-3 rounded-full text-sm text-white outline-none placeholder-gray-400" style="background:#2a2a5a;border:1px solid rgba(148,0,211,0.3);">
                             <button type="submit" class="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 transition hover:opacity-80" style="background:#9400D3;">
                                 <i class="fas fa-paper-plane text-white text-sm"></i>
                             </button>
                         </form>
-                    @else
-                        <p class="text-gray-400 text-sm text-center py-2">All messages replied</p>
-                    @endif
+
                 </div>
             </div>
         @endforeach
@@ -175,9 +159,11 @@
 
 <script>
 var activeConsumerId = null;
+var skipPollUntil = 0;
 
 function openConversation(consumerId) {
     activeConsumerId = consumerId;
+    window.location.hash = 'chat-' + consumerId;
     document.getElementById('chatEmpty').style.display = 'none';
     document.querySelectorAll('.chat-view').forEach(function(el) {
         el.classList.add('hidden');
@@ -213,6 +199,8 @@ function sendReply(form, consumerId) {
     msgsDiv.scrollTop = msgsDiv.scrollHeight;
     input.value = '';
 
+    skipPollUntil = Date.now() + 5000;
+
     fetch(form.action, {
         method: 'POST',
         body: fd,
@@ -239,9 +227,19 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
+
+// Restore active conversation from URL hash on page load
+(function() {
+    var hash = window.location.hash;
+    if (hash && hash.startsWith('#chat-')) {
+        var id = hash.replace('#chat-', '');
+        if (id) setTimeout(function() { openConversation(parseInt(id)); }, 100);
+    }
+})();
 // Auto-refresh chat every 3 seconds
 setInterval(function() {
     if (!activeConsumerId) return;
+    if (Date.now() < skipPollUntil) return;
     fetch('/pharmacy/messages-data', { credentials: 'same-origin' })
         .then(function(r) { return r.json(); })
         .then(function(data) {
@@ -252,18 +250,14 @@ setInterval(function() {
             var chatMsgs = chat.querySelector('.chat-messages');
             if (!chatMsgs) return;
 
-            // Build flat sorted timeline
+            // Build flat timeline using sender field
             var items = [];
             conv.messages.forEach(function(m) {
-                items.push({ type: 'consumer', text: m.message, time: m.created_at, hasPrescription: m.has_prescription || false, id: m.id, attachmentCount: m.attachment_count || 0 });
-                if (m.reply) {
-                    items.push({ type: 'pharmacy', text: m.reply, time: m.replied_at || m.created_at });
-                }
+                items.push({ type: m.sender || 'consumer', text: m.message, time: m.created_at, hasPrescription: m.has_prescription || false, id: m.id, attachmentCount: m.attachment_count || 0 });
             });
             items.sort(function(a, b) { return new Date(a.time) - new Date(b.time); });
 
-            var currentBubbles = chatMsgs.querySelectorAll('.flex.justify-start, .flex.justify-end').length;
-            if (items.length === currentBubbles) return;
+            // Always rebuild from server data (server is source of truth)
 
             var html = '';
             items.forEach(function(item) {

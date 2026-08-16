@@ -1,0 +1,233 @@
+{
+  "pbtResults": {
+    "1. Write the bug condition exploration test before implementing the migration": {
+      "status": "passed",
+      "failingExample": "fresh_template_selects_sqlite: intendedDatabaseEngine=pgsql, resolvedRuntimeDatabaseEngine=sqlite, cutoverPerformed=false, sourceChecksumUnchanged=true; failed predicate=runtime_uses_pgsql",
+      "artifact": "artifacts/task-1-bug-condition-exploration.json"
+    }
+  },
+  "executionHistory": {
+    "1. Write the bug condition exploration test before implementing the migration": [
+      {
+        "executionId": "efc8adea-35e3-464c-98da-28aa86836258",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786901681737
+      },
+      {
+        "executionId": "efc8adea-35e3-464c-98da-28aa86836258",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786901700869
+      },
+      {
+        "executionId": "efc8adea-35e3-464c-98da-28aa86836258",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786901838580
+      }
+    ],
+    "2. Write preservation property tests before implementing the migration": [
+      {
+        "executionId": "efc8adea-35e3-464c-98da-28aa86836258",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786901681783
+      },
+      {
+        "executionId": "efc8adea-35e3-464c-98da-28aa86836258",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786901848946
+      },
+      {
+        "executionId": "efc8adea-35e3-464c-98da-28aa86836258",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786902241019
+      }
+    ],
+    "3.1 Implement migration preflight and fail-closed safety gates": [
+      {
+        "executionId": "efc8adea-35e3-464c-98da-28aa86836258",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786901681859
+      },
+      {
+        "executionId": "efc8adea-35e3-464c-98da-28aa86836258",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786902245848
+      },
+      {
+        "executionId": "efc8adea-35e3-464c-98da-28aa86836258",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786902421059
+      }
+    ],
+    "3.2 Implement backup, quiescence, and source inventory procedures": [
+      {
+        "executionId": "efc8adea-35e3-464c-98da-28aa86836258",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786901681917
+      },
+      {
+        "executionId": "efc8adea-35e3-464c-98da-28aa86836258",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786902425912
+      },
+      {
+        "executionId": "efc8adea-35e3-464c-98da-28aa86836258",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786902794121
+      }
+    ],
+    "3.3 Update the checked-in PostgreSQL configuration template without exposing secrets": [
+      {
+        "executionId": "efc8adea-35e3-464c-98da-28aa86836258",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786901681953
+      },
+      {
+        "executionId": "efc8adea-35e3-464c-98da-28aa86836258",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786902802058
+      },
+      {
+        "executionId": "efc8adea-35e3-464c-98da-28aa86836258",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786902935320
+      }
+    ],
+    "3.4 Implement the one-time migration utility and auditable runbook": [
+      {
+        "executionId": "efc8adea-35e3-464c-98da-28aa86836258",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786901682002
+      },
+      {
+        "executionId": "efc8adea-35e3-464c-98da-28aa86836258",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786902943615
+      },
+      {
+        "executionId": "efc8adea-35e3-464c-98da-28aa86836258",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786903679639
+      }
+    ],
+    "3.5 Rehearse the complete migration against isolated disposable PostgreSQL": [
+      {
+        "executionId": "efc8adea-35e3-464c-98da-28aa86836258",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786901682065
+      },
+      {
+        "executionId": "efc8adea-35e3-464c-98da-28aa86836258",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786903688910
+      }
+    ],
+    "3.6 Perform the production backup, quiescence, and source inventory gate": [
+      {
+        "executionId": "efc8adea-35e3-464c-98da-28aa86836258",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786901682104
+      },
+      {
+        "executionId": "54df8827-bb17-49ba-94b5-97077a9f71be",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786904931821
+      },
+      {
+        "executionId": "54df8827-bb17-49ba-94b5-97077a9f71be",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786905429105
+      }
+    ],
+    "3.7 Create the isolated production target schema and transfer authoritative data": [
+      {
+        "executionId": "efc8adea-35e3-464c-98da-28aa86836258",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786901682140
+      },
+      {
+        "executionId": "54df8827-bb17-49ba-94b5-97077a9f71be",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786905436411
+      },
+      {
+        "executionId": "54df8827-bb17-49ba-94b5-97077a9f71be",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786905971800
+      }
+    ],
+    "3.8 Repair and verify PostgreSQL identity sequences": [
+      {
+        "executionId": "efc8adea-35e3-464c-98da-28aa86836258",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786901682180
+      },
+      {
+        "executionId": "54df8827-bb17-49ba-94b5-97077a9f71be",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786905978730
+      },
+      {
+        "executionId": "54df8827-bb17-49ba-94b5-97077a9f71be",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786906278939
+      }
+    ],
+    "3.9 Complete the pre-cutover verification and acceptance gate": [
+      {
+        "executionId": "efc8adea-35e3-464c-98da-28aa86836258",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786901682218
+      },
+      {
+        "executionId": "54df8827-bb17-49ba-94b5-97077a9f71be",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786906284714
+      },
+      {
+        "executionId": "bb258266-f706-4926-8ce9-8ff9dbe33300",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786908550299
+      },
+      {
+        "executionId": "6c1e4b0a-f99f-4d6d-8038-1588aa23fe35",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786908598724
+      }
+    ],
+    "3.10 Cut over the runtime to PostgreSQL and retain rollback protection": [
+      {
+        "executionId": "efc8adea-35e3-464c-98da-28aa86836258",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786901682255
+      }
+    ],
+    "3.11 Verify the original bug condition exploration test now passes": [
+      {
+        "executionId": "efc8adea-35e3-464c-98da-28aa86836258",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786901682291
+      }
+    ],
+    "3.12 Verify preservation properties and regression suites still pass": [
+      {
+        "executionId": "efc8adea-35e3-464c-98da-28aa86836258",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786901682360
+      }
+    ],
+    "3.13 Document the completed migration and operator procedures": [
+      {
+        "executionId": "efc8adea-35e3-464c-98da-28aa86836258",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786901682395
+      }
+    ],
+    "4. Checkpoint - Confirm migration acceptance and all tests pass": [
+      {
+        "executionId": "efc8adea-35e3-464c-98da-28aa86836258",
+        "chatSessionId": "sess_2582ef61-e42b-40d2-a130-2594e13c7aa8",
+        "timestamp": 1786901682428
+      }
+    ]
+  }
+}

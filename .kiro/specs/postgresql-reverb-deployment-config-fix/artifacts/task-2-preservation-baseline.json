@@ -1,0 +1,123 @@
+{
+  "task": "2. Write preservation property tests before implementing the migration",
+  "property": "Property 2: Preservation - Existing Data, Behavior, and Test Isolation",
+  "validates": [
+    "Requirements 3.1",
+    "Requirements 3.3",
+    "Requirements 3.4",
+    "Requirements 3.5",
+    "Requirements 3.6"
+  ],
+  "pbtStatus": "passed",
+  "interpretation": "The preservation properties pass on the unfixed application and establish the database, test-isolation, environment-override, and Reverb baselines that a future migration must retain.",
+  "propertyTestCommand": "php artisan test tests/Unit/MigrationPreservationConfigurationPropertyTest.php tests/Feature/DatabaseMigrationPreservationPropertyTest.php --no-coverage",
+  "propertyTestSummary": {
+    "passed": 22,
+    "failed": 0,
+    "assertions": 383,
+    "durationSeconds": 0.72
+  },
+  "generatedCoverage": {
+    "graphSamples": 12,
+    "reverbEventSamplesPerEvent": 24,
+    "testDatabaseContexts": 6,
+    "values": [
+      "sparse integer primary keys and deleted-ID gaps",
+      "circular user/pharmacy ownership",
+      "inventory, supplier, medicine, message, notification, and verification relationships",
+      "SQL null and empty strings",
+      "Unicode text",
+      "SQLite boolean forms",
+      "fixed-scale decimals",
+      "objects, arrays, JSON null, and stable JSON key ordering",
+      "dates, leap-day timestamps, and nullable timestamps",
+      "UUID notification identifiers",
+      "password hashes, remember tokens, and opaque message fields",
+      "encrypted prescription, attachment, and logo path references"
+    ]
+  },
+  "observedBaseline": {
+    "database": {
+      "source": "PHPUnit sqlite :memory:",
+      "disposableRoundTripTarget": "standalone sqlite :memory:",
+      "sourceCanonicalHashUnchanged": true,
+      "targetCanonicalHashEquivalent": true,
+      "primaryKeysPreserved": true,
+      "relationshipViolations": 0,
+      "passwordHashesAuthenticateUnchanged": true,
+      "storageReferencesPreserved": true
+    },
+    "testIsolation": {
+      "resolvedAppEnvironment": "testing",
+      "resolvedConnection": "sqlite",
+      "resolvedDatabase": ":memory:",
+      "resolvedDatabaseUrl": "empty",
+      "unsafeContextsRejected": [
+        "non-testing application environment",
+        "PostgreSQL connection",
+        "file-backed SQLite database",
+        "non-empty DB_URL",
+        "PostgreSQL DB_URL conflicting with SQLite fields"
+      ],
+      "activePostgreSqlConnectionObserved": false
+    },
+    "reverb": {
+      "phpunitBroadcasterResolution": "PHP null via the literal null test override",
+      "checkedInTemplateActiveBroadcastDeclarations": [
+        "log",
+        "reverb"
+      ],
+      "inventoryEventName": "inventory.updated",
+      "inventoryChannels": [
+        "inventory",
+        "inventory.{pharmacyId}"
+      ],
+      "messageEventName": "message.sent",
+      "messageChannel": "pharmacy.{pharmacyId}",
+      "userChannelAuthorization": "matching user ID allowed; non-matching user ID denied",
+      "payloadContractsUnchanged": true,
+      "configurationSecretsRecorded": false
+    },
+    "environmentOverrides": {
+      "databaseConfigurationRemainsEnvironmentDriven": true,
+      "settingNames": [
+        "DB_URL",
+        "DB_HOST",
+        "DB_PORT",
+        "DB_DATABASE",
+        "DB_USERNAME",
+        "DB_PASSWORD",
+        "DB_CHARSET",
+        "DB_SSLMODE"
+      ]
+    }
+  },
+  "representativeExistingWorkflowBaseline": {
+    "command": "php artisan test tests/Feature/Auth/AuthenticationTest.php tests/Feature/InventoryTest.php tests/Feature/MessagingTest.php tests/Feature/MedicineSearchTest.php --no-coverage",
+    "passed": 38,
+    "failed": 3,
+    "assertions": 81,
+    "durationSeconds": 5.01,
+    "passingAreas": [
+      "authentication screen, invalid-password rejection, and logout",
+      "inventory authorization, reads, validation, CRUD, audit, and export",
+      "message send, validation, encrypted storage, authorization, inbox, conversations, and mark-read",
+      "homepage access, search, logging, pharmacy detail, stock and status filtering"
+    ],
+    "preExistingFailuresObserved": [
+      "successful login authenticates but redirects to the homepage instead of the test's expected dashboard",
+      "pharmacy reply request reports success but the existing test observes an unchanged null reply",
+      "homepage contains the pharmacy name in JSON but the existing assertion expects HTML-escaped apostrophe output"
+    ],
+    "applicationChangesMadeForFailures": false
+  },
+  "safety": {
+    "productionSQLiteOpened": false,
+    "postgresqlConnectionAttempted": false,
+    "productionDatabaseFingerprintReadOrWritten": false,
+    "credentialsOrSensitiveRowPayloadsRecorded": false,
+    "fixtureType": "generated sanitized in-memory records",
+    "migrationImplemented": false,
+    "runtimeConfigurationChanged": false
+  }
+}

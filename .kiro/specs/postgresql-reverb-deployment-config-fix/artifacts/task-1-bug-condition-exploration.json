@@ -1,0 +1,50 @@
+{
+  "task": "1. Write the bug condition exploration test before implementing the migration",
+  "property": "Property 1: Bug Condition - Complete SQLite-to-PostgreSQL Cutover",
+  "validates": ["Requirements 2.1", "Requirements 2.3", "Requirements 2.6"],
+  "pbtStatus": "passed",
+  "interpretation": "The exploration property failed on unfixed code as required, confirming the defect.",
+  "command": "php artisan test tests/Unit/PostgreSqlCutoverBugConditionPropertyTest.php --no-coverage",
+  "testSummary": {
+    "failed": 1,
+    "passed": 8,
+    "assertions": 166,
+    "durationSeconds": 0.16
+  },
+  "minimizedCounterexample": {
+    "case": "fresh_template_selects_sqlite",
+    "intendedDatabaseEngine": "pgsql",
+    "resolvedRuntimeDatabaseEngine": "sqlite",
+    "cutoverPerformed": false,
+    "sourceChecksumUnchanged": true,
+    "failedExpectedBehaviorPredicates": ["runtime_uses_pgsql"]
+  },
+  "generatedFaultCoverage": [
+    "missing_pdo_pgsql",
+    "unreachable_target",
+    "unauthorized_target",
+    "non_empty_or_unknown_target",
+    "conflicting_db_url_and_db_fields",
+    "invalid_sqlite_integrity",
+    "unknown_table_or_column",
+    "malformed_typed_value",
+    "circular_relationship_failure",
+    "sparse_ids_without_sequence_repair",
+    "transfer_interruption",
+    "verification_failure",
+    "unsafe_test_database"
+  ],
+  "deterministicChecks": [
+    "unchanged .env.example resolves to sqlite",
+    "connection-only PostgreSQL switch exposes an unready target",
+    "explicit imported IDs without sequence repair are rejected",
+    "a file-backed SQLite test environment is rejected"
+  ],
+  "failureOutput": "Failed asserting that the violation list was empty because fresh_template_selects_sqlite resolved the runtime database engine to sqlite instead of pgsql.",
+  "safety": {
+    "productionSQLiteOpened": false,
+    "postgresqlConnectionAttempted": false,
+    "credentialsOrRowPayloadsRecorded": false,
+    "fixtureType": "sanitized in-memory migration contexts"
+  }
+}

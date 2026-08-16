@@ -207,13 +207,21 @@ public function messages(Request $request)
             return redirect()->back()->with('error', 'Message not found.');
         }
 
-        $message->reply = $request->reply;
-        $message->replied_at = now();
+        // Create a new message row from pharmacy (instead of overwriting reply field)
+        $newMsg = Message::create([
+            'consumer_id' => $message->consumer_id,
+            'pharmacy_id' => $pharmacy->id,
+            'sender'      => 'pharmacy',
+            'message'     => $request->reply,
+            'is_read'     => true,
+        ]);
+
+        // Also mark the original as read
         $message->is_read = true;
         $message->save();
 
         \App\Events\MessageSent::dispatch(
-            $message->id,
+            $newMsg->id,
             $message->consumer_id,
             $pharmacy->id,
             $request->reply,
