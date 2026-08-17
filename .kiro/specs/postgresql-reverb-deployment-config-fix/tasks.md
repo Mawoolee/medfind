@@ -234,7 +234,7 @@ Dependencies are mandatory gates, not scheduling suggestions. A task may start o
     - _Preservation: Imported primary keys and row counts/hashes remain unchanged; probe inserts leave no persistent records._
     - _Requirements: 2.3, 3.1, 3.5_
 
-  - [-] 3.9 Complete the pre-cutover verification and acceptance gate
+  - [x] 3.9 Complete the pre-cutover verification and acceptance gate
     - Verify canonical migration/schema parity and confirm no source table or column is unclassified or omitted.
     - Compare authoritative table counts, primary-key sets/ranges, and canonical per-row/per-table hashes using deterministic column/key order, explicit null markers, stable JSON ordering, and exact decimal/timestamp representations.
     - Verify zero foreign-key violations and explicit zero-orphan queries, including unconstrained `inventory_items.supplier_id`; verify circular links and unique keys match the source.
