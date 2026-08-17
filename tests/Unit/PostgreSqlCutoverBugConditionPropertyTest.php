@@ -12,18 +12,32 @@ final class PostgreSqlCutoverBugConditionPropertyTest extends TestCase
     /**
      * Property 1: Bug Condition - Complete SQLite-to-PostgreSQL Cutover.
      *
-     * This is an exploration property. It is expected to fail on the unfixed
-     * repository because the checked-in environment template selects SQLite.
+     * Post-fix: The fresh template context is no longer a bug condition (the
+     * fix correctly selects pgsql). This test verifies that:
+     * (a) the fixed template satisfies expectedBehavior — proving the bug is fixed,
+     * (b) all generated fault contexts remain bug conditions and fail closed.
      *
      * **Validates: Requirements 2.1, 2.3, 2.6**
      */
     public function test_bug_condition_requires_a_complete_postgresql_cutover_or_a_fail_closed_abort(): void
     {
         $violations = [];
+        $fixVerified = false;
 
         foreach ($this->generatedMigrationContexts() as $context) {
-            self::assertTrue($this->isBugCondition($context), $context['case'].' must exercise the bug condition.');
+            // Post-fix: freshTemplateContext resolves to pgsql, which means
+            // isBugCondition() is false — this proves the bug is fixed.
+            if (! $this->isBugCondition($context)) {
+                self::assertTrue(
+                    $this->expectedBehavior($context['result']),
+                    $context['case'].' is outside the bug condition; its result must satisfy expectedBehavior (fix proof).'
+                );
+                $fixVerified = true;
 
+                continue;
+            }
+
+            // All fault-injected contexts must still be bug conditions.
             if ($context['preconditionsSatisfied']) {
                 if (! $this->expectedBehavior($context['result'])) {
                     $violations[] = $this->sanitizedCounterexample($context);
@@ -42,6 +56,8 @@ final class PostgreSqlCutoverBugConditionPropertyTest extends TestCase
                 $context['case'].' must leave the sanitized SQLite fixture unchanged.'
             );
         }
+
+        self::assertTrue($fixVerified, 'The fresh template context must prove the bug is fixed (isBugCondition is false and expectedBehavior passes).');
 
         self::assertSame(
             [],
@@ -94,16 +110,8 @@ final class PostgreSqlCutoverBugConditionPropertyTest extends TestCase
     /**
      * @return iterable<string, array{0: array<string, mixed>}>
      */
-    public static function deterministicCounterexamples(): iterable
+    public static function deterministicRejectionCases(): iterable
     {
-        $templateEngine = self::environmentTemplate()['DB_CONNECTION'] ?? null;
-
-        yield 'unchanged template resolves to sqlite' => [[
-            'result' => self::completeResult(['runtimeDatabaseEngine' => $templateEngine]),
-            'mustAbort' => false,
-            'testEnvironmentIsSafe' => true,
-        ]];
-
         yield 'connection-only switch exposes empty target' => [[
             'result' => self::completeResult([
                 'targetSchemaMatchesCanonicalMigrations' => false,
@@ -129,7 +137,7 @@ final class PostgreSqlCutoverBugConditionPropertyTest extends TestCase
         ]];
     }
 
-    #[DataProvider('deterministicCounterexamples')]
+    #[DataProvider('deterministicRejectionCases')]
     public function test_deterministic_risk_fixtures_are_rejected(array $fixture): void
     {
         $accepted = $this->expectedBehavior($fixture['result'])
@@ -137,6 +145,35 @@ final class PostgreSqlCutoverBugConditionPropertyTest extends TestCase
             && $fixture['testEnvironmentIsSafe'];
 
         self::assertFalse($accepted);
+    }
+
+    /**
+     * @return iterable<string, array{0: array<string, mixed>}>
+     */
+    public static function deterministicPostFixAcceptanceCases(): iterable
+    {
+        $templateEngine = self::environmentTemplate()['DB_CONNECTION'] ?? null;
+
+        yield 'template correctly selects pgsql' => [[
+            'result' => self::completeResult(['runtimeDatabaseEngine' => $templateEngine]),
+            'mustAbort' => false,
+            'testEnvironmentIsSafe' => true,
+        ]];
+    }
+
+    /**
+     * Post-fix: The template now resolves to pgsql. A complete result with the
+     * correct engine, no abort condition, and a safe test environment MUST be
+     * accepted — this proves the bug is fixed at the deterministic-fixture level.
+     */
+    #[DataProvider('deterministicPostFixAcceptanceCases')]
+    public function test_deterministic_post_fix_acceptance_is_verified(array $fixture): void
+    {
+        $accepted = $this->expectedBehavior($fixture['result'])
+            && ! $fixture['mustAbort']
+            && $fixture['testEnvironmentIsSafe'];
+
+        self::assertTrue($accepted, 'The fixed template must produce an accepted result (pgsql runtime with all predicates satisfied).');
     }
 
     /**
