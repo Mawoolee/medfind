@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\ActivityLog;
 use App\Models\InventoryItem;
 use App\Models\Medicine;
-use App\Models\Message;
 use App\Models\Pharmacy;
 use App\Models\User;
 use App\Notifications\PharmacyStatusNotification;
@@ -16,19 +15,10 @@ class AdminDashboardController extends Controller
 {
     public function index(): View
     {
-        $userCount = User::count();
-        $pharmacyCount = Pharmacy::count();
-        $medicineCount = Medicine::count();
-        $messageCount = Message::count();
-
         $recentUsers = User::latest()->take(5)->get();
         $recentPharmacies = Pharmacy::latest()->take(5)->get();
 
         return view('admin.dashboard', compact(
-            'userCount',
-            'pharmacyCount',
-            'medicineCount',
-            'messageCount',
             'recentUsers',
             'recentPharmacies'
         ));
@@ -148,6 +138,7 @@ public function editUser(User $user): View
             'latitude'        => 'nullable|numeric',
             'longitude'       => 'nullable|numeric',
             'contactNumber'   => 'nullable|string|max:50',
+            'operating_hours' => 'nullable|string|max:255',
             'user_id'         => 'nullable|exists:users,id',
         ]);
 
@@ -157,6 +148,7 @@ public function editUser(User $user): View
             'latitude'        => $request->latitude,
             'longitude'       => $request->longitude,
             'contactNumber'   => $request->contactNumber,
+            'operating_hours' => $request->operating_hours,
             'user_id'         => $request->user_id,
             'status'          => 'approved',
         ]);
@@ -179,6 +171,7 @@ public function editPharmacy(Pharmacy $pharmacy): View
             'latitude'        => 'nullable|numeric',
             'longitude'       => 'nullable|numeric',
             'contactNumber'   => 'nullable|string|max:50',
+            'operating_hours' => 'nullable|string|max:255',
             'user_id'         => 'nullable|exists:users,id',
             'status'          => 'required|in:pending,approved,rejected',
         ]);
@@ -191,6 +184,7 @@ public function editPharmacy(Pharmacy $pharmacy): View
             'latitude'        => $request->latitude,
             'longitude'       => $request->longitude,
             'contactNumber'   => $request->contactNumber,
+            'operating_hours' => $request->operating_hours,
             'user_id'         => $request->user_id,
             'status'          => $request->status,
         ]);
@@ -327,5 +321,81 @@ public function editMedicine(Medicine $medicine): View
         $activities = $query->latest()->paginate(15)->withQueryString();
 
         return view('admin.activity', compact('activities'));
+    }
+
+    // ── Requirements Review ───────────────────────────────────────────────────
+    public function requirements(Request $request)
+    {
+        $query = Pharmacy::with('user')->whereNotNull('requirements');
+
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        } else {
+            // Default: show pending pharmacies with requirements
+            $query->where('status', 'pending');
+        }
+
+        $pharmacies = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
+
+        return view('admin.requirements', compact('pharmacies'));
+    }
+
+    public function approveRequirements(Request $request, Pharmacy $pharmacy)
+    {
+        $uploaded = $pharmacy->requirements ?? [];
+        $missingRequiredDocuments = [];
+
+        foreach (PharmacyRequirementsController::DOCS as $key => $document) {
+            if ($document['required'] && empty($uploaded[$key])) {
+                $missingRequiredDocuments[] = $document['label'];
+            }
+        }
+
+        if ($missingRequiredDocuments !== []) {
+            return redirect()->route('admin.requirements')->with(
+                'error',
+                'Cannot approve pharmacy. Missing required documents: ' . implode(', ', $missingRequiredDocuments) . '.'
+            );
+        }
+
+        $pharmacy->update(['status' => 'approved']);
+        if ($pharmacy->user) {
+            $pharmacy->user->notify(new \App\Notifications\PharmacyStatusNotification($pharmacy, 'approved'));
+        }
+        $this->logActivity('approved', 'Pharmacy', $pharmacy->id, "Approved requirements for {$pharmacy->pharmacy_name}");
+        return redirect()->route('admin.requirements')->with('success', "{$pharmacy->pharmacy_name} has been approved.");
+    }
+
+    public function rejectRequirements(Request $request, Pharmacy $pharmacy)
+    {
+        $pharmacy->update(['status' => 'rejected']);
+        if ($pharmacy->user) {
+            $pharmacy->user->notify(new \App\Notifications\PharmacyStatusNotification($pharmacy, 'rejected'));
+        }
+        $this->logActivity('rejected', 'Pharmacy', $pharmacy->id, "Rejected requirements for {$pharmacy->pharmacy_name}");
+        return redirect()->route('admin.requirements')->with('success', "{$pharmacy->pharmacy_name} has been rejected.");
+    }
+
+    // ── Serve private requirement file ────────────────────────────────────────
+    public function serveRequirement(Pharmacy $pharmacy, string $key)
+    {
+        $docs = $pharmacy->requirements ?? [];
+        if (!array_key_exists($key, $docs)) {
+            abort(404, 'Document not found.');
+        }
+
+        $path = $docs[$key];
+        if (!\Illuminate\Support\Facades\Storage::disk('local')->exists($path)) {
+            abort(404, 'File not found on disk.');
+        }
+
+        $fullPath = \Illuminate\Support\Facades\Storage::disk('local')->path($path);
+        $mime = mime_content_type($fullPath) ?: 'application/octet-stream';
+        $filename = basename($path);
+
+        return response()->file($fullPath, [
+            'Content-Type'        => $mime,
+            'Content-Disposition' => 'inline; filename="' . $filename . '"',
+        ]);
     }
 }

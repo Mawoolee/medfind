@@ -15,8 +15,15 @@ class Pharmacy extends Model
         'latitude',
         'longitude',
         'contactNumber',
+        'operating_hours',
         'user_id',
         'status',
+        'logo_path',
+        'requirements',
+    ];
+
+    protected $casts = [
+        'requirements' => 'array',
     ];
 
     /**

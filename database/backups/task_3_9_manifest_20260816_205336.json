@@ -1,0 +1,167 @@
+{
+    "manifest_version": 1,
+    "phase": "pre_cutover_verification_and_acceptance",
+    "task": "3.9",
+    "generated_at": "2026-08-16T18:53:36+00:00",
+    "depends_on_task": "3.8",
+    "all_gates_passed": false,
+    "cutover_approved": false,
+    "cutover_performed": false,
+    "runtime_change_permitted": false,
+    "source_mutation_permitted": false,
+    "target_application_traffic_permitted": false,
+    "gates": {
+        "gate_1_pgsql_driver": {
+            "passed": true,
+            "details": "Driver: pgsql, Server: PostgreSQL 16.14"
+        },
+        "gate_2_migrations": {
+            "passed": true,
+            "details": "17 migrations applied",
+            "migrations": [
+                "2026_07_20_143958_create_all_tables",
+                "2026_08_09_012700_add_message_verification_fields",
+                "2026_08_09_030000_add_inventory_enhancements",
+                "2026_08_09_030010_create_suppliers_table",
+                "2026_08_09_030020_create_controlled_substance_logs_table",
+                "2026_08_09_030030_create_cycle_counts_table",
+                "2026_08_09_030040_create_returns_recalls_table",
+                "2026_08_09_030050_create_audits_table",
+                "2026_08_10_000000_create_search_logs_table",
+                "2026_08_11_000000_create_notifications_table",
+                "2026_08_11_000010_create_activity_logs_table",
+                "2026_08_12_000000_create_survey_responses_table",
+                "2026_08_13_000001_add_logo_and_requirements_to_pharmacies",
+                "2026_08_13_000002_make_pharmacy_columns_nullable",
+                "2026_08_13_000003_add_operating_hours_to_pharmacies",
+                "2026_08_15_000001_add_attachments_to_messages",
+                "2026_08_16_000001_add_sender_to_messages"
+            ]
+        },
+        "gate_3_row_counts": {
+            "passed": true,
+            "details": {
+                "users": {
+                    "expected": 3,
+                    "actual": 3,
+                    "match": true
+                },
+                "pharmacies": {
+                    "expected": 5,
+                    "actual": 5,
+                    "match": true
+                },
+                "medicines": {
+                    "expected": 6,
+                    "actual": 6,
+                    "match": true
+                },
+                "inventory_items": {
+                    "expected": 12,
+                    "actual": 12,
+                    "match": true
+                },
+                "messages": {
+                    "expected": 0,
+                    "actual": 0,
+                    "match": true
+                },
+                "sessions": {
+                    "expected": 1,
+                    "actual": 1,
+                    "match": true
+                },
+                "suppliers": {
+                    "expected": 0,
+                    "actual": 0,
+                    "match": true
+                },
+                "controlled_substance_logs": {
+                    "expected": 0,
+                    "actual": 0,
+                    "match": true
+                },
+                "cycle_counts": {
+                    "expected": 0,
+                    "actual": 0,
+                    "match": true
+                },
+                "cycle_count_items": {
+                    "expected": 0,
+                    "actual": 0,
+                    "match": true
+                },
+                "returns_recalls": {
+                    "expected": 0,
+                    "actual": 0,
+                    "match": true
+                },
+                "inventory_audits": {
+                    "expected": 0,
+                    "actual": 0,
+                    "match": true
+                },
+                "search_logs": {
+                    "expected": 0,
+                    "actual": 0,
+                    "match": true
+                },
+                "activity_logs": {
+                    "expected": 0,
+                    "actual": 0,
+                    "match": true
+                },
+                "survey_responses": {
+                    "expected": 0,
+                    "actual": 0,
+                    "match": true
+                }
+            }
+        },
+        "gate_4_circular_relationship": {
+            "passed": true,
+            "details": []
+        },
+        "gate_5_rw_probe": {
+            "passed": false,
+            "details": "SQLSTATE[42703]: Undefined column: 7 ERROR:  column \"user_id\" of relation \"search_logs\" does not exist\nLINE 1: INSERT INTO search_logs (user_id, query, results_count, crea...\n                                 ^"
+        },
+        "gate_6_sqlite_checksum": {
+            "passed": true,
+            "details": "SHA256 matches: b23589695ddddcc5437aed7fe75f45148f805627db39f34489c4b78ffca0617d"
+        },
+        "gate_7_test_isolation": {
+            "passed": false,
+            "details": "phpunit.xml not found"
+        },
+        "gate_8_reverb_broadcasting": {
+            "passed": false,
+            "details": "Broadcasting/Reverb configs verified"
+        },
+        "gate_9_fk_orphans": {
+            "passed": true,
+            "details": {
+                "users.pharmacy_id->pharmacies": 0,
+                "pharmacies.user_id->users": 0,
+                "inventory_items.pharmacy_id->pharmacies": 0,
+                "inventory_items.medicine_id->medicines": 0,
+                "inventory_items.supplier_id->suppliers": 0
+            }
+        }
+    },
+    "gate_summary": {
+        "total": 9,
+        "passed": 6,
+        "failed": 3
+    },
+    "next_steps": [
+        "Fix failures and re-run pre-cutover verification",
+        "Do NOT attempt cutover"
+    ],
+    "warnings": [
+        "Do NOT enable target application traffic until task 3.10",
+        "Do NOT exit maintenance mode",
+        "Do NOT modify .env runtime selection without task 3.10 approval",
+        "Credentials are NOT logged in this manifest"
+    ]
+}

@@ -1,11 +1,14 @@
-import Echo from 'laravel-echo';
+﻿import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
+
+// Suppress Pusher's own warnings — we use it as a WebSocket transport
+// for Reverb, not as a Pusher cloud connection.
+Pusher.logToConsole = false;
+Pusher.Runtime.createXHR = function() { return new XMLHttpRequest(); };
 
 /**
  * Initialize Laravel Echo with Reverb (local WebSocket server).
- *
- * Falls back to a silent no-op when no key is configured so pages
- * that don't need WebSockets won't crash.
+ * Falls back to a silent no-op when no key is configured.
  */
 const reverbKey = import.meta.env.VITE_REVERB_APP_KEY || '';
 
@@ -25,11 +28,11 @@ if (reverbKey) {
 
     console.info('[MedFind] Laravel Echo initialized (Reverb)');
 } else {
-    // No key — install a safe no-op stub so downstream code won't throw.
+    window.Pusher = Pusher;   // still expose it so Echo works if key added later
     window.Echo = {
         channel: () => ({ listen: () => ({}) }),
         private: () => ({ listen: () => ({}), notification: () => ({}) }),
         leave: () => {},
     };
-    console.debug('[MedFind] Echo not initialized (no REVERB key)');
+    console.debug('[MedFind] Echo not initialized (no REVERB key configured)');
 }

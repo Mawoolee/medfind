@@ -17,22 +17,39 @@ class ConsumerController extends Controller
             ->with('inventory.medicine')
             ->get();
 
+        // Pre-compute most searched medicine per pharmacy from SearchLog
+        $topSearchedByPharmacy = SearchLog::selectRaw('pharmacy_id, query, COUNT(*) as total')
+            ->whereNotNull('query')
+            ->groupBy('pharmacy_id', 'query')
+            ->orderBy('total', 'desc')
+            ->get()
+            ->groupBy('pharmacy_id')
+            ->map(fn($rows) => $rows->take(3)->pluck('query')->values()->toArray());
+
         // Format pharmacies for the frontend
-        $formattedPharmacies = $pharmacies->map(function($pharmacy) {
+        $formattedPharmacies = $pharmacies->map(function($pharmacy) use ($topSearchedByPharmacy) {
             return [
-                'id' => $pharmacy->id,
-                'name' => $pharmacy->pharmacy_name,
-                'address' => $pharmacy->pharmacyAddress,
-                'lat' => (float) $pharmacy->latitude,
-                'lng' => (float) $pharmacy->longitude,
-                'medicines' => $pharmacy->inventory->map(function($item) {
+                'id'            => $pharmacy->id,
+                'name'          => $pharmacy->pharmacy_name,
+                'address'       => $pharmacy->pharmacyAddress,
+                'lat'           => (float) $pharmacy->latitude,
+                'lng'           => (float) $pharmacy->longitude,
+                'contactNumber' => $pharmacy->contactNumber,
+                'hours'         => $pharmacy->operating_hours,
+                'logo'          => $pharmacy->logo_path ? asset('storage/' . $pharmacy->logo_path) : null,
+                'mostSearched'  => $topSearchedByPharmacy[$pharmacy->id] ?? [],
+                'medicines'     => $pharmacy->inventory->map(function($item) {
                     return [
-                        'name' => $item->medicine->medicine_name ?? 'Unknown',
-                        'price' => (float) $item->price,
-                        'stock' => (int) $item->stockQuantity,
-                        'prescription' => $item->medicine->requiresPrescription ?? false
+                        'id'           => $item->id,
+                        'name'         => $item->medicine->medicine_name ?? 'Unknown',
+                        'dosage'       => $item->medicine->dosage ?? null,
+                        'manufacturer' => $item->medicine->manufacturer ?? null,
+                        'category'     => $item->medicine->category ?? null,
+                        'price'        => (float) $item->price,
+                        'stock'        => (int) $item->stockQuantity,
+                        'prescription' => $item->medicine->requiresPrescription ?? false,
                     ];
-                })->toArray()
+                })->toArray(),
             ];
         })->toArray();
 

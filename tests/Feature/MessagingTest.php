@@ -217,9 +217,18 @@ class MessagingTest extends TestCase
             ->assertRedirect()
             ->assertSessionHas('success');
 
+        // Controller creates a new message from pharmacy instead of updating reply field
         $this->assertDatabaseHas('messages', [
-            'id'    => $message->id,
-            'reply' => 'Yes, we have it in stock!',
+            'consumer_id' => $consumer->id,
+            'pharmacy_id' => $pharmacy->id,
+            'sender'      => 'pharmacy',
+            'message'     => 'Yes, we have it in stock!',
+        ]);
+
+        // Original message marked as read
+        $this->assertDatabaseHas('messages', [
+            'id'      => $message->id,
+            'is_read' => true,
         ]);
     }
 

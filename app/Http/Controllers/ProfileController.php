@@ -34,6 +34,10 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
+        // Redirect back to the consumer profile page for consumers, otherwise default profile.edit
+        if ($request->user()->role === 'consumer') {
+            return Redirect::route('consumer.profile.settings')->with('status', 'profile-updated');
+        }
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 

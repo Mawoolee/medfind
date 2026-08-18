@@ -1,0 +1,253 @@
+{
+    "manifest_version": 1,
+    "phase": "production_target_schema_and_authoritative_transfer",
+    "task": "3.7",
+    "generated_at": "2026-08-16T18:44:35+00:00",
+    "transfer_passed": true,
+    "abort_required": false,
+    "cutover_performed": false,
+    "runtime_change_permitted": false,
+    "source_mutation_permitted": false,
+    "target_application_traffic_permitted": false,
+    "resumption_policy": "discard_and_recreate_unaccepted_target",
+    "gates": {
+        "maintenance_mode_active": {
+            "passed": true,
+            "reason": "app in maintenance mode"
+        },
+        "target_empty_before_transfer": {
+            "passed": true,
+            "reason": "all_authoritative_tables_verified_empty"
+        },
+        "source_opened_read_only": {
+            "passed": true,
+            "reason": "query_only_mode_enabled"
+        },
+        "canonical_schema_applied": {
+            "passed": true,
+            "reason": "17_migrations_applied_from_repository"
+        },
+        "transactional_transfer": {
+            "passed": true,
+            "reason": "committed_to_unaccepted_target"
+        },
+        "authoritative_equivalence": {
+            "passed": true,
+            "reason": "counts_hashes_keys_verified"
+        },
+        "source_checksum_preserved": {
+            "passed": true,
+            "reason": "sha256_match"
+        },
+        "session_transfer_approved": {
+            "passed": true,
+            "reason": "session_transferred_with_app_key_retained"
+        },
+        "target_application_traffic_disabled": {
+            "passed": true,
+            "reason": "target_not_exposed_to_application"
+        }
+    },
+    "source": {
+        "path": "database/database.sqlite",
+        "checksum_sha256_before": "b23589695ddddcc5437aed7fe75f45148f805627db39f34489c4b78ffca0617d",
+        "checksum_sha256_after": "b23589695ddddcc5437aed7fe75f45148f805627db39f34489c4b78ffca0617d",
+        "checksum_preserved": true,
+        "migrations_applied": 7,
+        "table_count": 9,
+        "total_row_count": 34
+    },
+    "target": {
+        "database": "medfind",
+        "encoding": "UTF8",
+        "migrations_applied": 17,
+        "schema_source": "canonical_repository_migrations"
+    },
+    "schema_status": {
+        "canonical_migrations_applied": 17,
+        "source_migrations_applied": 7,
+        "tables_not_in_source": [
+            "suppliers",
+            "controlled_substance_logs",
+            "cycle_counts",
+            "cycle_count_items",
+            "returns_recalls",
+            "inventory_audits",
+            "search_logs",
+            "notifications",
+            "activity_logs",
+            "survey_responses"
+        ],
+        "columns_not_in_source": {
+            "pharmacies": [
+                "operating_hours",
+                "status",
+                "logo_path",
+                "requirements"
+            ],
+            "inventory_items": [
+                "expiry_date",
+                "batch_number",
+                "cold_chain",
+                "par_level",
+                "supplier_id"
+            ],
+            "messages": [
+                "verified_by",
+                "verification_status",
+                "verification_notes",
+                "verified_at",
+                "attachments",
+                "sender"
+            ]
+        },
+        "not_null_columns_filled_with_defaults": {
+            "pharmacies.status": "approved",
+            "inventory_items.cold_chain": false,
+            "inventory_items.par_level": 0
+        },
+        "note": "Source has 7/17 migrations. Later-added nullable columns are NULL. Later-added NOT NULL columns use schema defaults. Later-added tables exist empty."
+    },
+    "tables": {
+        "users": {
+            "source_row_count": 3,
+            "target_row_count": 3,
+            "primary_key_minimum": 1,
+            "primary_key_maximum": 3,
+            "source_canonical_sha256": "c9e1f31ccd7649231559bbf71c9260b657c42a01a9bee43e7b3f3220c439a346",
+            "target_canonical_sha256": "c9e1f31ccd7649231559bbf71c9260b657c42a01a9bee43e7b3f3220c439a346",
+            "equivalent": true,
+            "missing_columns_filled": []
+        },
+        "pharmacies": {
+            "source_row_count": 5,
+            "target_row_count": 5,
+            "primary_key_minimum": 1,
+            "primary_key_maximum": 5,
+            "source_canonical_sha256": "c273f7744c9b0163e3c0c22ef54cbe394b75731000f9fbee5c10723bd5ec4df2",
+            "target_canonical_sha256": "c273f7744c9b0163e3c0c22ef54cbe394b75731000f9fbee5c10723bd5ec4df2",
+            "equivalent": true,
+            "missing_columns_filled": [
+                "operating_hours",
+                "status",
+                "logo_path",
+                "requirements"
+            ]
+        },
+        "medicines": {
+            "source_row_count": 6,
+            "target_row_count": 6,
+            "primary_key_minimum": 1,
+            "primary_key_maximum": 6,
+            "source_canonical_sha256": "2505fd64f7ba63899b0a736857657e66dc6e5c3a900f80c3b2c2a17c386bb893",
+            "target_canonical_sha256": "2505fd64f7ba63899b0a736857657e66dc6e5c3a900f80c3b2c2a17c386bb893",
+            "equivalent": true,
+            "missing_columns_filled": []
+        },
+        "inventory_items": {
+            "source_row_count": 12,
+            "target_row_count": 12,
+            "primary_key_minimum": 1,
+            "primary_key_maximum": 12,
+            "source_canonical_sha256": "bb68e91ae92be86de8358fc242daed679771e59f91417f9a9e9daa8dd2d6cdb2",
+            "target_canonical_sha256": "bb68e91ae92be86de8358fc242daed679771e59f91417f9a9e9daa8dd2d6cdb2",
+            "equivalent": true,
+            "missing_columns_filled": [
+                "expiry_date",
+                "batch_number",
+                "cold_chain",
+                "par_level",
+                "supplier_id"
+            ]
+        },
+        "messages": {
+            "source_row_count": 0,
+            "target_row_count": 0,
+            "primary_key_minimum": null,
+            "primary_key_maximum": null,
+            "source_canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "target_canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "equivalent": true,
+            "missing_columns_filled": [
+                "verified_by",
+                "verification_status",
+                "verification_notes",
+                "verified_at",
+                "attachments",
+                "sender"
+            ]
+        },
+        "sessions": {
+            "source_row_count": 1,
+            "target_row_count": 1,
+            "primary_key_minimum": "ZBfLfnb8zT9sAgjCOXqVOpgq9c1cXHxKwSPyG5po",
+            "primary_key_maximum": "ZBfLfnb8zT9sAgjCOXqVOpgq9c1cXHxKwSPyG5po",
+            "source_canonical_sha256": "82ef40b312438e89c35d0fe3a2c3d3ede3a3fabfb598a22d53c79b52a7469769",
+            "target_canonical_sha256": "82ef40b312438e89c35d0fe3a2c3d3ede3a3fabfb598a22d53c79b52a7469769",
+            "equivalent": true,
+            "missing_columns_filled": []
+        }
+    },
+    "operational_tables": {
+        "migrations": "retained_from_canonical_laravel_migrations",
+        "cache": "not_transferred_empty",
+        "cache_locks": "not_transferred_empty"
+    },
+    "normalization": {
+        "invalid_value_count": 0,
+        "timezone_interpretation": "UTC for timezone-naive SQLite timestamps",
+        "json_semantics_validated": true,
+        "binary_float_decimal_conversion_used": false,
+        "sql_null_preserved_distinctly": true,
+        "missing_source_columns_handled": "nullable=NULL, not_null=schema_default"
+    },
+    "sequence_status": {
+        "state": "pending_task_3_8_repair_and_verification",
+        "cutover_blocked_until_verified": true,
+        "tables_requiring_sequence_repair": [
+            "users",
+            "pharmacies",
+            "medicines",
+            "inventory_items"
+        ],
+        "tables_with_no_rows": [
+            "messages",
+            "suppliers",
+            "controlled_substance_logs",
+            "cycle_counts",
+            "cycle_count_items",
+            "returns_recalls",
+            "inventory_audits",
+            "search_logs",
+            "activity_logs",
+            "survey_responses"
+        ],
+        "non_sequence_tables": [
+            "notifications (uuid)",
+            "sessions (string)",
+            "cache (string)",
+            "cache_locks (string)"
+        ]
+    },
+    "session_decision": {
+        "mode": "transfer",
+        "session_continuity_approved": true,
+        "app_key_retained": true,
+        "rows_transferred": 1
+    },
+    "dependency_order": [
+        "1. users (pharmacy_id deferred to NULL during insert)",
+        "2. pharmacies (user_id references already-inserted users)",
+        "3. users.pharmacy_id restored from deferred map",
+        "4. medicines",
+        "5. inventory_items",
+        "6. messages (0 rows - empty in source)",
+        "7. sessions (1 row - continuity approved)"
+    ],
+    "next_steps": [
+        "Task 3.8: Repair PostgreSQL identity sequences using setval(MAX(id))",
+        "Do NOT enable target application traffic",
+        "Do NOT exit maintenance mode",
+        "Do NOT modify .env runtime selection"
+    ]
+}

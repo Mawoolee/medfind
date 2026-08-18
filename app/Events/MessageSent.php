@@ -55,6 +55,7 @@ class MessageSent implements ShouldBroadcast
     {
         return [
             new Channel('pharmacy.' . $this->pharmacyId),
+            new Channel('consumer.' . $this->consumerId),
         ];
     }
 

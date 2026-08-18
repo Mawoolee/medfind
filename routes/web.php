@@ -42,6 +42,13 @@ Route::get('/dashboard', function () {
 require __DIR__.'/auth.php';
 
 // ============================================
+// PHARMACY PENDING APPROVAL PAGE
+// ============================================
+Route::get('/pharmacy/pending', function () {
+    return view('auth.pharmacy-pending');
+})->middleware('auth')->name('consumer.pharmacy.pending');
+
+// ============================================
 // SURVEY ROUTES (ISO/IEC 25010 Evaluation)
 // ============================================
 // Public form — anyone can fill it out
@@ -68,12 +75,18 @@ Route::middleware(['auth', 'role:consumer'])->prefix('consumer')->name('consumer
     Route::get('/pharmacy/{id}', [ConsumerController::class, 'pharmacyDetails'])->name('pharmacy.details');
     Route::post('/message/send', [MessageController::class, 'store'])->name('message.send');
     Route::get('/messages', [MessageController::class, 'consumerConversations'])->name('messages');
+    Route::delete('/messages/{pharmacyId}', [MessageController::class, 'deleteConversation'])->name('messages.delete');
+    Route::get('/messages/data', [MessageController::class, 'consumerMessagesJson'])->name('messages.json');
+    Route::get('/messages/{pharmacyId}', [MessageController::class, 'consumerChat'])->name('messages.chat');
+    Route::get('/prescription/{message}', [MessageController::class, 'consumerPrescription'])->name('prescription.view');
+    Route::get('/attachment/{message}/{index}', [MessageController::class, 'consumerAttachment'])->name('attachment.view');
+    Route::get('/profile', function() { return view('consumer.profile'); })->name('profile.settings');
 });
 
 // ============================================
 // PHARMACY ROUTES
 // ============================================
-Route::middleware(['auth', 'role:pharmacy,pharmacy_operator'])->prefix('pharmacy')->name('pharmacy.')->group(function () {
+Route::middleware(['auth', 'role:pharmacy,pharmacy_operator', 'pharmacy.pending'])->prefix('pharmacy')->name('pharmacy.')->group(function () {
     Route::get('/dashboard', [PharmacyDashboardController::class, 'index'])->name('dashboard');
     // Inventory management (CRUD, search, pagination)
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory');
@@ -98,14 +111,17 @@ Route::middleware(['auth', 'role:pharmacy,pharmacy_operator'])->prefix('pharmacy
     Route::get('/messages', [PharmacyDashboardController::class, 'messages'])->name('messages');
     Route::post('/message/reply/{id}', [PharmacyDashboardController::class, 'replyMessage'])->name('message.reply');
     Route::get('/message/mark-read/{id}', [PharmacyDashboardController::class, 'markRead'])->name('message.mark-read');
+    Route::delete('/message/conversation/{consumerId}', [MessageController::class, 'pharmacyDeleteConversation'])->name('message.delete');
 
     // AJAX endpoints for pharmacy messaging (return JSON) - used by frontend polling and mark-as-read buttons
     Route::get('/unread-count', [MessageController::class, 'unreadCount'])->name('unread.count');
+    Route::get('/messages-data', [MessageController::class, 'pharmacyMessagesJson'])->name('messages.data');
     Route::post('/message/mark-read-ajax/{id}', [MessageController::class, 'markReadAjax'])->name('message.mark-read-ajax');
     Route::post('/message/mark-unread-ajax/{id}', [MessageController::class, 'markUnreadAjax'])->name('message.mark-unread-ajax');
     Route::post('/message/verify-ajax/{id}', [MessageController::class, 'verifyAjax'])->name('message.verify-ajax');
     // Secure prescription image viewer (decrypts on-the-fly, never serves raw public URL)
     Route::get('/prescription/{message}', [MessageController::class, 'servePrescription'])->name('prescription.serve');
+    Route::get('/attachment/{message}/{index}', [MessageController::class, 'pharmacyAttachment'])->name('attachment.view');
 
     // Inventory Analysis (ABC/VED)
     Route::get('/analysis', [\App\Http\Controllers\AnalysisController::class, 'index'])->name('analysis');
@@ -134,6 +150,10 @@ Route::middleware(['auth', 'role:pharmacy,pharmacy_operator'])->prefix('pharmacy
     // Pharmacy profile
     Route::get('/profile', [\App\Http\Controllers\PharmacyProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [\App\Http\Controllers\PharmacyProfileController::class, 'update'])->name('profile.update');
+
+    // Requirements upload
+    Route::get('/requirements', [\App\Http\Controllers\PharmacyRequirementsController::class, 'show'])->name('requirements');
+    Route::post('/requirements', [\App\Http\Controllers\PharmacyRequirementsController::class, 'store'])->name('requirements.store');
 
     // Inventory CSV export
     Route::get('/inventory/export', [InventoryController::class, 'export'])->name('inventory.export');
@@ -179,5 +199,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Survey results
     Route::get('/survey/results', [SurveyController::class, 'results'])->name('survey.results');
+
+    // Requirements review
+    Route::get('/requirements', [AdminDashboardController::class, 'requirements'])->name('requirements');
+    Route::post('/pharmacy/{pharmacy}/requirements/approve', [AdminDashboardController::class, 'approveRequirements'])->name('requirements.approve');
+    Route::post('/pharmacy/{pharmacy}/requirements/reject', [AdminDashboardController::class, 'rejectRequirements'])->name('requirements.reject');
+    // Serve a private requirement file securely
+    Route::get('/pharmacy/{pharmacy}/requirement/{key}', [AdminDashboardController::class, 'serveRequirement'])->name('requirement.file');
 });
 
