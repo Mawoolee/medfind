@@ -39,25 +39,25 @@
  </div>
 
  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
- <div class="bg-white rounded-lg shadow-lg p-6">
- <h2 class="text-xl font-semibold text-gray-800 mb-4">Manage Users</h2>
- <p class="text-gray-600 mb-4">View and manage all system users.</p>
- <a href="{{ route('admin.users') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition duration-200">
+ <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col">
+ <h2 class="text-xl font-semibold text-gray-800 mb-2">Manage Users</h2>
+ <p class="text-gray-600 mb-4 flex-1">View and manage all system users.</p>
+ <a href="{{ route('admin.users') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition duration-200 w-fit">
  <i class="fas fa-user-cog mr-2"></i>Manage Users
  </a>
  </div>
- <div class="bg-white rounded-lg shadow-lg p-6">
- <h2 class="text-xl font-semibold text-gray-800 mb-4">Manage Pharmacies</h2>
- <p class="text-gray-600 mb-4">Add, edit, or remove pharmacies.</p>
- <a href="{{ route('admin.pharmacies') }}" class="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition duration-200">
+ <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col">
+ <h2 class="text-xl font-semibold text-gray-800 mb-2">Manage Pharmacies</h2>
+ <p class="text-gray-600 mb-4 flex-1">Add, edit, or remove pharmacies.</p>
+ <a href="{{ route('admin.pharmacies') }}" class="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition duration-200 w-fit">
  <i class="fas fa-store-alt mr-2"></i>Manage Pharmacies
  </a>
  </div>
- <div class="bg-white rounded-lg shadow-lg p-6">
- <h2 class="text-xl font-semibold text-gray-800 mb-4">Review Requirements</h2>
- <p class="text-gray-600 mb-4">Review pharmacy documents and approve or reject registrations.</p>
- <a href="{{ route('admin.requirements') }}" class="inline-block text-white px-6 py-2 rounded-lg transition duration-200" style="background:#9400D3;">
- <i class="fas fa-file-check mr-2"></i>Review Requirements
+ <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col">
+ <h2 class="text-xl font-semibold text-gray-800 mb-2">Review Requirements</h2>
+ <p class="text-gray-600 mb-4 flex-1">Review pharmacy documents and approve or reject registrations.</p>
+ <a href="{{ route('admin.requirements') }}" class="inline-block text-white px-6 py-3 rounded-lg transition duration-200 w-fit" style="background:#9400D3;">
+ <i class="fas fa-file-circle-check mr-2"></i>Review Requirements
  </a>
  </div>
  </div>

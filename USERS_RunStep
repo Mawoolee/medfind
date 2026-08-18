@@ -39,13 +39,9 @@ Checklist before opening the browser:
 
 
 Login credentials:
-
-Role	        Email	                Password
-Admin	    admin@medfind.com	        password
-Pharmacy	rose@demo.com	            password
-Pharmacy	generika@demo.com	        password
-Pharmacy	legazpicity@demo.com	    password
-Pharmacy	bicolultra@demo.com	        password
-Pharmacy	gracies@demo.com	        password
-Consumer	consumer1@demo.com	        password
-Consumer	consumer2@demo.com	        password
+	        
+Pharmacy	                                            Email                                    Password
+Legazpi City Pharmacy	                     legazpicitypharmacy@medfind.com	                password123
+Albay Medical Center Pharmacy              	 albaymedicalcenter@medfind.com	                    password123
+Bicol Ultra Drug	                         bicolultradrug@medfind.com	                        password123
+GRACIES PHARMA	                             graciespharma@medfind.com	                        password123

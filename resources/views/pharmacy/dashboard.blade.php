@@ -127,47 +127,49 @@
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
  <!-- Manage Inventory -->
- <div class="bg-white rounded-lg shadow-lg p-6">
- <h2 class="text-xl font-semibold text-gray-800 mb-4"> Manage Inventory</h2>
- <p class="text-gray-600 mb-4">Update your medicine stock levels and prices in real-time.</p>
- <a href="{{ route('pharmacy.inventory') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition duration-200">
+ <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col">
+ <h2 class="text-xl font-semibold text-gray-800 mb-2">Manage Inventory</h2>
+ <p class="text-gray-600 mb-4 flex-1">Update your medicine stock levels and prices in real-time.</p>
+ <a href="{{ route('pharmacy.inventory') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition duration-200 w-fit">
  <i class="fas fa-edit mr-2"></i>Update Stock
  </a>
  </div>
 
  <!-- Add New Medicine -->
- <div class="bg-white rounded-lg shadow-lg p-6">
- <h2 class="text-xl font-semibold text-gray-800 mb-4"> Add New Medicine</h2>
- <p class="text-gray-600 mb-4">Add a new medicine to your inventory.</p>
- <a href="{{ route('pharmacy.inventory.create') }}" class="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition duration-200">
+ <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col">
+ <h2 class="text-xl font-semibold text-gray-800 mb-2">Add New Medicine</h2>
+ <p class="text-gray-600 mb-4 flex-1">Add a new medicine to your inventory.</p>
+ <a href="{{ route('pharmacy.inventory.create') }}" class="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition duration-200 w-fit">
  <i class="fas fa-plus mr-2"></i>Add Medicine
  </a>
  </div>
 
  <!-- Messages -->
- <div class="bg-white rounded-lg shadow-lg p-6">
- <h2 class="text-xl font-semibold text-gray-800 mb-4"> Messages</h2>
- <p class="text-gray-600 mb-4">View and respond to customer inquiries and prescription verifications.</p>
- <a href="{{ route('pharmacy.messages') }}" class="inline-block bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition duration-200">
+ <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col">
+ <h2 class="text-xl font-semibold text-gray-800 mb-2">Messages</h2>
+ <p class="text-gray-600 mb-4 flex-1">View and respond to customer inquiries and prescription verifications.</p>
+ <a href="{{ route('pharmacy.messages') }}" class="inline-block bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition duration-200 w-fit">
  <i class="fas fa-comments mr-2"></i>View Messages
  @if($unreadCount > 0)
  <span class="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">{{ $unreadCount }}</span>
  @endif
  </a>
  </div>
+
  <!-- Audit Log -->
- <div class="bg-white rounded-lg shadow-lg p-6">
- <h2 class="text-xl font-semibold text-gray-800 mb-4"> Audit Log</h2>
- <p class="text-gray-600 mb-4">Review every stock change — who changed what and when.</p>
- <a href="{{ route('pharmacy.audit-log') }}" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg transition duration-200">
+ <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col">
+ <h2 class="text-xl font-semibold text-gray-800 mb-2">Audit Log</h2>
+ <p class="text-gray-600 mb-4 flex-1">Review every stock change — who changed what and when.</p>
+ <a href="{{ route('pharmacy.audit-log') }}" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg transition duration-200 w-fit">
  <i class="fas fa-history mr-2"></i>View Audit Log
  </a>
  </div>
+
  <!-- Controlled Substances -->
- <div class="bg-white rounded-lg shadow-lg p-6">
- <h2 class="text-xl font-semibold text-gray-800 mb-4"> Controlled Substances</h2>
- <p class="text-gray-600 mb-4">Logbook for dispensing, wastage, and transfer entries.</p>
- <a href="{{ route('pharmacy.controlled-substances.create') }}" class="inline-block bg-rose-600 hover:bg-rose-700 text-white px-6 py-3 rounded-lg transition duration-200">
+ <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col">
+ <h2 class="text-xl font-semibold text-gray-800 mb-2">Controlled Substances</h2>
+ <p class="text-gray-600 mb-4 flex-1">Logbook for dispensing, wastage, and transfer entries.</p>
+ <a href="{{ route('pharmacy.controlled-substances.create') }}" class="inline-block bg-rose-600 hover:bg-rose-700 text-white px-6 py-3 rounded-lg transition duration-200 w-fit">
  <i class="fas fa-shield-halved mr-2"></i>Log Entry
  </a>
  </div>

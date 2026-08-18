@@ -342,6 +342,22 @@ public function editMedicine(Medicine $medicine): View
 
     public function approveRequirements(Request $request, Pharmacy $pharmacy)
     {
+        $uploaded = $pharmacy->requirements ?? [];
+        $missingRequiredDocuments = [];
+
+        foreach (PharmacyRequirementsController::DOCS as $key => $document) {
+            if ($document['required'] && empty($uploaded[$key])) {
+                $missingRequiredDocuments[] = $document['label'];
+            }
+        }
+
+        if ($missingRequiredDocuments !== []) {
+            return redirect()->route('admin.requirements')->with(
+                'error',
+                'Cannot approve pharmacy. Missing required documents: ' . implode(', ', $missingRequiredDocuments) . '.'
+            );
+        }
+
         $pharmacy->update(['status' => 'approved']);
         if ($pharmacy->user) {
             $pharmacy->user->notify(new \App\Notifications\PharmacyStatusNotification($pharmacy, 'approved'));

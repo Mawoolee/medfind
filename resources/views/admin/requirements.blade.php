@@ -85,7 +85,7 @@
  'bir' => 'BIR Certificate of Registration',
  'business' => "Mayor's / Business Permit",
  'philhealth' => 'PhilHealth Accreditation (optional)',
- 'fda' => 'FDA Certificate (optional)',
+ 'fda' => 'FDA Certificate',
  'pharmacist' => 'Pharmacist License',
  ];
 

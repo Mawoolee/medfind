@@ -17,7 +17,7 @@
     <form method="GET" action="{{ route('admin.activity') }}" class="bg-white rounded-lg shadow-lg p-4 mb-6 flex flex-wrap gap-3 items-end">
         <div>
             <label class="block text-xs font-semibold text-gray-600 mb-1">Action</label>
-            <select name="action" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            <select name="action" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-300 focus:border-purple-400">
                 <option value="all">All Actions</option>
                 @foreach(['created', 'updated', 'deleted', 'approved', 'rejected'] as $act)
                     <option value="{{ $act }}" {{ request('action') === $act ? 'selected' : '' }}>{{ ucfirst($act) }}</option>
@@ -26,7 +26,7 @@
         </div>
         <div>
             <label class="block text-xs font-semibold text-gray-600 mb-1">Entity</label>
-            <select name="entity" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            <select name="entity" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-300 focus:border-purple-400">
                 <option value="all">All Entities</option>
                 @foreach(['User', 'Pharmacy', 'Medicine'] as $entity)
                     <option value="{{ $entity }}" {{ request('entity') === $entity ? 'selected' : '' }}>{{ $entity }}</option>

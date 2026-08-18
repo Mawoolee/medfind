@@ -119,14 +119,16 @@
                     @php
                         // Build flat timeline using sender field
                         $timeline = $thread->sortBy('created_at')->map(function($msg) {
+                            $attachments = $msg->attachments && is_array($msg->attachments) ? $msg->attachments : [];
                             return (object)[
                                 'type' => $msg->sender ?? 'consumer',
                                 'text' => $msg->message,
                                 'time' => $msg->created_at,
                                 'id' => $msg->id,
                                 'has_prescription' => !empty($msg->prescription_image),
-                                'has_attachments' => !empty($msg->attachments) && is_array($msg->attachments) && count($msg->attachments) > 0,
-                                'attachment_count' => !empty($msg->attachments) && is_array($msg->attachments) ? count($msg->attachments) : 0,
+                                'has_attachments' => count($attachments) > 0,
+                                'attachment_count' => count($attachments),
+                                'attachments' => $attachments,
                             ];
                         });
                     @endphp
@@ -149,11 +151,24 @@
                                     @endif
                                     @if($item->has_attachments)
                                         <div class="mt-2 flex flex-wrap gap-1 justify-end">
-                                            @for($i = 0; $i < $item->attachment_count; $i++)
-                                                <img src="{{ route('consumer.attachment.view', [$item->id, $i]) }}"
-                                                     class="w-16 h-16 rounded-lg object-cover border border-white/20 cursor-pointer hover:opacity-80"
-                                                     onclick="window.open(this.src, '_blank')">
-                                            @endfor
+                                            @foreach($item->attachments as $idx => $att)
+                                                @php
+                                                    $mime = is_array($att) ? ($att['mime'] ?? '') : '';
+                                                    $name = is_array($att) ? ($att['name'] ?? 'attachment') : 'attachment';
+                                                    $isImage = str_starts_with($mime, 'image/');
+                                                @endphp
+                                                @if($isImage)
+                                                    <img src="{{ route('consumer.attachment.view', [$item->id, $idx]) }}"
+                                                         class="w-16 h-16 rounded-lg object-cover border border-white/20 cursor-pointer hover:opacity-80"
+                                                         onclick="window.open(this.src, '_blank')">
+                                                @else
+                                                    <a href="{{ route('consumer.attachment.view', [$item->id, $idx]) }}" target="_blank"
+                                                       class="flex items-center gap-2 px-3 py-2 rounded-lg border border-white/20 hover:bg-white/5 transition" style="background:#2a2a5a;">
+                                                        <i class="fas fa-file-alt text-[#D9F855] text-sm"></i>
+                                                        <span class="text-white text-xs truncate max-w-[120px]">{{ $name }}</span>
+                                                    </a>
+                                                @endif
+                                            @endforeach
                                         </div>
                                     @endif
                                     <p class="text-gray-500 text-xs mt-1 text-right">You · {{ $item->time->format('M d · g:i A') }}</p>
@@ -181,7 +196,7 @@
                         <label for="rx_{{ $pharmacyId }}" class="cursor-pointer text-gray-400 hover:text-[#D9F855] transition">
                             <i class="fas fa-paperclip text-lg"></i>
                         </label>
-                        <input type="file" name="attachments[]" id="rx_{{ $pharmacyId }}" accept=".jpg,.jpeg,.png,.gif,.webp,.pdf" class="hidden" multiple>
+                        <input type="file" name="attachments[]" id="rx_{{ $pharmacyId }}" accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.csv" class="hidden" multiple>
                         <input type="text" name="message" placeholder="Message..." required autocomplete="off"
                                class="flex-1 px-5 py-3 rounded-full text-sm text-white outline-none placeholder-gray-400"
                                style="background:#2a2a5a;border:1px solid rgba(148,0,211,0.3);">
@@ -235,13 +250,25 @@ function sendMessage(form, pharmacyId) {
     // Check for attached files
     var fileInput = form.querySelector('input[name="attachments[]"]');
     var hasFiles = fileInput && fileInput.files && fileInput.files.length > 0;
-    var attachHtml = hasFiles ? '<div class="mt-1 text-xs text-gray-300">' + fileInput.files.length + ' file(s) attached</div>' : '';
+    var attachHtml = '';
+    if (hasFiles) {
+        attachHtml = '<div class="mt-1 flex flex-wrap gap-1 justify-end">';
+        for (var fi = 0; fi < fileInput.files.length; fi++) {
+            var f = fileInput.files[fi];
+            if (f.type && f.type.startsWith('image/')) {
+                attachHtml += '<img src="' + URL.createObjectURL(f) + '" class="w-16 h-16 rounded-lg object-cover border border-white/20">';
+            } else {
+                attachHtml += '<a class="flex items-center gap-2 px-3 py-2 rounded-lg border border-white/20" style="background:#2a2a5a;"><i class="fas fa-file-alt text-[#D9F855] text-sm"></i><span class="text-white text-xs truncate max-w-[120px]">' + f.name + '</span></a>';
+            }
+        }
+        attachHtml += '</div>';
+    }
 
     // Add message bubble immediately
     var msgsDiv = document.getElementById('chat-' + pharmacyId).querySelector('.chat-messages');
     var bubble = document.createElement('div');
     bubble.className = 'flex justify-end';
-    bubble.innerHTML = '<div class="max-w-[70%]"><div class="px-4 py-2.5 rounded-2xl rounded-br-sm" style="background:#9400D3;"><p class="text-white text-sm">' + msg + '</p></div>' + attachHtml + '<p class="text-gray-500 text-xs mt-1 text-right">You - just now</p></div>';
+    bubble.innerHTML = '<div class="max-w-[70%]"><div class="px-4 py-2.5 rounded-2xl rounded-br-sm" style="background:#9400D3;"><p class="text-white text-sm">' + msg + '</p></div>' + attachHtml + '<p class="text-gray-500 text-xs mt-1 text-right">You · just now</p></div>';
     msgsDiv.appendChild(bubble);
     msgsDiv.scrollTop = msgsDiv.scrollHeight;
 
@@ -308,7 +335,7 @@ setInterval(function() {
             // Build flat timeline using sender field
             var items = [];
             conv.messages.forEach(function(m) {
-                items.push({ type: m.sender || 'consumer', text: m.message, time: m.created_at, hasPrescription: m.has_prescription || false, id: m.id, attachmentCount: m.attachment_count || 0 });
+                items.push({ type: m.sender || 'consumer', text: m.message, time: m.created_at, hasPrescription: m.has_prescription || false, id: m.id, attachmentCount: m.attachment_count || 0, attachmentsMeta: m.attachments_meta || [] });
             });
             items.sort(function(a, b) { return new Date(a.time) - new Date(b.time); });
 
@@ -322,14 +349,30 @@ setInterval(function() {
                     html += '<div class="flex justify-end"><div class="max-w-[70%]"><div class="px-4 py-2.5 rounded-2xl rounded-br-sm" style="background:#9400D3;"><p class="text-white text-sm">' + item.text + '</p></div>';
                     if (item.attachmentCount > 0) {
                         html += '<div class="mt-1 flex flex-wrap gap-1 justify-end">';
-                        for (var i = 0; i < item.attachmentCount; i++) {
-                            html += '<img src="/consumer/attachment/' + item.id + '/' + i + '" class="w-16 h-16 rounded-lg object-cover border border-white/20 cursor-pointer" onclick="window.open(this.src, \'_blank\')">';
-                        }
+                        item.attachmentsMeta.forEach(function(att) {
+                            if (att.mime && att.mime.startsWith('image/')) {
+                                html += '<img src="/consumer/attachment/' + item.id + '/' + att.index + '" class="w-16 h-16 rounded-lg object-cover border border-white/20 cursor-pointer" onclick="window.open(this.src, \'_blank\')">';
+                            } else {
+                                html += '<a href="/consumer/attachment/' + item.id + '/' + att.index + '" target="_blank" class="flex items-center gap-2 px-3 py-2 rounded-lg border border-white/20 hover:bg-white/5 transition" style="background:#2a2a5a;"><i class="fas fa-file-alt text-[#D9F855] text-sm"></i><span class="text-white text-xs truncate max-w-[120px]">' + att.name + '</span></a>';
+                            }
+                        });
                         html += '</div>';
                     }
                     html += '<p class="text-gray-500 text-xs mt-1 text-right">You · ' + timeStr + '</p></div></div>';
                 } else {
-                    html += '<div class="flex justify-start"><div class="max-w-[70%]"><div class="px-4 py-2.5 rounded-2xl rounded-bl-sm" style="background:#2a2a5a;"><p class="text-gray-200 text-sm">' + item.text + '</p></div><p class="text-gray-500 text-xs mt-1">' + conv.pharmacy_name + ' · ' + timeStr + '</p></div></div>';
+                    html += '<div class="flex justify-start"><div class="max-w-[70%]"><div class="px-4 py-2.5 rounded-2xl rounded-bl-sm" style="background:#2a2a5a;"><p class="text-gray-200 text-sm">' + item.text + '</p></div>';
+                    if (item.attachmentCount > 0) {
+                        html += '<div class="mt-1 flex flex-wrap gap-1">';
+                        item.attachmentsMeta.forEach(function(att) {
+                            if (att.mime && att.mime.startsWith('image/')) {
+                                html += '<img src="/consumer/attachment/' + item.id + '/' + att.index + '" class="w-16 h-16 rounded-lg object-cover border border-white/20 cursor-pointer" onclick="window.open(this.src, \'_blank\')">';
+                            } else {
+                                html += '<a href="/consumer/attachment/' + item.id + '/' + att.index + '" target="_blank" class="flex items-center gap-2 px-3 py-2 rounded-lg border border-white/20 hover:bg-white/5 transition" style="background:#2a2a5a;"><i class="fas fa-file-alt text-[#D9F855] text-sm"></i><span class="text-white text-xs truncate max-w-[120px]">' + att.name + '</span></a>';
+                            }
+                        });
+                        html += '</div>';
+                    }
+                    html += '<p class="text-gray-500 text-xs mt-1">' + conv.pharmacy_name + ' · ' + timeStr + '</p></div></div>';
                 }
             });
             chatMsgs.innerHTML = html;
@@ -374,14 +417,29 @@ function showFilePreview(files, pharmacyId) {
     list.innerHTML = '';
     pendingFiles.forEach(function(file, idx) {
         var size = file.size < 1024*1024 ? (file.size/1024).toFixed(1) + ' KB' : (file.size/1024/1024).toFixed(1) + ' MB';
+        var isImage = file.type && file.type.startsWith('image/');
         var row = document.createElement('div');
         row.className = 'flex items-center gap-3 py-2 border-b border-white/5';
-        row.innerHTML = '<div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style="background:#9400D3;">'
+
+        var thumbId = 'fileThumb_' + idx;
+        row.innerHTML = '<div id="' + thumbId + '" class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden" style="background:#9400D3;">'
             + '<i class="fas fa-file text-white text-sm"></i></div>'
             + '<div class="flex-1 min-w-0"><p class="text-white text-xs font-medium truncate">' + file.name + '</p>'
             + '<p class="text-gray-400 text-xs">' + size + '</p></div>'
             + '<button onclick="removeFileFromPreview(' + idx + ')" class="text-gray-500 hover:text-red-400 transition"><i class="fas fa-times"></i></button>';
         list.appendChild(row);
+
+        // Show image thumbnail
+        if (isImage) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var thumbEl = document.getElementById(thumbId);
+                if (thumbEl) {
+                    thumbEl.innerHTML = '<img src="' + e.target.result + '" class="w-10 h-10 object-cover rounded-lg">';
+                }
+            };
+            reader.readAsDataURL(file);
+        }
     });
 
     popup.style.display = 'flex';
@@ -415,21 +473,33 @@ function closeFilePreview() {
 
 function sendWithFiles() {
     if (!pendingPharmacyId || pendingFiles.length === 0) return;
-    var caption = document.getElementById('fileCaption').value.trim() || 'Sent ' + pendingFiles.length + ' file(s)';
+    var caption = document.getElementById('fileCaption').value.trim() || '';
     var form = document.querySelector('#chat-' + pendingPharmacyId + ' form');
     if (!form) return;
 
     var fd = new FormData();
     fd.append('_token', form.querySelector('input[name="_token"]').value);
     fd.append('pharmacy_id', pendingPharmacyId);
-    fd.append('message', caption);
+    fd.append('message', caption || 'Sent ' + pendingFiles.length + ' file(s)');
     pendingFiles.forEach(function(file) { fd.append('attachments[]', file); });
 
-    // Show bubble immediately
+    // Show bubble immediately with image previews
     var msgsDiv = document.getElementById('chat-' + pendingPharmacyId).querySelector('.chat-messages');
     var bubble = document.createElement('div');
     bubble.className = 'flex justify-end';
-    bubble.innerHTML = '<div class="max-w-[70%]"><div class="px-4 py-2.5 rounded-2xl rounded-br-sm" style="background:#9400D3;"><p class="text-white text-sm">' + caption + '</p></div><div class="mt-1 text-xs text-gray-300 text-right">' + pendingFiles.length + ' file(s) attached</div><p class="text-gray-500 text-xs mt-1 text-right">You - just now</p></div>';
+    var captionHtml = caption ? '<div class="px-4 py-2.5 rounded-2xl rounded-br-sm" style="background:#9400D3;"><p class="text-white text-sm">' + caption + '</p></div>' : '';
+    var thumbsHtml = '<div class="mt-1 flex flex-wrap gap-1 justify-end">';
+    pendingFiles.forEach(function(file) {
+        var isImage = file.type && file.type.startsWith('image/');
+        if (isImage) {
+            var url = URL.createObjectURL(file);
+            thumbsHtml += '<img src="' + url + '" class="w-16 h-16 rounded-lg object-cover border border-white/20">';
+        } else {
+            thumbsHtml += '<a class="flex items-center gap-2 px-3 py-2 rounded-lg border border-white/20" style="background:#2a2a5a;"><i class="fas fa-file-alt text-[#D9F855] text-sm"></i><span class="text-white text-xs truncate max-w-[120px]">' + file.name + '</span></a>';
+        }
+    });
+    thumbsHtml += '</div>';
+    bubble.innerHTML = '<div class="max-w-[70%]">' + captionHtml + thumbsHtml + '<p class="text-gray-500 text-xs mt-1 text-right">You · just now</p></div>';
     msgsDiv.appendChild(bubble);
     msgsDiv.scrollTop = msgsDiv.scrollHeight;
 
@@ -471,7 +541,7 @@ document.addEventListener('change', function(e) {
                 <label for="addMoreFiles" class="cursor-pointer text-gray-400 hover:text-[#D9F855] transition" title="Add more files">
                     <i class="fas fa-plus"></i>
                 </label>
-                <input type="file" id="addMoreFiles" accept=".jpg,.jpeg,.png,.gif,.webp,.pdf" multiple class="hidden" onchange="addMoreFilesToPreview(this)">
+                <input type="file" id="addMoreFiles" accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.csv" multiple class="hidden" onchange="addMoreFilesToPreview(this)">
                 <button onclick="closeFilePreview()" class="text-gray-400 hover:text-white transition">
                     <i class="fas fa-times"></i>
                 </button>

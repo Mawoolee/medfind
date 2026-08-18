@@ -191,6 +191,8 @@ public function messages(Request $request)
     {
         $request->validate([
             'reply' => 'required|string|max:1000',
+            'attachments' => 'nullable|array|max:10',
+            'attachments.*' => 'file|mimes:jpeg,jpg,png,gif,webp,pdf,doc,docx,xls,xlsx,csv|max:10240',
         ]);
 
         $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
@@ -215,6 +217,21 @@ public function messages(Request $request)
             'message'     => $request->reply,
             'is_read'     => true,
         ]);
+
+        // Handle file attachments
+        if ($request->hasFile('attachments')) {
+            $svc = app(\App\Services\PrescriptionService::class);
+            $attachmentData = [];
+            foreach ($request->file('attachments') as $file) {
+                $attachmentData[] = [
+                    'path' => $svc->store($file),
+                    'name' => $file->getClientOriginalName(),
+                    'mime' => $file->getClientMimeType(),
+                ];
+            }
+            $newMsg->attachments = $attachmentData;
+            $newMsg->save();
+        }
 
         // Also mark the original as read
         $message->is_read = true;

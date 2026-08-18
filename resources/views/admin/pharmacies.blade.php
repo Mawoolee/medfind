@@ -29,11 +29,11 @@
         <div class="flex-1 min-w-[200px]">
             <label class="block text-xs font-semibold text-gray-600 mb-1">Search</label>
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by name or address..."
-                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-300 focus:border-purple-400">
         </div>
         <div>
             <label class="block text-xs font-semibold text-gray-600 mb-1">Status</label>
-            <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-300 focus:border-purple-400">
                 <option value="all">All Statuses</option>
                 @foreach(['approved', 'pending', 'rejected'] as $status)
                     <option value="{{ $status }}" {{ request('status') === $status ? 'selected' : '' }}>{{ ucfirst($status) }}</option>
@@ -68,29 +68,40 @@
                                 <td class="px-4 py-3">{{ $pharmacy->contactNumber }}</td>
 <td class="px-4 py-3">{{ $pharmacy->user->name ?? 'No owner' }}</td>
                                 <td class="px-4 py-3">
-                                    <form action="{{ route('admin.pharmacy.update', $pharmacy->id) }}" method="POST">
-                                        @csrf
-                                        @method('PUT')
-                                        {{-- hidden fields to carry over unchanged values --}}
-                                        <input type="hidden" name="pharmacy_name"   value="{{ $pharmacy->pharmacy_name }}">
-                                        <input type="hidden" name="pharmacyAddress" value="{{ $pharmacy->pharmacyAddress }}">
-                                        <input type="hidden" name="latitude"        value="{{ $pharmacy->latitude }}">
-                                        <input type="hidden" name="longitude"       value="{{ $pharmacy->longitude }}">
-                                        <input type="hidden" name="contactNumber"   value="{{ $pharmacy->contactNumber }}">
-                                        <input type="hidden" name="user_id"         value="{{ $pharmacy->user_id }}">
-                                        <div class="flex items-center gap-2">
-                                            <select name="status"
-                                                    onchange="this.form.submit()"
-                                                    class="text-xs border rounded-lg px-2 py-1 font-semibold cursor-pointer focus:outline-none
-                                                        {{ $pharmacy->status === 'approved' ? 'border-green-400 bg-green-50 text-green-700' : '' }}
-                                                        {{ $pharmacy->status === 'pending'  ? 'border-yellow-400 bg-yellow-50 text-yellow-700' : '' }}
-                                                        {{ $pharmacy->status === 'rejected' ? 'border-red-400 bg-red-50 text-red-700' : '' }}">
-                                                <option value="pending"  {{ $pharmacy->status === 'pending'  ? 'selected' : '' }}>Pending</option>
-                                                <option value="approved" {{ $pharmacy->status === 'approved' ? 'selected' : '' }}>Approved</option>
-                                                <option value="rejected" {{ $pharmacy->status === 'rejected' ? 'selected' : '' }}>Rejected</option>
-                                            </select>
+                                    <div x-data="{ open: false }" class="relative inline-block">
+                                        <button @click="open = !open" type="button"
+                                            class="text-xs border-2 rounded-full px-4 py-1.5 font-semibold cursor-pointer focus:outline-none inline-flex items-center gap-1
+                                                {{ $pharmacy->status === 'approved' ? 'border-green-400 bg-green-50 text-green-700' : '' }}
+                                                {{ $pharmacy->status === 'pending'  ? 'border-yellow-400 bg-yellow-50 text-yellow-700' : '' }}
+                                                {{ $pharmacy->status === 'rejected' ? 'border-red-400 bg-red-50 text-red-700' : '' }}">
+                                            {{ ucfirst($pharmacy->status) }}
+                                            <svg class="w-3 h-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                        </button>
+                                        <div x-show="open" @click.away="open = false" x-cloak
+                                             class="absolute left-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 w-32">
+                                            @foreach(['pending', 'approved', 'rejected'] as $statusOption)
+                                                @if($statusOption !== $pharmacy->status)
+                                                    <form action="{{ route('admin.pharmacy.update', $pharmacy->id) }}" method="POST">
+                                                        @csrf
+                                                        @method('PUT')
+                                                        <input type="hidden" name="pharmacy_name"   value="{{ $pharmacy->pharmacy_name }}">
+                                                        <input type="hidden" name="pharmacyAddress" value="{{ $pharmacy->pharmacyAddress }}">
+                                                        <input type="hidden" name="latitude"        value="{{ $pharmacy->latitude }}">
+                                                        <input type="hidden" name="longitude"       value="{{ $pharmacy->longitude }}">
+                                                        <input type="hidden" name="contactNumber"   value="{{ $pharmacy->contactNumber }}">
+                                                        <input type="hidden" name="user_id"         value="{{ $pharmacy->user_id }}">
+                                                        <input type="hidden" name="status"          value="{{ $statusOption }}">
+                                                        <button type="submit" class="w-full text-left px-3 py-1.5 text-xs font-medium hover:bg-gray-50 transition
+                                                            {{ $statusOption === 'approved' ? 'text-green-700' : '' }}
+                                                            {{ $statusOption === 'pending'  ? 'text-yellow-700' : '' }}
+                                                            {{ $statusOption === 'rejected' ? 'text-red-700' : '' }}">
+                                                            {{ ucfirst($statusOption) }}
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            @endforeach
                                         </div>
-                                    </form>
+                                    </div>
                                 </td>
                                 <td class="px-4 py-3">
                                     <div class="flex gap-3 items-center">

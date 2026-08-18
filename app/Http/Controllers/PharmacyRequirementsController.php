@@ -11,7 +11,7 @@ class PharmacyRequirementsController extends Controller
         'bir'          => ['label' => 'BIR Certificate of Registration', 'required' => true],
         'business'     => ['label' => "Mayor's / Business Permit",        'required' => true],
         'philhealth'   => ['label' => 'PhilHealth Accreditation',          'required' => false],
-        'fda'          => ['label' => 'FDA Certificate',                   'required' => false],
+        'fda'          => ['label' => 'FDA Certificate',                   'required' => true],
         'pharmacist'   => ['label' => 'Pharmacist License',                'required' => true],
     ];
 

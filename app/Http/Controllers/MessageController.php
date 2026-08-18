@@ -68,7 +68,7 @@ class MessageController extends Controller
             'message'            => 'required|string|max:1000',
             'prescription_image' => 'nullable|file|mimes:jpeg,jpg,png,gif,webp,pdf|max:5120',
             'attachments'        => 'nullable|array|max:10',
-            'attachments.*'      => 'file|mimes:jpeg,jpg,png,gif,webp,pdf|max:10240',
+            'attachments.*'      => 'file|mimes:jpeg,jpg,png,gif,webp,pdf,doc,docx,xls,xlsx,csv|max:10240',
         ]);
 
         $user = Auth::user();
@@ -79,6 +79,7 @@ class MessageController extends Controller
         $message = new Message();
         $message->consumer_id = $user->id;
         $message->pharmacy_id = $request->pharmacy_id;
+        $message->sender      = 'consumer';
         $message->message     = $request->message;
         $message->is_read     = false;
 
@@ -91,15 +92,19 @@ class MessageController extends Controller
         $message->save();
 
         // Handle multiple attachments
-        $attachmentPaths = [];
+        $attachmentData = [];
         if ($request->hasFile('attachments')) {
             $svc = app(PrescriptionService::class);
             foreach ($request->file('attachments') as $file) {
-                $attachmentPaths[] = $svc->store($file);
+                $attachmentData[] = [
+                    'path' => $svc->store($file),
+                    'name' => $file->getClientOriginalName(),
+                    'mime' => $file->getClientMimeType(),
+                ];
             }
         }
-        if (!empty($attachmentPaths)) {
-            $message->attachments = $attachmentPaths;
+        if (!empty($attachmentData)) {
+            $message->attachments = $attachmentData;
             $message->save();
         }
 
@@ -389,6 +394,13 @@ class MessageController extends Controller
                             'created_at' => $m->created_at->toDateTimeString(),
                             'has_prescription' => !empty($m->prescription_image),
                             'attachment_count' => !empty($m->attachments) ? count($m->attachments) : 0,
+                            'attachments_meta' => !empty($m->attachments) ? collect($m->attachments)->map(function($a, $idx) use ($m) {
+                                return [
+                                    'name' => is_array($a) ? ($a['name'] ?? 'attachment') : 'attachment',
+                                    'mime' => is_array($a) ? ($a['mime'] ?? 'application/octet-stream') : 'application/octet-stream',
+                                    'index' => $idx,
+                                ];
+                            })->values()->toArray() : [],
                         ];
                     })->values(),
                 ];
@@ -473,6 +485,13 @@ class MessageController extends Controller
                             "created_at" => $m->created_at->toDateTimeString(),
                             "has_prescription" => !empty($m->prescription_image),
                             "attachment_count" => !empty($m->attachments) ? count($m->attachments) : 0,
+                            "attachments_meta" => !empty($m->attachments) ? collect($m->attachments)->map(function($a, $idx) {
+                                return [
+                                    "name" => is_array($a) ? ($a['name'] ?? 'attachment') : 'attachment',
+                                    "mime" => is_array($a) ? ($a['mime'] ?? 'application/octet-stream') : 'application/octet-stream',
+                                    "index" => $idx,
+                                ];
+                            })->values()->toArray() : [],
                         ];
                     })->values(),
                 ];
@@ -491,10 +510,13 @@ class MessageController extends Controller
         if ($message->consumer_id !== $user->id) abort(403);
         $attachments = $message->attachments ?? [];
         if (!isset($attachments[$index])) abort(404);
+        $entry = $attachments[$index];
+        $path = is_array($entry) ? $entry['path'] : $entry;
         $svc = app(\App\Services\PrescriptionService::class);
-        $rawBytes = $svc->retrieve($attachments[$index]);
+        $rawBytes = $svc->retrieve($path);
         $mime = $svc->mimeType($rawBytes);
-        return response($rawBytes)->header('Content-Type', $mime)->header('Content-Length', strlen($rawBytes))->header('Content-Disposition', 'inline')->header('Cache-Control', 'no-store');
+        $filename = is_array($entry) && isset($entry['name']) ? $entry['name'] : 'attachment';
+        return response($rawBytes)->header('Content-Type', $mime)->header('Content-Length', strlen($rawBytes))->header('Content-Disposition', 'inline; filename="' . $filename . '"')->header('Cache-Control', 'no-store');
     }
 
     /**
@@ -508,10 +530,13 @@ class MessageController extends Controller
         if (!$pharmacy || $message->pharmacy_id !== $pharmacy->id) abort(403);
         $attachments = $message->attachments ?? [];
         if (!isset($attachments[$index])) abort(404);
+        $entry = $attachments[$index];
+        $path = is_array($entry) ? $entry['path'] : $entry;
         $svc = app(\App\Services\PrescriptionService::class);
-        $rawBytes = $svc->retrieve($attachments[$index]);
+        $rawBytes = $svc->retrieve($path);
         $mime = $svc->mimeType($rawBytes);
-        return response($rawBytes)->header('Content-Type', $mime)->header('Content-Length', strlen($rawBytes))->header('Content-Disposition', 'inline')->header('Cache-Control', 'no-store');
+        $filename = is_array($entry) && isset($entry['name']) ? $entry['name'] : 'attachment';
+        return response($rawBytes)->header('Content-Type', $mime)->header('Content-Length', strlen($rawBytes))->header('Content-Disposition', 'inline; filename="' . $filename . '"')->header('Cache-Control', 'no-store');
     }
 
 }

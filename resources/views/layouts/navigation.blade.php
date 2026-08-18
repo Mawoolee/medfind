@@ -83,12 +83,7 @@
                                 <a href="{{ route('admin.dashboard') }}"  class="block px-4 py-2 text-sm text-gray-700 hover:bg-[#9400D3]/5"><i class="fas fa-gauge mr-2 text-[#9400D3]"></i>Dashboard</a>
                                 <a href="{{ route('admin.users') }}"       class="block px-4 py-2 text-sm text-gray-700 hover:bg-[#9400D3]/5"><i class="fas fa-users mr-2 text-[#9400D3]"></i>Users</a>
                                 <a href="{{ route('admin.pharmacies') }}"  class="block px-4 py-2 text-sm text-gray-700 hover:bg-[#9400D3]/5"><i class="fas fa-store mr-2 text-[#9400D3]"></i>Pharmacies</a>
-                                <a href="{{ route('admin.requirements') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-[#9400D3]/5"><i class="fas fa-file-check mr-2 text-[#9400D3]"></i>Requirements</a>
-                                <a href="{{ route('admin.medicines') }}"   class="block px-4 py-2 text-sm text-gray-700 hover:bg-[#9400D3]/5"><i class="fas fa-capsules mr-2 text-[#9400D3]"></i>Medicines</a>
-                                <a href="{{ route('admin.inventory') }}"   class="block px-4 py-2 text-sm text-gray-700 hover:bg-[#9400D3]/5"><i class="fas fa-boxes-stacked mr-2 text-[#9400D3]"></i>Inventory Overview</a>
-                                <div class="border-t border-gray-100 my-1"></div>
-                                <a href="{{ route('admin.logs') }}"        class="block px-4 py-2 text-sm text-gray-700 hover:bg-[#9400D3]/5"><i class="fas fa-clipboard-list mr-2 text-[#9400D3]"></i>System Logs</a>
-                                <a href="{{ route('admin.activity') }}"    class="block px-4 py-2 text-sm text-gray-700 hover:bg-[#9400D3]/5"><i class="fas fa-history mr-2 text-[#9400D3]"></i>Activity Log</a>
+                                <a href="{{ route('admin.requirements') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-[#9400D3]/5"><i class="fas fa-file-circle-check mr-2 text-[#9400D3]"></i>Requirements</a>
                             </div>
                         </div>
                     @endif
