@@ -21,6 +21,7 @@ class Message extends Model
         'reply',
         'replied_at',
         'is_read',
+        'consumer_read_at',
         // verification fields
         'verified_by',
         'verification_status',
@@ -31,6 +32,7 @@ class Message extends Model
     protected $casts = [
         'is_read' => 'boolean',
         'replied_at' => 'datetime',
+        'consumer_read_at' => 'datetime',
         'verified_at' => 'datetime',
         'attachments' => 'array',
     ];

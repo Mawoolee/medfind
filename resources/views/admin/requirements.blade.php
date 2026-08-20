@@ -217,7 +217,7 @@
  @csrf
  <button type="submit"
  class="inline-flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold bg-green-600 hover:bg-green-700 text-white transition shadow-sm">
- <i class="fas fa-check"></i> Approve ✓
+ <i class="fas fa-check"></i> Approve
  </button>
  </form>
 
@@ -228,7 +228,7 @@
  @csrf
  <button type="submit"
  class="inline-flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold bg-red-600 hover:bg-red-700 text-white transition shadow-sm">
- <i class="fas fa-times"></i> Reject ✗
+ <i class="fas fa-times"></i> Reject
  </button>
  </form>
  </div>

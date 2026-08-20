@@ -76,6 +76,7 @@ Route::middleware(['auth', 'role:consumer'])->prefix('consumer')->name('consumer
     Route::post('/message/send', [MessageController::class, 'store'])->name('message.send');
     Route::get('/messages', [MessageController::class, 'consumerConversations'])->name('messages');
     Route::delete('/messages/{pharmacyId}', [MessageController::class, 'deleteConversation'])->name('messages.delete');
+    Route::post('/messages/{pharmacyId}/mark-read', [MessageController::class, 'consumerMarkConversationRead'])->name('messages.mark-read');
     Route::get('/messages/data', [MessageController::class, 'consumerMessagesJson'])->name('messages.json');
     Route::get('/messages/{pharmacyId}', [MessageController::class, 'consumerChat'])->name('messages.chat');
     Route::get('/prescription/{message}', [MessageController::class, 'consumerPrescription'])->name('prescription.view');
@@ -118,6 +119,7 @@ Route::middleware(['auth', 'role:pharmacy,pharmacy_operator', 'pharmacy.pending'
     Route::get('/messages-data', [MessageController::class, 'pharmacyMessagesJson'])->name('messages.data');
     Route::post('/message/mark-read-ajax/{id}', [MessageController::class, 'markReadAjax'])->name('message.mark-read-ajax');
     Route::post('/message/mark-unread-ajax/{id}', [MessageController::class, 'markUnreadAjax'])->name('message.mark-unread-ajax');
+    Route::post('/message/mark-conversation-read/{consumerId}', [MessageController::class, 'markConversationReadAjax'])->name('message.mark-conversation-read');
     Route::post('/message/verify-ajax/{id}', [MessageController::class, 'verifyAjax'])->name('message.verify-ajax');
     // Secure prescription image viewer (decrypts on-the-fly, never serves raw public URL)
     Route::get('/prescription/{message}', [MessageController::class, 'servePrescription'])->name('prescription.serve');

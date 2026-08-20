@@ -1,7 +1,7 @@
 ﻿@extends('layouts.app')
 
 @section('content')
-<div class="map-container" style="height: 100vh; width: 100%; position: relative; overflow: hidden;">
+<div class="map-container" style="height: 100vh; width: 100%; position: relative; overflow: hidden; margin-top: -64px;">
     <!-- Map Container -->
     <div id="medfindMap" style="height: 100%; width: 100%;"></div>
     
@@ -31,6 +31,9 @@
         </div>
         <div id="autocompleteList" class="autocomplete-items" style="display: none;"></div>
     </div>
+
+    <!-- Nearest Pharmacy Suggestion (appears after search) -->
+    <div id="nearestSuggestion" class="nearest-suggestion-panel" style="display: none;"></div>
 
 <!-- Messenger-style Chat Heads -->
     <div id="chatHeadsContainer" style="position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;align-items:flex-end;gap:10px;"></div>
@@ -149,6 +152,244 @@
 </script>
 
 <style>
+    /* Pulsing animation for user location marker */
+    @keyframes medfindPulse {
+        0% { transform: scale(1); opacity: 0.6; }
+        70% { transform: scale(2.5); opacity: 0; }
+        100% { transform: scale(1); opacity: 0; }
+    }
+    .medfind-user-location {
+        background: transparent !important;
+        border: none !important;
+    }
+
+    /* Nearest pharmacy suggestion panel */
+    .nearest-suggestion-panel {
+        position: fixed !important;
+        top: 170px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        z-index: 9997 !important;
+        width: 90% !important;
+        max-width: 420px !important;
+        background: rgba(255, 255, 255, 0.97) !important;
+        backdrop-filter: blur(12px) !important;
+        border-radius: 16px !important;
+        padding: 14px 18px !important;
+        box-shadow: 0 8px 32px rgba(25, 25, 112, 0.12) !important;
+        border: 1px solid rgba(148, 0, 211, 0.15) !important;
+        font-family: system-ui, -apple-system, sans-serif !important;
+    }
+    .nearest-suggestion-panel .suggestion-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+    .nearest-suggestion-panel .suggestion-header i {
+        color: #9400D3;
+        font-size: 14px;
+    }
+    .nearest-suggestion-panel .suggestion-header span {
+        font-size: 12px;
+        font-weight: 700;
+        color: #191970;
+    }
+    .nearest-suggestion-panel .suggestion-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: rgba(148, 0, 211, 0.04);
+        border: 1px solid rgba(148, 0, 211, 0.08);
+        margin-bottom: 8px;
+    }
+    .nearest-suggestion-panel .suggestion-item:last-child {
+        margin-bottom: 0;
+    }
+    .nearest-suggestion-panel .suggestion-info {
+        flex: 1;
+        min-width: 0;
+    }
+    .nearest-suggestion-panel .suggestion-name {
+        font-size: 13px;
+        font-weight: 700;
+        color: #191970;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .nearest-suggestion-panel .suggestion-meta {
+        font-size: 11px;
+        color: #64748b;
+        margin-top: 2px;
+    }
+    .nearest-suggestion-panel .suggestion-meta .price {
+        color: #9400D3;
+        font-weight: 700;
+    }
+    .nearest-suggestion-panel .suggestion-actions {
+        display: flex;
+        gap: 6px;
+        flex-shrink: 0;
+    }
+    .nearest-suggestion-panel .btn-directions {
+        background: #191970;
+        color: #D9F855;
+        border: none;
+        padding: 7px 12px;
+        border-radius: 9999px;
+        font-size: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+    }
+    .nearest-suggestion-panel .btn-directions:hover {
+        opacity: 0.85;
+    }
+    .nearest-suggestion-panel .btn-view {
+        background: #9400D3;
+        color: #fff;
+        border: none;
+        padding: 7px 12px;
+        border-radius: 9999px;
+        font-size: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+    }
+    .nearest-suggestion-panel .btn-view:hover {
+        opacity: 0.85;
+    }
+    .nearest-suggestion-panel .close-suggestion {
+        position: absolute;
+        top: 10px;
+        right: 14px;
+        background: none;
+        border: none;
+        color: #94a3b8;
+        font-size: 18px;
+        cursor: pointer;
+        line-height: 1;
+    }
+    .nearest-suggestion-panel .close-suggestion:hover {
+        color: #191970;
+    }
+
+    /* Leaflet Routing Machine Container - Custom Styling */
+    .leaflet-routing-container {
+        background: rgba(255, 255, 255, 0.97) !important;
+        backdrop-filter: blur(12px) !important;
+        border-radius: 16px !important;
+        border: 1px solid rgba(148, 0, 211, 0.12) !important;
+        box-shadow: 0 8px 32px rgba(25, 25, 112, 0.12) !important;
+        padding: 0 !important;
+        overflow-y: auto !important;
+        max-height: 65vh !important;
+        font-family: system-ui, -apple-system, sans-serif !important;
+        width: 320px !important;
+        margin-top: 80px !important;
+    }
+    .leaflet-routing-container .leaflet-routing-alternatives-container {
+        padding: 0 !important;
+        overflow-y: visible !important;
+    }
+    /* Route alternative tabs - only show the selected one */
+    .leaflet-routing-alt {
+        padding: 14px 16px !important;
+        border-bottom: 1px solid rgba(148, 0, 211, 0.08) !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+        padding: 0 16px !important;
+        opacity: 0.6 !important;
+    }
+    .leaflet-routing-alt-minimized {
+        max-height: 44px !important;
+        padding: 12px 16px !important;
+        overflow: hidden !important;
+        opacity: 0.6 !important;
+        background: rgba(148, 0, 211, 0.03) !important;
+    }
+    .leaflet-routing-alt-minimized:hover {
+        background: rgba(148, 0, 211, 0.06) !important;
+        opacity: 0.85 !important;
+    }
+    .leaflet-routing-alt:not(.leaflet-routing-alt-minimized) {
+        max-height: 40vh !important;
+        overflow-y: auto !important;
+        padding: 14px 16px !important;
+        opacity: 1 !important;
+        background: #fff !important;
+    }
+    /* Route header (distance/time summary per route) */
+    .leaflet-routing-alt h2,
+    .leaflet-routing-alt h3 {
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        color: #191970 !important;
+        margin: 0 0 8px 0 !important;
+        padding: 0 !important;
+        border: none !important;
+    }
+    .leaflet-routing-alt-minimized h2,
+    .leaflet-routing-alt-minimized h3 {
+        font-size: 12px !important;
+        color: #64748b !important;
+        margin: 0 !important;
+    }
+    /* Individual instruction rows */
+    .leaflet-routing-alt table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+    }
+    .leaflet-routing-alt table tr {
+        border-bottom: 1px solid rgba(148, 0, 211, 0.05) !important;
+        transition: background 0.15s ease !important;
+    }
+    .leaflet-routing-alt table tr:hover {
+        background: rgba(148, 0, 211, 0.04) !important;
+    }
+    .leaflet-routing-alt table tr td {
+        padding: 8px 4px !important;
+        font-size: 12px !important;
+        color: #334155 !important;
+        vertical-align: middle !important;
+    }
+    .leaflet-routing-alt table tr td:last-child {
+        text-align: right !important;
+        font-weight: 600 !important;
+        color: #9400D3 !important;
+        white-space: nowrap !important;
+        font-size: 11px !important;
+    }
+    /* Direction icons */
+    .leaflet-routing-icon {
+        width: 20px !important;
+        height: 20px !important;
+        margin-right: 8px !important;
+    }
+    /* Scrollbar styling */
+    .leaflet-routing-alt:not(.leaflet-routing-alt-minimized)::-webkit-scrollbar {
+        width: 4px;
+    }
+    .leaflet-routing-alt:not(.leaflet-routing-alt-minimized)::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .leaflet-routing-alt:not(.leaflet-routing-alt-minimized)::-webkit-scrollbar-thumb {
+        background: rgba(148, 0, 211, 0.2);
+        border-radius: 4px;
+    }
+
     /* Force all UI elements to be on top */
     .stats-bar-fixed {
         position: fixed !important;
