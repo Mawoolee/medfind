@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('content')
 <div class="map-container" style="height: 100vh; width: 100%; position: relative; overflow: hidden; margin-top: -64px;">
@@ -73,15 +73,13 @@
         </div>
     </div>
 
-<!-- Clear Route Button - shows when a route is active -->
-    <div id="clearRouteBtn" class="clear-route-fixed" style="display: none;">
-        <button onclick="window.clearRoute()" class="clear-route-btn">
-            <i class="fas fa-times mr-1"></i> Clear Route
+<!-- Route Info Bar - below the routing panel: summary + clear button -->
+    <div id="routeInfoBar" style="display:none; position:fixed; bottom:24px; left:50%; transform:translateX(-50%); z-index:9999; background:#ffffff; border-radius:9999px; padding:8px 12px 8px 16px; box-shadow:0 4px 20px rgba(25,25,112,0.15); border:1px solid rgba(148,0,211,0.12); font-family:system-ui,-apple-system,sans-serif; align-items:center; gap:12px;">
+        <div id="routeSummary" style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:#191970;"></div>
+        <button id="clearRouteBtn" onclick="window.clearRoute()" style="background:#9400D3; color:#ffffff; border:none; padding:8px 14px; border-radius:9999px; font-weight:700; font-size:11px; cursor:pointer; display:flex; align-items:center; gap:4px; box-shadow:0 2px 8px rgba(148,0,211,0.3); white-space:nowrap;">
+            <i class="fas fa-times"></i> Clear Route
         </button>
     </div>
-
-    <!-- Route Summary - shows distance & ETA above the routing panel -->
-    <div id="routeSummary" class="route-summary-fixed" style="display: none;"></div>
 
 
 </div>
@@ -144,10 +142,22 @@
                     window.performSearch();
                 }
 
-                console.info('[MedFind] Real-time: stock updated for pharmacy', e.pharmacyId, '→', e.medicineName, e.stock);
+                console.info('[MedFind] Real-time: stock updated for pharmacy', e.pharmacyId, '?', e.medicineName, e.stock);
             });
 
         console.info('[MedFind] Listening on inventory channel for real-time updates');
+
+        // Listen for new messages directed to this consumer (real-time chat)
+        @auth
+        if ('{{ auth()->user()->role }}' === 'consumer') {
+            window.Echo.channel('consumer.{{ auth()->id() }}')
+                .listen('.message.sent', function(e) {
+                    if (e.direction === 'pharmacy_to_consumer') {
+                        loadChatHeads();
+                    }
+                });
+        }
+        @endauth
     });
 </script>
 
@@ -166,7 +176,7 @@
     /* Nearest pharmacy suggestion panel */
     .nearest-suggestion-panel {
         position: fixed !important;
-        top: 170px !important;
+        top: 195px !important;
         left: 50% !important;
         transform: translateX(-50%) !important;
         z-index: 9997 !important;
@@ -527,58 +537,9 @@
         border-bottom: none !important;
     }
     
-/* Clear Route Button - Fixed position */
-    .clear-route-fixed {
-        position: fixed !important;
-        bottom: 84px !important;
-        right: 24px !important;
-        z-index: 9999 !important;
-    }
+
     
-    .clear-route-btn {
-        background: #9400D3 !important;
-        color: #ffffff !important;
-        border: none !important;
-        padding: 10px 16px !important;
-        border-radius: 9999px !important;
-        font-weight: 700 !important;
-        font-size: 12px !important;
-        cursor: pointer !important;
-        box-shadow: 0 4px 16px rgba(148, 0, 211, 0.3) !important;
-        transition: 0.2s !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 4px !important;
-        font-family: system-ui, -apple-system, sans-serif !important;
-    }
-    
-.clear-route-btn:hover {
-        background: #7a00b0 !important;
-        transform: scale(1.03) !important;
-    }
-    
-    /* Route Summary - Fixed position above routing panel */
-    .route-summary-fixed {
-        position: fixed !important;
-        bottom: 84px !important;
-        right: 180px !important;
-        z-index: 9999 !important;
-        background: #ffffff !important;
-        border-radius: 12px !important;
-        padding: 8px 16px !important;
-        box-shadow: 0 4px 16px rgba(25, 25, 112, 0.12) !important;
-        border: 1px solid rgba(148, 0, 211, 0.15) !important;
-        font-size: 12px !important;
-        font-weight: 700 !important;
-        color: #191970 !important;
-        font-family: system-ui, -apple-system, sans-serif !important;
-        align-items: center !important;
-        gap: 6px !important;
-    }
-    
-    .route-summary-fixed i {
-        color: #9400D3 !important;
-    }
+
     
     /* Chat Button - Fixed position with highest z-index */
     .chat-float-fixed {
@@ -818,6 +779,16 @@ function loadChatHeads() {
                 return !isDismissed(conv);
             });
             renderChatHeads();
+
+            // Auto-refresh active chat window if open
+            if (activeChatPharmacyId) {
+                const activeConv = conversationsData.find(c => c.pharmacy_id == activeChatPharmacyId);
+                if (activeConv) {
+                    renderActiveChatMessages(activeConv);
+                    const msgs = document.getElementById('activeChatMessages');
+                    if (msgs) msgs.scrollTop = msgs.scrollHeight;
+                }
+            }
         })
         .catch(function() {});
     @endauth
@@ -854,9 +825,9 @@ function renderChatHeads() {
             // Show unread count by default
             cornerBtn.style.cssText = baseStyle + 'background:#e53e3e;color:#fff;';
             cornerBtn.textContent = conv.unread > 9 ? '9+' : conv.unread;
-            // On hover: switch to close ✕
+            // On hover: switch to close ?
             head.onmouseenter = function() {
-                cornerBtn.textContent = '✕';
+                cornerBtn.textContent = '?';
                 cornerBtn.style.background = '#6b7280';
                 cornerBtn.style.color = '#fff';
                 circle.style.transform = 'scale(1.1)';
@@ -868,9 +839,9 @@ function renderChatHeads() {
                 circle.style.transform = 'scale(1)';
             };
         } else {
-            // No unread — show close only on hover, hidden otherwise
+            // No unread � show close only on hover, hidden otherwise
             cornerBtn.style.cssText = baseStyle + 'background:#6b7280;color:#fff;opacity:0;';
-            cornerBtn.textContent = '✕';
+            cornerBtn.textContent = '?';
             head.onmouseenter = function() {
                 cornerBtn.style.opacity = '1';
                 circle.style.transform = 'scale(1.1)';
@@ -928,32 +899,47 @@ function renderActiveChatMessages(conv) {
     container.innerHTML = '';
 
     conv.messages.forEach(function(msg) {
-        // Consumer message (right)
-        const consumerRow = document.createElement('div');
-        consumerRow.style.cssText = 'display:flex;justify-content:flex-end;gap:6px;align-items:flex-end;';
-        consumerRow.innerHTML =
-            '<div style="max-width:75%;">' +
-                '<div style="background:#191970;color:#D9F855;font-size:12px;font-weight:500;padding:8px 14px;border-radius:16px 16px 4px 16px;line-height:1.4;">' + escHtml(msg.message) + '</div>' +
-                '<p style="font-size:10px;color:#94a3b8;text-align:right;margin-top:2px;">You</p>' +
-            '</div>' +
-            '<div style="width:26px;height:26px;border-radius:50%;background:rgba(148,0,211,0.1);display:flex;align-items:center;justify-content:center;shrink:0;">' +
-                '<i class="fas fa-user" style="color:#9400D3;font-size:10px;"></i>' +
-            '</div>';
-        container.appendChild(consumerRow);
-
-        // Pharmacy reply (left)
-        if (msg.reply) {
-            const replyRow = document.createElement('div');
-            replyRow.style.cssText = 'display:flex;justify-content:flex-start;gap:6px;align-items:flex-end;';
-            replyRow.innerHTML =
-                '<div style="width:26px;height:26px;border-radius:50%;background:#191970;display:flex;align-items:center;justify-content:center;shrink:0;">' +
+        if (msg.sender === 'pharmacy') {
+            // Pharmacy message (left side)
+            const pharmacyRow = document.createElement('div');
+            pharmacyRow.style.cssText = 'display:flex;justify-content:flex-start;gap:6px;align-items:flex-end;margin-bottom:8px;';
+            pharmacyRow.innerHTML =
+                '<div style="width:26px;height:26px;border-radius:50%;background:#191970;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
                     '<i class="fas fa-store" style="color:#D9F855;font-size:10px;"></i>' +
                 '</div>' +
                 '<div style="max-width:75%;">' +
-                    '<div style="background:#fff;border:1px solid rgba(148,0,211,0.15);color:#191970;font-size:12px;font-weight:500;padding:8px 14px;border-radius:16px 16px 16px 4px;line-height:1.4;">' + escHtml(msg.reply) + '</div>' +
+                    '<div style="background:#fff;border:1px solid rgba(148,0,211,0.15);color:#191970;font-size:12px;font-weight:500;padding:8px 14px;border-radius:16px 16px 16px 4px;line-height:1.4;">' + escHtml(msg.message) + '</div>' +
                     '<p style="font-size:10px;color:#94a3b8;margin-top:2px;">' + escHtml(conv.pharmacy_name) + '</p>' +
                 '</div>';
-            container.appendChild(replyRow);
+            container.appendChild(pharmacyRow);
+        } else {
+            // Consumer message (right side)
+            const consumerRow = document.createElement('div');
+            consumerRow.style.cssText = 'display:flex;justify-content:flex-end;gap:6px;align-items:flex-end;margin-bottom:8px;';
+            consumerRow.innerHTML =
+                '<div style="max-width:75%;">' +
+                    '<div style="background:#191970;color:#D9F855;font-size:12px;font-weight:500;padding:8px 14px;border-radius:16px 16px 4px 16px;line-height:1.4;">' + escHtml(msg.message) + '</div>' +
+                    '<p style="font-size:10px;color:#94a3b8;text-align:right;margin-top:2px;">You</p>' +
+                '</div>' +
+                '<div style="width:26px;height:26px;border-radius:50%;background:rgba(148,0,211,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
+                    '<i class="fas fa-user" style="color:#9400D3;font-size:10px;"></i>' +
+                '</div>';
+            container.appendChild(consumerRow);
+
+            // Legacy: if msg.reply exists (old format), also show it
+            if (msg.reply) {
+                const replyRow = document.createElement('div');
+                replyRow.style.cssText = 'display:flex;justify-content:flex-start;gap:6px;align-items:flex-end;margin-bottom:8px;';
+                replyRow.innerHTML =
+                    '<div style="width:26px;height:26px;border-radius:50%;background:#191970;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
+                        '<i class="fas fa-store" style="color:#D9F855;font-size:10px;"></i>' +
+                    '</div>' +
+                    '<div style="max-width:75%;">' +
+                        '<div style="background:#fff;border:1px solid rgba(148,0,211,0.15);color:#191970;font-size:12px;font-weight:500;padding:8px 14px;border-radius:16px 16px 16px 4px;line-height:1.4;">' + escHtml(msg.reply) + '</div>' +
+                        '<p style="font-size:10px;color:#94a3b8;margin-top:2px;">' + escHtml(conv.pharmacy_name) + '</p>' +
+                    '</div>';
+                container.appendChild(replyRow);
+            }
         }
     });
 }
@@ -1028,7 +1014,7 @@ document.addEventListener('DOMContentLoaded', function() {
     @auth
     if ('{{ auth()->user()->role }}' === 'consumer') {
         loadChatHeads();
-        setInterval(loadChatHeads, 15000);
+        setInterval(loadChatHeads, 5000);
     }
     @endauth
 });

@@ -14,6 +14,15 @@ Open terminals:
     Terminal 3 - php artisan queue:work         (Queue Worker (Broadcasting))   -   Processes background jobs (sending notifications when pharmacy status changes)
     Terminal 4 - npm run dev                    (Vite (Frontend assets - only needed if editing the CSS/JS))    -   Skip this if you're not making frontend changes
 
+# Terminal 1 - Laravel App
+php artisan serve --host=127.0.0.1 --port=8000
+
+# Terminal 2 - Reverb WebSocket
+php artisan reverb:start --host=127.0.0.1 --port=8080
+
+# Terminal 3 - Nginx (optional)
+cd C:\nginx; .\nginx.exe
+
 
 One-time setup steps (only needed if running on a fresh machine):
 # Install PHP dependencies
