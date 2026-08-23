@@ -58,3 +58,26 @@ GRACIES PHARMA	                             graciespharma@medfind.com	          
 
 sanjose.pharmacy@medfind.com / password123
 nuevaecija.drugstore@medfind.com / password123
+
+
+
+Admin:
+
+Email	Password
+admin@medfind.com	password123
+Pharmacies (Legazpi City):
+
+Email	Password	Pharmacy
+sanjose.pharmacy@medfind.com	password123	San Jose Community Pharmacy
+nuevaecija.drugstore@medfind.com	password123	Nueva Ecija MedPlus Drugstore
+Pharmacies (Holy Spirit, QC):
+
+Email	Password	Pharmacy
+holyspirit.pharmacy@medfind.com	password123	Holy Spirit Pharmacy
+qchealthplus@medfind.com	password123	QC HealthPlus Drugstore
+batasanmedcare@medfind.com	password123	Batasan Hills MedCare
+Consumer:
+
+Email	Password
+consumer@medfind.com	password123
+All passwords are password123.
