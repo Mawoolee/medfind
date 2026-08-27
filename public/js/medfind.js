@@ -334,10 +334,9 @@ function initMap() {
  });
 
  L.tileLayer(
- "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+ "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
  {
- attribution: "? OSM",
- subdomains: "abcd",
+ attribution: "&copy; OpenStreetMap contributors",
  maxZoom: 19,
  }
  ).addTo(map);
