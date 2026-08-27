@@ -1,7 +1,7 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('content')
-<div class="map-container" style="height: 100vh; width: 100%; position: relative; overflow: hidden;">
+<div class="map-container" style="height: 100vh; width: 100%; position: relative; overflow: hidden; margin-top: -64px;">
     <!-- Map Container -->
     <div id="medfindMap" style="height: 100%; width: 100%;"></div>
     
@@ -31,6 +31,9 @@
         </div>
         <div id="autocompleteList" class="autocomplete-items" style="display: none;"></div>
     </div>
+
+    <!-- Nearest Pharmacy Suggestion (appears after search) -->
+    <div id="nearestSuggestion" class="nearest-suggestion-panel" style="display: none;"></div>
 
 <!-- Messenger-style Chat Heads -->
     <div id="chatHeadsContainer" style="position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;align-items:flex-end;gap:10px;"></div>
@@ -70,15 +73,13 @@
         </div>
     </div>
 
-<!-- Clear Route Button - shows when a route is active -->
-    <div id="clearRouteBtn" class="clear-route-fixed" style="display: none;">
-        <button onclick="window.clearRoute()" class="clear-route-btn">
-            <i class="fas fa-times mr-1"></i> Clear Route
+<!-- Route Info Bar - below the routing panel: summary + clear button -->
+    <div id="routeInfoBar" style="display:none; position:fixed; bottom:24px; left:50%; transform:translateX(-50%); z-index:9999; background:#ffffff; border-radius:9999px; padding:8px 12px 8px 16px; box-shadow:0 4px 20px rgba(25,25,112,0.15); border:1px solid rgba(148,0,211,0.12); font-family:system-ui,-apple-system,sans-serif; align-items:center; gap:12px;">
+        <div id="routeSummary" style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:#191970;"></div>
+        <button id="clearRouteBtn" onclick="window.clearRoute()" style="background:#9400D3; color:#ffffff; border:none; padding:8px 14px; border-radius:9999px; font-weight:700; font-size:11px; cursor:pointer; display:flex; align-items:center; gap:4px; box-shadow:0 2px 8px rgba(148,0,211,0.3); white-space:nowrap;">
+            <i class="fas fa-times"></i> Clear Route
         </button>
     </div>
-
-    <!-- Route Summary - shows distance & ETA above the routing panel -->
-    <div id="routeSummary" class="route-summary-fixed" style="display: none;"></div>
 
 
 </div>
@@ -141,14 +142,264 @@
                     window.performSearch();
                 }
 
-                console.info('[MedFind] Real-time: stock updated for pharmacy', e.pharmacyId, '→', e.medicineName, e.stock);
+                console.info('[MedFind] Real-time: stock updated for pharmacy', e.pharmacyId, '?', e.medicineName, e.stock);
             });
 
         console.info('[MedFind] Listening on inventory channel for real-time updates');
+
+        // Listen for new messages directed to this consumer (real-time chat)
+        @auth
+        if ('{{ auth()->user()->role }}' === 'consumer') {
+            window.Echo.channel('consumer.{{ auth()->id() }}')
+                .listen('.message.sent', function(e) {
+                    if (e.direction === 'pharmacy_to_consumer') {
+                        loadChatHeads();
+                    }
+                });
+        }
+        @endauth
     });
 </script>
 
 <style>
+    /* Pulsing animation for user location marker */
+    @keyframes medfindPulse {
+        0% { transform: scale(1); opacity: 0.6; }
+        70% { transform: scale(2.5); opacity: 0; }
+        100% { transform: scale(1); opacity: 0; }
+    }
+    .medfind-user-location {
+        background: transparent !important;
+        border: none !important;
+    }
+
+    /* Nearest pharmacy suggestion panel */
+    .nearest-suggestion-panel {
+        position: fixed !important;
+        top: 195px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        z-index: 9997 !important;
+        width: 90% !important;
+        max-width: 420px !important;
+        background: rgba(255, 255, 255, 0.97) !important;
+        backdrop-filter: blur(12px) !important;
+        border-radius: 16px !important;
+        padding: 14px 18px !important;
+        box-shadow: 0 8px 32px rgba(25, 25, 112, 0.12) !important;
+        border: 1px solid rgba(148, 0, 211, 0.15) !important;
+        font-family: system-ui, -apple-system, sans-serif !important;
+    }
+    .nearest-suggestion-panel .suggestion-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+    .nearest-suggestion-panel .suggestion-header i {
+        color: #9400D3;
+        font-size: 14px;
+    }
+    .nearest-suggestion-panel .suggestion-header span {
+        font-size: 12px;
+        font-weight: 700;
+        color: #191970;
+    }
+    .nearest-suggestion-panel .suggestion-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: rgba(148, 0, 211, 0.04);
+        border: 1px solid rgba(148, 0, 211, 0.08);
+        margin-bottom: 8px;
+    }
+    .nearest-suggestion-panel .suggestion-item:last-child {
+        margin-bottom: 0;
+    }
+    .nearest-suggestion-panel .suggestion-info {
+        flex: 1;
+        min-width: 0;
+    }
+    .nearest-suggestion-panel .suggestion-name {
+        font-size: 13px;
+        font-weight: 700;
+        color: #191970;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .nearest-suggestion-panel .suggestion-meta {
+        font-size: 11px;
+        color: #64748b;
+        margin-top: 2px;
+    }
+    .nearest-suggestion-panel .suggestion-meta .price {
+        color: #9400D3;
+        font-weight: 700;
+    }
+    .nearest-suggestion-panel .suggestion-actions {
+        display: flex;
+        gap: 6px;
+        flex-shrink: 0;
+    }
+    .nearest-suggestion-panel .btn-directions {
+        background: #191970;
+        color: #D9F855;
+        border: none;
+        padding: 7px 12px;
+        border-radius: 9999px;
+        font-size: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+    }
+    .nearest-suggestion-panel .btn-directions:hover {
+        opacity: 0.85;
+    }
+    .nearest-suggestion-panel .btn-view {
+        background: #9400D3;
+        color: #fff;
+        border: none;
+        padding: 7px 12px;
+        border-radius: 9999px;
+        font-size: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+    }
+    .nearest-suggestion-panel .btn-view:hover {
+        opacity: 0.85;
+    }
+    .nearest-suggestion-panel .close-suggestion {
+        position: absolute;
+        top: 10px;
+        right: 14px;
+        background: none;
+        border: none;
+        color: #94a3b8;
+        font-size: 18px;
+        cursor: pointer;
+        line-height: 1;
+    }
+    .nearest-suggestion-panel .close-suggestion:hover {
+        color: #191970;
+    }
+
+    /* Leaflet Routing Machine Container - Custom Styling */
+    .leaflet-routing-container {
+        background: rgba(255, 255, 255, 0.97) !important;
+        backdrop-filter: blur(12px) !important;
+        border-radius: 16px !important;
+        border: 1px solid rgba(148, 0, 211, 0.12) !important;
+        box-shadow: 0 8px 32px rgba(25, 25, 112, 0.12) !important;
+        padding: 0 !important;
+        overflow-y: auto !important;
+        max-height: 65vh !important;
+        font-family: system-ui, -apple-system, sans-serif !important;
+        width: 320px !important;
+        margin-top: 80px !important;
+    }
+    .leaflet-routing-container .leaflet-routing-alternatives-container {
+        padding: 0 !important;
+        overflow-y: visible !important;
+    }
+    /* Route alternative tabs - only show the selected one */
+    .leaflet-routing-alt {
+        padding: 14px 16px !important;
+        border-bottom: 1px solid rgba(148, 0, 211, 0.08) !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+        padding: 0 16px !important;
+        opacity: 0.6 !important;
+    }
+    .leaflet-routing-alt-minimized {
+        max-height: 44px !important;
+        padding: 12px 16px !important;
+        overflow: hidden !important;
+        opacity: 0.6 !important;
+        background: rgba(148, 0, 211, 0.03) !important;
+    }
+    .leaflet-routing-alt-minimized:hover {
+        background: rgba(148, 0, 211, 0.06) !important;
+        opacity: 0.85 !important;
+    }
+    .leaflet-routing-alt:not(.leaflet-routing-alt-minimized) {
+        max-height: 40vh !important;
+        overflow-y: auto !important;
+        padding: 14px 16px !important;
+        opacity: 1 !important;
+        background: #fff !important;
+    }
+    /* Route header (distance/time summary per route) */
+    .leaflet-routing-alt h2,
+    .leaflet-routing-alt h3 {
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        color: #191970 !important;
+        margin: 0 0 8px 0 !important;
+        padding: 0 !important;
+        border: none !important;
+    }
+    .leaflet-routing-alt-minimized h2,
+    .leaflet-routing-alt-minimized h3 {
+        font-size: 12px !important;
+        color: #64748b !important;
+        margin: 0 !important;
+    }
+    /* Individual instruction rows */
+    .leaflet-routing-alt table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+    }
+    .leaflet-routing-alt table tr {
+        border-bottom: 1px solid rgba(148, 0, 211, 0.05) !important;
+        transition: background 0.15s ease !important;
+    }
+    .leaflet-routing-alt table tr:hover {
+        background: rgba(148, 0, 211, 0.04) !important;
+    }
+    .leaflet-routing-alt table tr td {
+        padding: 8px 4px !important;
+        font-size: 12px !important;
+        color: #334155 !important;
+        vertical-align: middle !important;
+    }
+    .leaflet-routing-alt table tr td:last-child {
+        text-align: right !important;
+        font-weight: 600 !important;
+        color: #9400D3 !important;
+        white-space: nowrap !important;
+        font-size: 11px !important;
+    }
+    /* Direction icons */
+    .leaflet-routing-icon {
+        width: 20px !important;
+        height: 20px !important;
+        margin-right: 8px !important;
+    }
+    /* Scrollbar styling */
+    .leaflet-routing-alt:not(.leaflet-routing-alt-minimized)::-webkit-scrollbar {
+        width: 4px;
+    }
+    .leaflet-routing-alt:not(.leaflet-routing-alt-minimized)::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .leaflet-routing-alt:not(.leaflet-routing-alt-minimized)::-webkit-scrollbar-thumb {
+        background: rgba(148, 0, 211, 0.2);
+        border-radius: 4px;
+    }
+
     /* Force all UI elements to be on top */
     .stats-bar-fixed {
         position: fixed !important;
@@ -286,58 +537,9 @@
         border-bottom: none !important;
     }
     
-/* Clear Route Button - Fixed position */
-    .clear-route-fixed {
-        position: fixed !important;
-        bottom: 84px !important;
-        right: 24px !important;
-        z-index: 9999 !important;
-    }
+
     
-    .clear-route-btn {
-        background: #9400D3 !important;
-        color: #ffffff !important;
-        border: none !important;
-        padding: 10px 16px !important;
-        border-radius: 9999px !important;
-        font-weight: 700 !important;
-        font-size: 12px !important;
-        cursor: pointer !important;
-        box-shadow: 0 4px 16px rgba(148, 0, 211, 0.3) !important;
-        transition: 0.2s !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 4px !important;
-        font-family: system-ui, -apple-system, sans-serif !important;
-    }
-    
-.clear-route-btn:hover {
-        background: #7a00b0 !important;
-        transform: scale(1.03) !important;
-    }
-    
-    /* Route Summary - Fixed position above routing panel */
-    .route-summary-fixed {
-        position: fixed !important;
-        bottom: 84px !important;
-        right: 180px !important;
-        z-index: 9999 !important;
-        background: #ffffff !important;
-        border-radius: 12px !important;
-        padding: 8px 16px !important;
-        box-shadow: 0 4px 16px rgba(25, 25, 112, 0.12) !important;
-        border: 1px solid rgba(148, 0, 211, 0.15) !important;
-        font-size: 12px !important;
-        font-weight: 700 !important;
-        color: #191970 !important;
-        font-family: system-ui, -apple-system, sans-serif !important;
-        align-items: center !important;
-        gap: 6px !important;
-    }
-    
-    .route-summary-fixed i {
-        color: #9400D3 !important;
-    }
+
     
     /* Chat Button - Fixed position with highest z-index */
     .chat-float-fixed {
@@ -577,6 +779,16 @@ function loadChatHeads() {
                 return !isDismissed(conv);
             });
             renderChatHeads();
+
+            // Auto-refresh active chat window if open
+            if (activeChatPharmacyId) {
+                const activeConv = conversationsData.find(c => c.pharmacy_id == activeChatPharmacyId);
+                if (activeConv) {
+                    renderActiveChatMessages(activeConv);
+                    const msgs = document.getElementById('activeChatMessages');
+                    if (msgs) msgs.scrollTop = msgs.scrollHeight;
+                }
+            }
         })
         .catch(function() {});
     @endauth
@@ -613,9 +825,9 @@ function renderChatHeads() {
             // Show unread count by default
             cornerBtn.style.cssText = baseStyle + 'background:#e53e3e;color:#fff;';
             cornerBtn.textContent = conv.unread > 9 ? '9+' : conv.unread;
-            // On hover: switch to close ✕
+            // On hover: switch to close ?
             head.onmouseenter = function() {
-                cornerBtn.textContent = '✕';
+                cornerBtn.textContent = '?';
                 cornerBtn.style.background = '#6b7280';
                 cornerBtn.style.color = '#fff';
                 circle.style.transform = 'scale(1.1)';
@@ -627,9 +839,9 @@ function renderChatHeads() {
                 circle.style.transform = 'scale(1)';
             };
         } else {
-            // No unread — show close only on hover, hidden otherwise
+            // No unread � show close only on hover, hidden otherwise
             cornerBtn.style.cssText = baseStyle + 'background:#6b7280;color:#fff;opacity:0;';
-            cornerBtn.textContent = '✕';
+            cornerBtn.textContent = '?';
             head.onmouseenter = function() {
                 cornerBtn.style.opacity = '1';
                 circle.style.transform = 'scale(1.1)';
@@ -687,32 +899,47 @@ function renderActiveChatMessages(conv) {
     container.innerHTML = '';
 
     conv.messages.forEach(function(msg) {
-        // Consumer message (right)
-        const consumerRow = document.createElement('div');
-        consumerRow.style.cssText = 'display:flex;justify-content:flex-end;gap:6px;align-items:flex-end;';
-        consumerRow.innerHTML =
-            '<div style="max-width:75%;">' +
-                '<div style="background:#191970;color:#D9F855;font-size:12px;font-weight:500;padding:8px 14px;border-radius:16px 16px 4px 16px;line-height:1.4;">' + escHtml(msg.message) + '</div>' +
-                '<p style="font-size:10px;color:#94a3b8;text-align:right;margin-top:2px;">You</p>' +
-            '</div>' +
-            '<div style="width:26px;height:26px;border-radius:50%;background:rgba(148,0,211,0.1);display:flex;align-items:center;justify-content:center;shrink:0;">' +
-                '<i class="fas fa-user" style="color:#9400D3;font-size:10px;"></i>' +
-            '</div>';
-        container.appendChild(consumerRow);
-
-        // Pharmacy reply (left)
-        if (msg.reply) {
-            const replyRow = document.createElement('div');
-            replyRow.style.cssText = 'display:flex;justify-content:flex-start;gap:6px;align-items:flex-end;';
-            replyRow.innerHTML =
-                '<div style="width:26px;height:26px;border-radius:50%;background:#191970;display:flex;align-items:center;justify-content:center;shrink:0;">' +
+        if (msg.sender === 'pharmacy') {
+            // Pharmacy message (left side)
+            const pharmacyRow = document.createElement('div');
+            pharmacyRow.style.cssText = 'display:flex;justify-content:flex-start;gap:6px;align-items:flex-end;margin-bottom:8px;';
+            pharmacyRow.innerHTML =
+                '<div style="width:26px;height:26px;border-radius:50%;background:#191970;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
                     '<i class="fas fa-store" style="color:#D9F855;font-size:10px;"></i>' +
                 '</div>' +
                 '<div style="max-width:75%;">' +
-                    '<div style="background:#fff;border:1px solid rgba(148,0,211,0.15);color:#191970;font-size:12px;font-weight:500;padding:8px 14px;border-radius:16px 16px 16px 4px;line-height:1.4;">' + escHtml(msg.reply) + '</div>' +
+                    '<div style="background:#fff;border:1px solid rgba(148,0,211,0.15);color:#191970;font-size:12px;font-weight:500;padding:8px 14px;border-radius:16px 16px 16px 4px;line-height:1.4;">' + escHtml(msg.message) + '</div>' +
                     '<p style="font-size:10px;color:#94a3b8;margin-top:2px;">' + escHtml(conv.pharmacy_name) + '</p>' +
                 '</div>';
-            container.appendChild(replyRow);
+            container.appendChild(pharmacyRow);
+        } else {
+            // Consumer message (right side)
+            const consumerRow = document.createElement('div');
+            consumerRow.style.cssText = 'display:flex;justify-content:flex-end;gap:6px;align-items:flex-end;margin-bottom:8px;';
+            consumerRow.innerHTML =
+                '<div style="max-width:75%;">' +
+                    '<div style="background:#191970;color:#D9F855;font-size:12px;font-weight:500;padding:8px 14px;border-radius:16px 16px 4px 16px;line-height:1.4;">' + escHtml(msg.message) + '</div>' +
+                    '<p style="font-size:10px;color:#94a3b8;text-align:right;margin-top:2px;">You</p>' +
+                '</div>' +
+                '<div style="width:26px;height:26px;border-radius:50%;background:rgba(148,0,211,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
+                    '<i class="fas fa-user" style="color:#9400D3;font-size:10px;"></i>' +
+                '</div>';
+            container.appendChild(consumerRow);
+
+            // Legacy: if msg.reply exists (old format), also show it
+            if (msg.reply) {
+                const replyRow = document.createElement('div');
+                replyRow.style.cssText = 'display:flex;justify-content:flex-start;gap:6px;align-items:flex-end;margin-bottom:8px;';
+                replyRow.innerHTML =
+                    '<div style="width:26px;height:26px;border-radius:50%;background:#191970;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
+                        '<i class="fas fa-store" style="color:#D9F855;font-size:10px;"></i>' +
+                    '</div>' +
+                    '<div style="max-width:75%;">' +
+                        '<div style="background:#fff;border:1px solid rgba(148,0,211,0.15);color:#191970;font-size:12px;font-weight:500;padding:8px 14px;border-radius:16px 16px 16px 4px;line-height:1.4;">' + escHtml(msg.reply) + '</div>' +
+                        '<p style="font-size:10px;color:#94a3b8;margin-top:2px;">' + escHtml(conv.pharmacy_name) + '</p>' +
+                    '</div>';
+                container.appendChild(replyRow);
+            }
         }
     });
 }
@@ -787,7 +1014,7 @@ document.addEventListener('DOMContentLoaded', function() {
     @auth
     if ('{{ auth()->user()->role }}' === 'consumer') {
         loadChatHeads();
-        setInterval(loadChatHeads, 15000);
+        setInterval(loadChatHeads, 5000);
     }
     @endauth
 });

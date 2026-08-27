@@ -1,4 +1,4 @@
-﻿// ============================================
+// ============================================
 // MEDFIND - FULL JS LOGIC WITH WORKING AUTOCOMPLETE
 // ============================================
 
@@ -12,6 +12,7 @@ let map;
 let markers = [];
 let userLat = 13.1475;
 let userLng = 123.7431;
+let userMarker = null;
 let currentSearchQuery = "";
 let currentFilteredPharmacies = [];
 let chatVisible = false;
@@ -34,6 +35,38 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 
 function closePopup() {
  if (map) map.closePopup();
+}
+
+// ============================================
+// USER LOCATION MARKER (Blue Pulsing Dot)
+// ============================================
+function updateUserLocationMarker(lat, lng) {
+ if (!map) return;
+
+ const userIconHtml = `
+ <div style="position:relative;width:40px;height:40px;">
+ <div style="position:absolute;top:0;left:0;width:40px;height:40px;background:rgba(66,133,244,0.2);border-radius:50%;animation:medfindPulse 2s ease-out infinite;"></div>
+ <div style="position:absolute;top:10px;left:10px;width:20px;height:20px;background:#4285F4;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.35);"></div>
+ </div>`;
+
+ const userIcon = L.divIcon({
+ html: userIconHtml,
+ className: 'medfind-user-location',
+ iconSize: [40, 40],
+ iconAnchor: [20, 20],
+ popupAnchor: [0, -22]
+ });
+
+ if (userMarker) {
+ userMarker.setLatLng([lat, lng]);
+ } else {
+ userMarker = L.marker([lat, lng], { icon: userIcon, zIndexOffset: 1000 })
+ .addTo(map)
+ .bindPopup('<div style="text-align:center;font-family:system-ui;font-size:12px;font-weight:600;color:#191970;">?? You are here</div>', {
+ closeButton: false,
+ offset: [0, -2]
+ });
+ }
 }
 
 function performSearch() {
@@ -93,6 +126,59 @@ function performSearch() {
  if (stockCount) stockCount.textContent = totalStock;
 
  updateMapMarkers();
+ showNearestSuggestion();
+}
+
+// ============================================
+// NEAREST PHARMACY SUGGESTION
+// ============================================
+function showNearestSuggestion() {
+ const panel = document.getElementById("nearestSuggestion");
+ if (!panel) return;
+
+ // Only show when there's an active search with results
+ if (!currentSearchQuery || currentFilteredPharmacies.length === 0) {
+ panel.style.display = "none";
+ return;
+ }
+
+ // Sort pharmacies by distance from user
+ const sorted = currentFilteredPharmacies.map(function(ph) {
+ const dist = calculateDistance(userLat, userLng, ph.lat, ph.lng);
+ const med = ph.medicines.find(function(m) {
+ return m.name.toLowerCase().includes(currentSearchQuery) && m.stock > 0;
+ });
+ return { pharmacy: ph, distance: dist, medicine: med };
+ }).sort(function(a, b) { return a.distance - b.distance; });
+
+ // Take top 3 nearest
+ const top = sorted.slice(0, 3);
+
+ let html = '<button class="close-suggestion" onclick="document.getElementById(\'nearestSuggestion\').style.display=\'none\'">&times;</button>';
+ html += '<div class="suggestion-header"><i class="fas fa-location-arrow"></i><span>Nearest pharmacy with "' + currentSearchQuery + '" in stock</span></div>';
+
+ top.forEach(function(item, idx) {
+ const ph = item.pharmacy;
+ const dist = item.distance;
+ const med = item.medicine;
+ const price = med ? '\u20B1' + parseFloat(med.price).toFixed(2) : '';
+ const stock = med ? med.stock + ' in stock' : '';
+ const badge = idx === 0 ? '<span style="background:#D9F855;color:#191970;font-size:9px;font-weight:800;padding:2px 6px;border-radius:9999px;margin-left:6px;">NEAREST</span>' : '';
+
+ html += '<div class="suggestion-item">';
+ html += '<div class="suggestion-info">';
+ html += '<div class="suggestion-name">' + ph.name + badge + '</div>';
+ html += '<div class="suggestion-meta">' + dist.toFixed(1) + ' km away \u00B7 <span class="price">' + price + '</span> \u00B7 ' + stock + '</div>';
+ html += '</div>';
+ html += '<div class="suggestion-actions">';
+ html += '<button class="btn-directions" onclick="window.getDirections(' + ph.lat + ',' + ph.lng + ')"><i class="fas fa-directions"></i> Go</button>';
+ html += '<a href="/consumer/pharmacy/' + ph.id + '" class="btn-view"><i class="fas fa-store"></i> View</a>';
+ html += '</div>';
+ html += '</div>';
+ });
+
+ panel.innerHTML = html;
+ panel.style.display = "block";
 }
 
 function createPopupContent(pharmacy) {
@@ -248,13 +334,15 @@ function initMap() {
  });
 
  L.tileLayer(
- "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+ "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
  {
- attribution: "© OSM",
- subdomains: "abcd",
+ attribution: "&copy; OpenStreetMap contributors",
  maxZoom: 19,
  }
  ).addTo(map);
+
+    // Fix map rendering when loaded through tunnels/proxies
+    setTimeout(function() { map.invalidateSize(); }, 200);
 
  map.zoomControl.setPosition('bottomright');
 
@@ -268,13 +356,17 @@ function initMap() {
  userLat = pos.coords.latitude;
  userLng = pos.coords.longitude;
  map.setView([userLat, userLng], 14);
+ updateUserLocationMarker(userLat, userLng);
  performSearch();
  },
  function() {
+ // Geolocation denied ? show marker at default Legazpi center
+ updateUserLocationMarker(userLat, userLng);
  performSearch();
  }
  );
  } else {
+ updateUserLocationMarker(userLat, userLng);
  performSearch();
  }
 }
@@ -294,6 +386,10 @@ let routingControl = null;
 let routeActive = false;
 
 function getDirections(pharmacyLat, pharmacyLng) {
+ // Hide the nearest suggestion panel when navigating
+ const suggPanel = document.getElementById("nearestSuggestion");
+ if (suggPanel) suggPanel.style.display = "none";
+
  // If a route is already showing, remove it first
  clearRoute();
 
@@ -320,94 +416,92 @@ routingControl = L.Routing.control({
  profile: 'driving'
  }),
  lineOptions: {
- styles: [{ color: '#191970', weight: 5, opacity: 0.9 }]
+ styles: [{ color: '#191970', weight: 8, opacity: 0.85, lineCap: 'round', lineJoin: 'round' }]
  },
  createMarker: function(i, wp) {
  const html = i === 0
- ? '<div style="background:#191970;color:#D9F855;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid #D9F855;box-shadow:0 2px 6px rgba(25,25,112,0.3);">📍</div>'
- : '<div style="background:#9400D3;color:#fff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid #D9F855;box-shadow:0 2px 6px rgba(148,0,211,0.3);">🏪</div>';
+ ? '<div style="background:#191970;color:#D9F855;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:14px;border:3px solid #D9F855;box-shadow:0 3px 8px rgba(25,25,112,0.4);">??</div>'
+ : '<div style="background:#9400D3;color:#fff;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:14px;border:3px solid #D9F855;box-shadow:0 3px 8px rgba(148,0,211,0.4);">??</div>';
  return L.marker(wp.latLng, {
  icon: L.divIcon({
  html: html,
  className: 'route-marker',
- iconSize: [26, 26],
- iconAnchor: [13, 13]
+ iconSize: [30, 30],
+ iconAnchor: [15, 15]
  })
  });
  },
  showAlternatives: true,
  altLineOptions: {
- styles: [{ color: '#9400D3', weight: 3, opacity: 0.5 }]
+ styles: [{ color: '#9400D3', weight: 5, opacity: 0.4, lineCap: 'round', lineJoin: 'round' }]
  },
- routeWhileDragging: true,
+ routeWhileDragging: false,
  fitSelectedRoutes: true,
  show: true,
- collapsible: true
+ collapsible: false,
+ formatter: new L.Routing.Formatter({ units: 'metric' })
  }).addTo(map);
 
  routeActive = true;
 
  // Show the clear-route button
- const clearBtn = document.getElementById("clearRouteBtn");
- if (clearBtn) clearBtn.style.display = "block";
 
-// Auto-fit bounds to the route once it's calculated + show summary
+    const infoBar = document.getElementById("routeInfoBar");
+    if (infoBar) infoBar.style.display = "flex";
+ // When routes are found, auto-select the shortest one and show summary
  routingControl.on('routesfound', function(e) {
- const routes = e.routes;
- if (routes && routes.length) {
- const selected = routingControl.getRouter().route ? null : routes[0];
- const route = routes[0];
- const bounds = L.latLngBounds(route.coordinates);
+ var routes = e.routes;
+ if (!routes || !routes.length) return;
+
+ // Find the shortest route by distance
+ var bestIdx = 0;
+ var bestDist = routes[0].summary.totalDistance;
+ for (var i = 1; i < routes.length; i++) {
+ if (routes[i].summary.totalDistance < bestDist) {
+ bestDist = routes[i].summary.totalDistance;
+ bestIdx = i;
+ }
+ }
+
+ // Use the shortest route for display
+ var route = routes[bestIdx];
+
+ // Fit map bounds to the best route
+ var bounds = L.latLngBounds(route.coordinates);
  map.fitBounds(bounds, { padding: [40, 40] });
 
- // Show distance / ETA summary above the routing panel
+ // Show distance / ETA summary
  if (route.summary) {
- const km = (route.summary.totalDistance / 1000).toFixed(1);
- const min = Math.round(route.summary.totalTime / 60);
- const summaryEl = document.getElementById('routeSummary');
+ var km = (route.summary.totalDistance / 1000).toFixed(1);
+ var min = Math.round(route.summary.totalTime / 60);
+ var summaryEl = document.getElementById('routeSummary');
  if (summaryEl) {
- summaryEl.innerHTML = '<i class="fas fa-route"></i> ' + km + ' km &nbsp;·&nbsp; <i class="fas fa-clock"></i> approx ' + min + ' min';
- summaryEl.style.display = 'flex';
- }
+ summaryEl.innerHTML = '<i class="fas fa-route"></i> ' + km + ' km &nbsp;&middot;&nbsp; <i class="fas fa-clock"></i> approx ' + min + ' min';
+ summaryEl.style.display = 'flex'; document.getElementById('routeInfoBar').style.display = 'flex';
  }
  }
  });
 
- // Hide summary when the routing control is removed from the map
+ // Update summary when user clicks a different route
  routingControl.on('routeselected', function(e) {
- const route = e.route;
+ var route = e.route;
  if (route && route.summary) {
- const km = (route.summary.totalDistance / 1000).toFixed(1);
- const min = Math.round(route.summary.totalTime / 60);
- const summaryEl = document.getElementById('routeSummary');
+ var km = (route.summary.totalDistance / 1000).toFixed(1);
+ var min = Math.round(route.summary.totalTime / 60);
+ var summaryEl = document.getElementById('routeSummary');
  if (summaryEl) {
- summaryEl.innerHTML = '<i class="fas fa-route"></i> ' + km + ' km &nbsp;·&nbsp; <i class="fas fa-clock"></i> approx ' + min + ' min';
- summaryEl.style.display = 'flex';
+ summaryEl.innerHTML = '<i class="fas fa-route"></i> ' + km + ' km &nbsp;&middot;&nbsp; <i class="fas fa-clock"></i> approx ' + min + ' min';
+ summaryEl.style.display = 'flex'; document.getElementById('routeInfoBar').style.display = 'flex';
  }
  }
  });
-
- // Update the user location marker after starting
- if (navigator.geolocation) {
- navigator.geolocation.getCurrentPosition(function(pos) {
- userLat = pos.coords.latitude;
- userLng = pos.coords.longitude;
- // Re-add route with actual location if it differs meaningfully
- routingControl.setWaypoints([
- L.latLng(userLat, userLng),
- L.latLng(pharmacyLat, pharmacyLng)
- ]);
- }, function() {
- // Geolocation denied - keep fallback location
- });
- }
  };
 
  if (navigator.geolocation) {
  navigator.geolocation.getCurrentPosition(
  function(pos) {
- const lat = pos.coords.latitude;
- const lng = pos.coords.longitude;
+ var lat = pos.coords.latitude;
+ var lng = pos.coords.longitude;
  userLat = lat;
  userLng = lng;
  startRoute(lat, lng);
@@ -430,9 +524,9 @@ function clearRoute() {
  routeActive = false;
 
 // Hide the clear-route button
- const clearBtn = document.getElementById("clearRouteBtn");
- if (clearBtn) clearBtn.style.display = "none";
 
+    const infoBar = document.getElementById("routeInfoBar");
+    if (infoBar) infoBar.style.display = "none";
  // Hide the route summary
  const summaryEl = document.getElementById("routeSummary");
  if (summaryEl) summaryEl.style.display = "none";
@@ -942,8 +1036,23 @@ function highlightItem(items, index) {
 
 
 function openContactPharmacy(pharmacyId) {
- closePopup();
- window.location.href = "/consumer/pharmacy/" + pharmacyId + "#contact";
+    closePopup();
+    // Open the chat window directly if available on the dashboard
+    if (typeof openChatWindow === "function" && typeof conversationsData !== "undefined") {
+        var conv = conversationsData.find(function(c) { return c.pharmacy_id == pharmacyId; });
+        if (conv) {
+            openChatWindow(pharmacyId);
+            return;
+        }
+        // No existing conversation - create a placeholder and open chat
+        var pharmacy = (typeof pharmaciesData !== "undefined") ? pharmaciesData.find(function(p) { return p.id == pharmacyId; }) : null;
+        var name = pharmacy ? (pharmacy.pharmacy_name || pharmacy.name || "Pharmacy") : "Pharmacy";
+        conversationsData.push({ pharmacy_id: pharmacyId, pharmacy_name: name, unread: 0, messages: [] });
+        openChatWindow(pharmacyId);
+        return;
+    }
+    // Fallback: redirect to pharmacy page
+    window.location.href = "/consumer/pharmacy/" + pharmacyId + "#contact";
 }
 
 // Make functions globally accessible
@@ -979,7 +1088,7 @@ function updateUnreadBadge(count) {
 }
 
 /**
- * Unread count — prefer real-time Echo; fall back to 10-second AJAX poll
+ * Unread count ? prefer real-time Echo; fall back to 10-second AJAX poll
  * only when WebSockets aren't available.
  */
 function pollUnreadCount() {

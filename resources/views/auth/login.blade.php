@@ -1,12 +1,9 @@
 ﻿<x-guest-layout>
     <div class="min-h-screen flex flex-col items-center justify-center bg-[#f0f0ff] px-4">
         <!-- Logo -->
-        <div class="mb-8 text-center">
-            <div class="flex items-center justify-center gap-2 mb-2">
-                <div class="bg-[#191970] rounded-lg p-2">
-                    <i class="fas fa-hospital text-[#D9F855] text-xl"></i>
-                </div>
-                <img src="{{ asset('images/Final Logo MedFind.png') }}" alt="MedFind" class="h-32 w-auto">
+        <div class="mb-4 text-center">
+            <div class="flex items-center justify-center mb-1">
+                <img src="{{ asset('images/Final Logo MedFind.png') }}" alt="MedFind" class="h-48 w-auto">
             </div>
             <p class="text-sm text-[#9400D3] font-light">Sign in to your account</p>
         </div>

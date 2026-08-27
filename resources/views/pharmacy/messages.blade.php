@@ -30,17 +30,19 @@
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center justify-between">
                                 <p class="text-white font-semibold text-sm truncate">{{ $consumer->name ?? 'Customer' }}</p>
-                                <span class="text-gray-400 text-xs flex-shrink-0">{{ $lastMsg->created_at->format('M d') }}</span>
                             </div>
                             <p class="text-gray-400 text-xs truncate mt-0.5">{{ $lastText }}</p>
                         </div>
-                        @if($unread > 0)
-                            <span class="bg-[#9400D3] text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0">{{ $unread }}</span>
-                        @endif
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <span class="text-gray-400 text-xs">{{ $lastMsg->created_at->format('M d') }}</span>
+                            @if($unread > 0)
+                                <span class="unread-badge bg-[#9400D3] text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">{{ $unread }}</span>
+                            @endif
+                            <button @click.stop="menuOpen = !menuOpen" class="text-gray-500 hover:text-white opacity-0 group-hover:opacity-100 transition p-1">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
                     </div>
-                    <button @click.stop="menuOpen = !menuOpen" class="absolute top-3 right-3 text-gray-500 hover:text-white opacity-0 group-hover:opacity-100 transition p-1">
-                        <i class="fas fa-ellipsis-v"></i>
-                    </button>
                     <div x-show="menuOpen" @click.away="menuOpen = false" x-cloak class="absolute top-10 right-3 bg-white rounded-lg shadow-lg py-1 z-50 w-44">
                         <form method="POST" action="{{ route('pharmacy.message.delete', $consumerId) }}" onsubmit="return confirm('Delete this conversation?')">
                             @csrf
@@ -199,6 +201,25 @@ function openConversation(consumerId) {
     });
     var item = document.querySelector('[data-consumer-id="' + consumerId + '"]');
     if (item) item.classList.add('active-conv');
+
+    // Mark all unread messages in this conversation as read
+    fetch('/pharmacy/message/mark-conversation-read/' + consumerId, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    }).then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.success) {
+            // Remove the unread badge from this conversation in the left panel
+            if (item) {
+                var badge = item.querySelector('.unread-badge');
+                if (badge) badge.remove();
+            }
+        }
+    }).catch(function() {});
 }
 
 function sendReply(form, consumerId) {

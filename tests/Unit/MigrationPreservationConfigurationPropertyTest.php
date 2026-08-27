@@ -114,7 +114,7 @@ final class MigrationPreservationConfigurationPropertyTest extends TestCase
                 $reply
             );
 
-            self::assertSame(["pharmacy.{$pharmacyId}"], self::channelNames($message->broadcastOn()));
+            self::assertSame(["pharmacy.{$pharmacyId}", "consumer." . (301 + ($sample * 29))], self::channelNames($message->broadcastOn()));
             self::assertSame('message.sent', $message->broadcastAs());
             self::assertSame(
                 [

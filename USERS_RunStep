@@ -9,10 +9,25 @@ Admin	    admin@medfind.com	        password	    /admin/dashboard
   
 How to run this project
 Open terminals:
-    Terminal 1 - php artisan serve              (Web Server)    -   Starts the app at http://127.0.0.1:8000                        
-    Terminal 2 - php artisan reverb:start       (WebSocket Server(Real-time))   -   Powers live inventory updates and message notifications
-    Terminal 3 - php artisan queue:work         (Queue Worker (Broadcasting))   -   Processes background jobs (sending notifications when pharmacy status changes)
-    Terminal 4 - npm run dev                    (Vite (Frontend assets - only needed if editing the CSS/JS))    -   Skip this if you're not making frontend changes
+
+# Terminal 1 - Laravel App
+php artisan serve --host=127.0.0.1 --port=8000
+
+# Terminal 2 - Reverb WebSocket
+php artisan reverb:start --host=127.0.0.1 --port=8080
+
+# Terminal 3 - Nginx (optional)
+cd C:\nginx; .\nginx.exe
+
+Optional:
+# Terminal 4 - Queue Worker (Broadcasting)
+php artisan queue:work 
+Processes background jobs (sending notifications when pharmacy status changes)
+
+# Terminal 5 - (Vite (Frontend assets - only needed if editing the CSS/JS)) 
+npm run dev 
+(Skip this if you're not making frontend changes)
+
 
 
 One-time setup steps (only needed if running on a fresh machine):
@@ -45,3 +60,14 @@ Legazpi City Pharmacy	                     legazpicitypharmacy@medfind.com	     
 Albay Medical Center Pharmacy              	 albaymedicalcenter@medfind.com	                    password123
 Bicol Ultra Drug	                         bicolultradrug@medfind.com	                        password123
 GRACIES PHARMA	                             graciespharma@medfind.com	                        password123
+
+
+sanjose.pharmacy@medfind.com / password123
+nuevaecija.drugstore@medfind.com / password123
+
+Pharmacies (Holy Spirit, QC):
+Email	                                    Password	             
+holyspirit.pharmacy@medfind.com	           password123	
+qchealthplus@medfind.com	               password123
+batasanmedcare@medfind.com	               password123	
+Consumer:

@@ -203,6 +203,33 @@ class MessageController extends Controller
     }
 
     /**
+     * Mark all unread messages in a conversation as read (bulk)
+     */
+    public function markConversationReadAjax($consumerId)
+    {
+        $user = Auth::user();
+
+        if (! $user->isPharmacy()) {
+            return response()->json(['success' => false, 'error' => 'Unauthorized'], 403);
+        }
+
+        $pharmacy = Pharmacy::where('user_id', $user->id)->first();
+        if (! $pharmacy) {
+            return response()->json(['success' => false, 'error' => 'Pharmacy not found'], 404);
+        }
+
+        // Mark all unread consumer messages in this conversation as read
+        $updated = Message::where('pharmacy_id', $pharmacy->id)
+            ->where('consumer_id', $consumerId)
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
+
+        $count = Message::where('pharmacy_id', $pharmacy->id)->where('is_read', false)->count();
+
+        return response()->json(['success' => true, 'marked' => $updated, 'count' => $count]);
+    }
+
+    /**
      * Reply to a message from pharmacy
      */
     public function reply(Request $request, Message $message)
@@ -346,6 +373,31 @@ class MessageController extends Controller
     }
 
     /**
+     * Mark all unread pharmacy messages in a conversation as read by the consumer
+     */
+    public function consumerMarkConversationRead($pharmacyId)
+    {
+        $user = Auth::user();
+        if (!$user || $user->role !== 'consumer') {
+            return response()->json(['success' => false, 'error' => 'Unauthorized'], 403);
+        }
+
+        $updated = Message::where('consumer_id', $user->id)
+            ->where('pharmacy_id', $pharmacyId)
+            ->where('sender', 'pharmacy')
+            ->whereNull('consumer_read_at')
+            ->update(['consumer_read_at' => now()]);
+
+        // Return total unread count across all conversations
+        $count = Message::where('consumer_id', $user->id)
+            ->where('sender', 'pharmacy')
+            ->whereNull('consumer_read_at')
+            ->count();
+
+        return response()->json(['success' => true, 'marked' => $updated, 'count' => $count]);
+    }
+
+    /**
      * Delete all messages in a conversation between pharmacy and a consumer
      */
     public function pharmacyDeleteConversation($consumerId)
@@ -377,7 +429,7 @@ class MessageController extends Controller
             ->groupBy('pharmacy_id')
             ->map(function($thread) {
                 $pharmacy = $thread->first()->pharmacy;
-                $unread = $thread->whereNotNull('reply')->filter(function($m) {
+                $unread = $thread->where('sender', 'pharmacy')->filter(function($m) {
                     return !$m->consumer_read_at;
                 })->count();
                 return [
