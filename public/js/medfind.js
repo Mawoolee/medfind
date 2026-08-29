@@ -323,9 +323,21 @@ function updateMapMarkers() {
  });
 }
 
-function initMap() {
+function initMap(attempt = 0) {
  const mapElement = document.getElementById("medfindMap");
- if (!mapElement) return;
+ if (!mapElement || map) return;
+
+ // Vite modules are deferred, so wait briefly if this classic script runs first.
+ if (typeof window.L === "undefined") {
+ if (attempt < 20) {
+ window.setTimeout(function() { initMap(attempt + 1); }, 100);
+ return;
+ }
+
+ console.error("[MedFind] Leaflet failed to load from the application bundle.");
+ mapElement.innerHTML = '<div style="height:100%;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:#64748b;background:#f8fafc;">The map could not be loaded. Please refresh the page.</div>';
+ return;
+ }
 
  map = L.map("medfindMap", {
  center: [userLat, userLng],

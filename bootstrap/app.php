@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Middleware\CheckRole;
+use App\Http\Middleware\NoCacheHeaders;
+use App\Http\Middleware\PharmacyPendingMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -12,17 +15,18 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->trustProxies(at: '*');
+
         $middleware->alias([
-            'role' => \App\Http\Middleware\CheckRole::class,
-            'pharmacy.pending' => \App\Http\Middleware\PharmacyPendingMiddleware::class,
+            'role' => CheckRole::class,
+            'pharmacy.pending' => PharmacyPendingMiddleware::class,
         ]);
 
         // Prevent browser from caching pages so back button after logout won't show stale content
         $middleware->web(append: [
-            \App\Http\Middleware\NoCacheHeaders::class,
+            NoCacheHeaders::class,
         ]);
     })
-    
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();

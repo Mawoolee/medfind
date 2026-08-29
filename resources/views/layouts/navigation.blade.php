@@ -4,7 +4,7 @@
             {{-- Logo --}}
             <div class="flex items-center">
                 <a href="{{ route('home') }}" class="flex items-center gap-2">
-                    <img src="{{ asset('images/Final Logo MedFind.png') }}" alt="MedFind" class="h-40 w-auto">
+                    <img src="{{ asset('images/Final Logo MedFind.png') }}" alt="MedFind" class="h-12 w-12 object-contain" width="48" height="48">
                 </a>
             </div>
 

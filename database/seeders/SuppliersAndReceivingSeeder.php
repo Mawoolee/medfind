@@ -2,15 +2,17 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Supplier;
-use App\Models\Pharmacy;
 use App\Models\Medicine;
-use App\Models\InventoryItem;
+use App\Models\Pharmacy;
+use App\Models\Supplier;
 use App\Models\User;
+use Database\Seeders\Concerns\SeedsBatchInventory;
+use Illuminate\Database\Seeder;
 
 class SuppliersAndReceivingSeeder extends Seeder
 {
+    use SeedsBatchInventory;
+
     public function run()
     {
         // Create a few suppliers
@@ -28,13 +30,13 @@ class SuppliersAndReceivingSeeder extends Seeder
 
         // Find a pharmacy (created by InventoryTestSeeder) or create one
         $user = User::where('role', 'pharmacy')->first();
-        if (!$user) {
-            $user = User::create([ 'name' => 'Seeder Pharmacy', 'email' => 'seeder-pharmacy@example.test', 'password' => bcrypt('password'), 'role' => 'pharmacy' ]);
+        if (! $user) {
+            $user = User::create(['name' => 'Seeder Pharmacy', 'email' => 'seeder-pharmacy@example.test', 'password' => bcrypt('password'), 'role' => 'pharmacy']);
             $this->command->info('Created seeder user: '.$user->email);
         }
 
         $pharmacy = Pharmacy::where('user_id', $user->id)->first();
-        if (!$pharmacy) {
+        if (! $pharmacy) {
             $pharmacy = Pharmacy::create([
                 'pharmacy_name' => 'Seeder Pharmacy',
                 'pharmacyAddress' => '99 Seeder Lane',
@@ -58,26 +60,27 @@ class SuppliersAndReceivingSeeder extends Seeder
 
         $processed = 0;
         foreach ($shipment as $it) {
-            if (empty($it['medicine_name'])) continue;
+            if (empty($it['medicine_name'])) {
+                continue;
+            }
 
             $medicine = Medicine::firstOrCreate(['medicine_name' => $it['medicine_name']], [
                 'dosage' => $it['dosage'] ?? '',
                 'manufacturer' => $it['manufacturer'] ?? '',
             ]);
 
-            $existing = InventoryItem::where('pharmacy_id', $pharmacy->id)->where('medicine_id', $medicine->id)->first();
-            $existingQty = $existing->stockQuantity ?? 0;
-
-            $inv = InventoryItem::updateOrCreate(
-                ['pharmacy_id' => $pharmacy->id, 'medicine_id' => $medicine->id],
+            $this->seedBatchInventory(
+                $pharmacy,
+                $medicine,
+                (int) $it['quantity'],
+                $it['price'] ?? 0,
                 [
-                    'stockQuantity' => $existingQty + intval($it['quantity']),
-                    'price' => $it['price'] ?? 0,
-                    'batch_number' => $it['batch_number'] ?? null,
-                    'expiry_date' => !empty($it['expiry_date']) ? $it['expiry_date'] : null,
-                    'cold_chain' => !empty($it['cold_chain']) ? boolval($it['cold_chain']) : false,
-                    'supplier_id' => $supplier->id ?? null,
-                    'status' => 'available',
+                    'batch_number' => $it['batch_number'],
+                    'expiry_date' => $it['expiry_date'] ?? null,
+                    'cold_chain' => ! empty($it['cold_chain']),
+                    'supplier_id' => $supplier?->id,
+                    'supplier_name' => $supplier?->name,
+                    'received_reference' => 'suppliers-receiving-seeder',
                 ]
             );
 

@@ -22,17 +22,24 @@ class MedicineFactory extends Factory
     public function definition(): array
     {
         return [
-            'medicine_name'        => fake()->randomElement(self::$names) . ' ' . fake()->numberBetween(1, 100) . 'mg',
-            'dosage'               => fake()->randomElement(['500mg', '250mg', '100mg', '10mg', '5mg']),
-            'manufacturer'         => fake()->company(),
+            'medicine_name' => fake()->randomElement(self::$names).' '.fake()->numberBetween(1, 100).'mg',
+            'brand_name' => fake()->optional()->company(),
+            'dosage' => fake()->randomElement(['500mg', '250mg', '100mg', '10mg', '5mg']),
+            'manufacturer' => fake()->company(),
             'requiresPrescription' => false,
-            'category'             => fake()->randomElement(self::$categories),
+            'cold_chain_required' => false,
+            'category' => fake()->randomElement(self::$categories),
         ];
     }
 
     public function prescription(): static
     {
         return $this->state(['requiresPrescription' => true]);
+    }
+
+    public function coldChainRequired(): static
+    {
+        return $this->state(['cold_chain_required' => true]);
     }
 
     public function named(string $name): static

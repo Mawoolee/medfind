@@ -2,32 +2,33 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\User;
-use App\Models\Pharmacy;
 use App\Models\Medicine;
-use App\Models\InventoryItem;
-use Illuminate\Support\Str;
+use App\Models\Pharmacy;
+use App\Models\User;
+use Database\Seeders\Concerns\SeedsBatchInventory;
+use Illuminate\Database\Seeder;
 
 class InventoryTestSeeder extends Seeder
 {
+    use SeedsBatchInventory;
+
     public function run()
     {
         // Ensure a user exists
         $user = User::first();
-        if (!$user) {
+        if (! $user) {
             $user = User::create([
                 'name' => 'Test Pharmacy User',
                 'email' => 'pharmacy@example.test',
                 'password' => bcrypt('password'),
                 'role' => 'pharmacy',
             ]);
-            $this->command->info('Created test user: ' . $user->email);
+            $this->command->info('Created test user: '.$user->email);
         }
 
         // Ensure a pharmacy exists for the user
         $pharmacy = Pharmacy::where('user_id', $user->id)->first();
-        if (!$pharmacy) {
+        if (! $pharmacy) {
             $pharmacy = Pharmacy::create([
                 'pharmacy_name' => 'Test Pharmacy',
                 'pharmacyAddress' => '123 Test St',
@@ -37,7 +38,7 @@ class InventoryTestSeeder extends Seeder
                 'user_id' => $user->id,
                 'status' => 'approved',
             ]);
-            $this->command->info('Created pharmacy: ' . $pharmacy->pharmacy_name);
+            $this->command->info('Created pharmacy: '.$pharmacy->pharmacy_name);
         }
 
         $sample = [
@@ -65,14 +66,17 @@ class InventoryTestSeeder extends Seeder
             ], [
                 'dosage' => $s['dosage'],
                 'manufacturer' => $s['manufacturer'],
-                'requiresPrescription' => in_array($s['name'], ['Amoxicillin','Azithromycin','Prednisone','Insulin (Vial)']),
+                'requiresPrescription' => in_array($s['name'], ['Amoxicillin', 'Azithromycin', 'Prednisone', 'Insulin (Vial)']),
                 'category' => 'General',
             ]);
 
-            $item = InventoryItem::updateOrCreate(
-                ['pharmacy_id' => $pharmacy->id, 'medicine_id' => $medicine->id],
-                ['stockQuantity' => rand(0, 120), 'price' => rand(50, 1500) / 10.0, 'status' => 'available']
-            );
+            $quantity = rand(0, 120);
+            $price = rand(50, 1500) / 10.0;
+            $this->seedBatchInventory($pharmacy, $medicine, $quantity, $price, [
+                'batch_number' => 'TEST-'.$pharmacy->id.'-'.$medicine->id,
+                'cold_chain' => in_array($s['name'], ['Insulin (Vial)', 'Vaccine X'], true),
+                'received_reference' => 'inventory-test-seeder',
+            ]);
 
             $count++;
         }

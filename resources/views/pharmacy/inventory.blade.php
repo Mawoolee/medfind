@@ -112,6 +112,9 @@
                                     <td class="px-4 py-3" data-medicine-dosage>{{ $item->medicine->dosage }}</td>
                                     <td class="px-4 py-3 text-sm">
                                         <div>{{ $item->batch_number ?? '—' }}</div>
+                                        @if($item->lot_number)
+                                            <div class="text-gray-500">Lot: {{ $item->lot_number }}</div>
+                                        @endif
                                         @if($item->expiry_date)
                                             <div class="{{ $expiryStatus === 'expired' ? 'text-red-600 font-semibold' : ($expiryStatus === 'critical' ? 'text-orange-600 font-semibold' : 'text-gray-500') }}">
                                                 {{ $item->expiry_date->format('M d, Y') }}

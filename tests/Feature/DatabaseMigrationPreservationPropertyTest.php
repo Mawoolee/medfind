@@ -23,7 +23,7 @@ final class DatabaseMigrationPreservationPropertyTest extends TestCase
      *
      * **Validates: Requirements 3.1, 3.3, 3.5, 3.6**
      *
-     * @param array<string, mixed> $fixture
+     * @param  array<string, mixed>  $fixture
      */
     #[DataProvider('generatedAuthoritativeGraphs')]
     public function test_generated_authoritative_graphs_survive_a_disposable_round_trip(array $fixture): void
@@ -66,6 +66,10 @@ final class DatabaseMigrationPreservationPropertyTest extends TestCase
                 'inventory_pharmacy' => $fixture['pharmacies'][0]['id'],
                 'inventory_medicine' => $fixture['medicines'][0]['id'],
                 'inventory_supplier' => $fixture['suppliers'][0]['id'],
+                'batch_inventory' => $fixture['inventory_items'][0]['id'],
+                'batch_supplier' => $fixture['suppliers'][0]['id'],
+                'movement_inventory' => $fixture['inventory_items'][0]['id'],
+                'movement_batch' => $fixture['inventory_batches'][0]['id'],
                 'message_consumer' => $fixture['users'][1]['id'],
                 'message_pharmacy' => $fixture['pharmacies'][0]['id'],
             ],
@@ -102,6 +106,14 @@ final class DatabaseMigrationPreservationPropertyTest extends TestCase
             $password = password_hash('baseline-password', PASSWORD_BCRYPT, ['cost' => 4]);
             $token = hash('sha256', "sanitized-fixture-{$sample}");
             $uuid = sprintf('12345678-1234-4%03x-8%03x-%012x', $sample, $sample, $sample + 1);
+            $inventoryId = $base + 3000;
+            $batchId = $base + 3500;
+            $stock = ($sample * 7) % 101;
+            $price = $sample % 2 === 0 ? '0.00' : '999999.99';
+            $batchNumber = $nullable ?? 'LEGACY-'.$inventoryId;
+            $identityKey = $nullable === null
+                ? 'legacy:'.$inventoryId
+                : 'batch:'.mb_strtolower(trim($nullable), 'UTF-8').'|lot:';
 
             yield "graph with sparse ids {$sample}" => [[
                 'token' => $token,
@@ -148,9 +160,11 @@ final class DatabaseMigrationPreservationPropertyTest extends TestCase
                 'medicines' => [[
                     'id' => $base + 2000,
                     'medicine_name' => "Amoxicillin {$sample} — β",
+                    'brand_name' => $nullable,
                     'dosage' => $sample % 2 === 0 ? '0mg' : '500mg',
                     'manufacturer' => "Maker {$sample}",
                     'requiresPrescription' => $sample % 2,
+                    'cold_chain_required' => $sample % 2,
                     'category' => $nullable,
                     'created_at' => $createdAt,
                     'updated_at' => $createdAt,
@@ -166,19 +180,56 @@ final class DatabaseMigrationPreservationPropertyTest extends TestCase
                     'updated_at' => $createdAt,
                 ]],
                 'inventory_items' => [[
-                    'id' => $base + 3000,
+                    'id' => $inventoryId,
                     'pharmacy_id' => $base + 1000,
                     'medicine_id' => $base + 2000,
-                    'stockQuantity' => ($sample * 7) % 101,
-                    'price' => $sample % 2 === 0 ? '0.00' : '999999.99',
+                    'stockQuantity' => $stock,
+                    'price' => $price,
                     'expiry_date' => $nullable === null ? null : '2030-02-28',
                     'batch_number' => $nullable,
+                    'lot_number' => $nullable === null ? null : "LOT-{$sample}",
                     'cold_chain' => $sample % 2,
                     'par_level' => $sample,
                     'supplier_id' => $base + 2500,
                     'status' => $sample % 2 === 0 ? 'available' : 'low_stock',
                     'created_at' => $createdAt,
                     'updated_at' => $createdAt,
+                ]],
+                'inventory_batches' => [[
+                    'id' => $batchId,
+                    'inventory_item_id' => $inventoryId,
+                    'legacy_source_inventory_item_id' => $inventoryId,
+                    'batch_number' => $batchNumber,
+                    'lot_number' => $nullable === null ? null : "LOT-{$sample}",
+                    'identity_key' => $identityKey,
+                    'quantity_received' => $stock,
+                    'current_quantity' => $stock,
+                    'price' => $price,
+                    'supplier_id' => $base + 2500,
+                    'supplier_name' => "Supplier {$sample}",
+                    'expiry_date' => $nullable === null ? null : '2030-02-28',
+                    'cold_chain' => $sample % 2,
+                    'received_date' => substr($createdAt, 0, 10),
+                    'received_reference' => 'legacy-inventory:'.$inventoryId,
+                    'created_by' => $base,
+                    'created_at' => $createdAt,
+                    'updated_at' => $createdAt,
+                ]],
+                'stock_movements' => [[
+                    'id' => $base + 3600,
+                    'operation_id' => 'legacy-backfill:'.$inventoryId,
+                    'inventory_item_id' => $inventoryId,
+                    'inventory_batch_id' => $batchId,
+                    'type' => 'backfill',
+                    'before_quantity' => 0,
+                    'after_quantity' => $stock,
+                    'quantity_delta' => $stock,
+                    'reason' => 'Legacy inventory migration',
+                    'reference_type' => 'inventory_item',
+                    'reference_id' => (string) $inventoryId,
+                    'received_reference' => 'legacy-inventory:'.$inventoryId,
+                    'user_id' => $base,
+                    'created_at' => $createdAt,
                 ]],
                 'messages' => [[
                     'id' => $base + 4000,
@@ -213,7 +264,7 @@ final class DatabaseMigrationPreservationPropertyTest extends TestCase
     }
 
     /**
-     * @param array<string, mixed> $fixture
+     * @param  array<string, mixed>  $fixture
      */
     private function insertSourceGraph(array $fixture): void
     {
@@ -227,6 +278,8 @@ final class DatabaseMigrationPreservationPropertyTest extends TestCase
         DB::table('medicines')->insert($fixture['medicines']);
         DB::table('suppliers')->insert($fixture['suppliers']);
         DB::table('inventory_items')->insert($fixture['inventory_items']);
+        DB::table('inventory_batches')->insert($fixture['inventory_batches']);
+        DB::table('stock_movements')->insert($fixture['stock_movements']);
         DB::table('messages')->insert($fixture['messages']);
         DB::table('notifications')->insert($fixture['notifications']);
     }
@@ -257,9 +310,11 @@ final class DatabaseMigrationPreservationPropertyTest extends TestCase
         $pdo->exec('PRAGMA foreign_keys = ON');
         $pdo->exec('CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL UNIQUE, email_verified_at TEXT NULL, password TEXT NOT NULL, role TEXT NOT NULL, pharmacy_id INTEGER NULL, remember_token TEXT NULL, created_at TEXT NULL, updated_at TEXT NULL, FOREIGN KEY (pharmacy_id) REFERENCES pharmacies(id))');
         $pdo->exec('CREATE TABLE pharmacies (id INTEGER PRIMARY KEY, pharmacy_name TEXT NOT NULL, pharmacyAddress TEXT NOT NULL, latitude NUMERIC NOT NULL, longitude NUMERIC NOT NULL, contactNumber TEXT NOT NULL, status TEXT NOT NULL, logo_path TEXT NULL, requirements TEXT NULL, user_id INTEGER NULL, created_at TEXT NULL, updated_at TEXT NULL, FOREIGN KEY (user_id) REFERENCES users(id))');
-        $pdo->exec('CREATE TABLE medicines (id INTEGER PRIMARY KEY, medicine_name TEXT NOT NULL, dosage TEXT NOT NULL, manufacturer TEXT NOT NULL, requiresPrescription INTEGER NOT NULL, category TEXT NULL, created_at TEXT NULL, updated_at TEXT NULL)');
+        $pdo->exec('CREATE TABLE medicines (id INTEGER PRIMARY KEY, medicine_name TEXT NOT NULL, brand_name TEXT NULL, dosage TEXT NOT NULL, manufacturer TEXT NOT NULL, requiresPrescription INTEGER NOT NULL, cold_chain_required INTEGER NOT NULL, category TEXT NULL, created_at TEXT NULL, updated_at TEXT NULL)');
         $pdo->exec('CREATE TABLE suppliers (id INTEGER PRIMARY KEY, name TEXT NOT NULL, contact_person TEXT NULL, phone TEXT NULL, email TEXT NULL, address TEXT NULL, created_at TEXT NULL, updated_at TEXT NULL)');
-        $pdo->exec('CREATE TABLE inventory_items (id INTEGER PRIMARY KEY, pharmacy_id INTEGER NOT NULL, medicine_id INTEGER NOT NULL, stockQuantity INTEGER NOT NULL, price NUMERIC NOT NULL, expiry_date TEXT NULL, batch_number TEXT NULL, cold_chain INTEGER NOT NULL, par_level INTEGER NOT NULL, supplier_id INTEGER NULL, status TEXT NOT NULL, created_at TEXT NULL, updated_at TEXT NULL, FOREIGN KEY (pharmacy_id) REFERENCES pharmacies(id), FOREIGN KEY (medicine_id) REFERENCES medicines(id), FOREIGN KEY (supplier_id) REFERENCES suppliers(id), UNIQUE (pharmacy_id, medicine_id))');
+        $pdo->exec('CREATE TABLE inventory_items (id INTEGER PRIMARY KEY, pharmacy_id INTEGER NOT NULL, medicine_id INTEGER NOT NULL, stockQuantity INTEGER NOT NULL, price NUMERIC NOT NULL, expiry_date TEXT NULL, batch_number TEXT NULL, lot_number TEXT NULL, cold_chain INTEGER NOT NULL, par_level INTEGER NOT NULL, supplier_id INTEGER NULL, status TEXT NOT NULL, created_at TEXT NULL, updated_at TEXT NULL, FOREIGN KEY (pharmacy_id) REFERENCES pharmacies(id), FOREIGN KEY (medicine_id) REFERENCES medicines(id), FOREIGN KEY (supplier_id) REFERENCES suppliers(id), UNIQUE (pharmacy_id, medicine_id))');
+        $pdo->exec('CREATE TABLE inventory_batches (id INTEGER PRIMARY KEY, inventory_item_id INTEGER NOT NULL, legacy_source_inventory_item_id INTEGER NULL UNIQUE, batch_number TEXT NOT NULL, lot_number TEXT NULL, identity_key TEXT NOT NULL, quantity_received INTEGER NOT NULL, current_quantity INTEGER NOT NULL, price NUMERIC NOT NULL, supplier_id INTEGER NULL, supplier_name TEXT NULL, expiry_date TEXT NULL, cold_chain INTEGER NOT NULL, received_date TEXT NOT NULL, received_reference TEXT NULL, created_by INTEGER NULL, created_at TEXT NULL, updated_at TEXT NULL, FOREIGN KEY (inventory_item_id) REFERENCES inventory_items(id), FOREIGN KEY (legacy_source_inventory_item_id) REFERENCES inventory_items(id), FOREIGN KEY (supplier_id) REFERENCES suppliers(id), FOREIGN KEY (created_by) REFERENCES users(id), UNIQUE (inventory_item_id, identity_key))');
+        $pdo->exec('CREATE TABLE stock_movements (id INTEGER PRIMARY KEY, operation_id TEXT NOT NULL, inventory_item_id INTEGER NOT NULL, inventory_batch_id INTEGER NOT NULL, type TEXT NOT NULL, before_quantity INTEGER NOT NULL, after_quantity INTEGER NOT NULL, quantity_delta INTEGER NOT NULL, reason TEXT NULL, reference_type TEXT NULL, reference_id TEXT NULL, received_reference TEXT NULL, user_id INTEGER NULL, created_at TEXT NULL, FOREIGN KEY (inventory_item_id) REFERENCES inventory_items(id), FOREIGN KEY (inventory_batch_id) REFERENCES inventory_batches(id), FOREIGN KEY (user_id) REFERENCES users(id))');
         $pdo->exec('CREATE TABLE messages (id INTEGER PRIMARY KEY, consumer_id INTEGER NOT NULL, pharmacy_id INTEGER NOT NULL, sender TEXT NULL, message TEXT NOT NULL, prescription_image TEXT NULL, attachments TEXT NULL, reply TEXT NULL, replied_at TEXT NULL, is_read INTEGER NOT NULL, verified_by INTEGER NULL, verification_status TEXT NULL, verification_notes TEXT NULL, verified_at TEXT NULL, created_at TEXT NULL, updated_at TEXT NULL, FOREIGN KEY (consumer_id) REFERENCES users(id), FOREIGN KEY (pharmacy_id) REFERENCES pharmacies(id), FOREIGN KEY (verified_by) REFERENCES users(id))');
         $pdo->exec('CREATE TABLE notifications (id TEXT PRIMARY KEY, type TEXT NOT NULL, notifiable_type TEXT NOT NULL, notifiable_id INTEGER NOT NULL, data TEXT NOT NULL, read_at TEXT NULL, created_at TEXT NULL, updated_at TEXT NULL)');
 
@@ -267,7 +322,7 @@ final class DatabaseMigrationPreservationPropertyTest extends TestCase
     }
 
     /**
-     * @param array<string, array<int, array<string, mixed>>> $graph
+     * @param  array<string, array<int, array<string, mixed>>>  $graph
      */
     private function copyGraphWithParameterizedStatements(PDO $target, array $graph): void
     {
@@ -292,7 +347,7 @@ final class DatabaseMigrationPreservationPropertyTest extends TestCase
                 $restore->execute(['pharmacy_id' => $pharmacyId, 'id' => $userId]);
             }
 
-            foreach (['inventory_items', 'messages', 'notifications'] as $table) {
+            foreach (['inventory_items', 'inventory_batches', 'stock_movements', 'messages', 'notifications'] as $table) {
                 foreach ($graph[$table] as $row) {
                     $this->insertTargetRow($target, $table, $row);
                 }
@@ -306,7 +361,7 @@ final class DatabaseMigrationPreservationPropertyTest extends TestCase
     }
 
     /**
-     * @param array<string, mixed> $row
+     * @param  array<string, mixed>  $row
      */
     private function insertTargetRow(PDO $target, string $table, array $row): void
     {
@@ -338,7 +393,7 @@ final class DatabaseMigrationPreservationPropertyTest extends TestCase
     }
 
     /**
-     * @param array<string, array<int, array<string, mixed>>> $graph
+     * @param  array<string, array<int, array<string, mixed>>>  $graph
      */
     private function canonicalGraphHash(array $graph): string
     {
@@ -354,7 +409,7 @@ final class DatabaseMigrationPreservationPropertyTest extends TestCase
     }
 
     /**
-     * @param array<string, mixed> $row
+     * @param  array<string, mixed>  $row
      * @return array<string, array{type: string, value?: mixed}>
      */
     private function canonicalRow(string $table, array $row): array
@@ -366,6 +421,7 @@ final class DatabaseMigrationPreservationPropertyTest extends TestCase
 
             if ($value === null) {
                 $canonical[$column] = ['type' => 'null'];
+
                 continue;
             }
 
@@ -403,7 +459,7 @@ final class DatabaseMigrationPreservationPropertyTest extends TestCase
     }
 
     /**
-     * @param array<string, array<int, array<string, mixed>>> $graph
+     * @param  array<string, array<int, array<string, mixed>>>  $graph
      * @return array<string, array<int, int|string>>
      */
     private function primaryKeys(array $graph): array
@@ -427,6 +483,8 @@ final class DatabaseMigrationPreservationPropertyTest extends TestCase
         $consumer = $target->query("SELECT id FROM users WHERE role = 'consumer'")->fetch();
         $pharmacy = $target->query('SELECT id, user_id FROM pharmacies')->fetch();
         $inventory = $target->query('SELECT pharmacy_id, medicine_id, supplier_id FROM inventory_items')->fetch();
+        $batch = $target->query('SELECT inventory_item_id, supplier_id FROM inventory_batches')->fetch();
+        $movement = $target->query('SELECT inventory_item_id, inventory_batch_id FROM stock_movements')->fetch();
         $message = $target->query('SELECT consumer_id, pharmacy_id FROM messages')->fetch();
 
         return [
@@ -435,6 +493,10 @@ final class DatabaseMigrationPreservationPropertyTest extends TestCase
             'inventory_pharmacy' => (int) $inventory['pharmacy_id'],
             'inventory_medicine' => (int) $inventory['medicine_id'],
             'inventory_supplier' => (int) $inventory['supplier_id'],
+            'batch_inventory' => (int) $batch['inventory_item_id'],
+            'batch_supplier' => (int) $batch['supplier_id'],
+            'movement_inventory' => (int) $movement['inventory_item_id'],
+            'movement_batch' => (int) $movement['inventory_batch_id'],
             'message_consumer' => (int) $message['consumer_id'],
             'message_pharmacy' => (int) $message['pharmacy_id'],
         ];
@@ -470,8 +532,8 @@ final class DatabaseMigrationPreservationPropertyTest extends TestCase
                 'requirements' => 'json', 'user_id' => 'integer', 'created_at' => 'timestamp', 'updated_at' => 'timestamp',
             ],
             'medicines' => [
-                'id' => 'integer', 'medicine_name' => 'string', 'dosage' => 'string', 'manufacturer' => 'string',
-                'requiresPrescription' => 'boolean', 'category' => 'string', 'created_at' => 'timestamp', 'updated_at' => 'timestamp',
+                'id' => 'integer', 'medicine_name' => 'string', 'brand_name' => 'string', 'dosage' => 'string', 'manufacturer' => 'string',
+                'requiresPrescription' => 'boolean', 'cold_chain_required' => 'boolean', 'category' => 'string', 'created_at' => 'timestamp', 'updated_at' => 'timestamp',
             ],
             'suppliers' => [
                 'id' => 'integer', 'name' => 'string', 'contact_person' => 'string', 'phone' => 'string',
@@ -479,9 +541,24 @@ final class DatabaseMigrationPreservationPropertyTest extends TestCase
             ],
             'inventory_items' => [
                 'id' => 'integer', 'pharmacy_id' => 'integer', 'medicine_id' => 'integer', 'stockQuantity' => 'integer',
-                'price' => 'decimal:2', 'expiry_date' => 'date', 'batch_number' => 'string', 'cold_chain' => 'boolean',
+                'price' => 'decimal:2', 'expiry_date' => 'date', 'batch_number' => 'string', 'lot_number' => 'string', 'cold_chain' => 'boolean',
                 'par_level' => 'integer', 'supplier_id' => 'integer', 'status' => 'string', 'created_at' => 'timestamp',
                 'updated_at' => 'timestamp',
+            ],
+            'inventory_batches' => [
+                'id' => 'integer', 'inventory_item_id' => 'integer', 'legacy_source_inventory_item_id' => 'integer',
+                'batch_number' => 'string', 'lot_number' => 'string', 'identity_key' => 'string',
+                'quantity_received' => 'integer', 'current_quantity' => 'integer', 'price' => 'decimal:2',
+                'supplier_id' => 'integer', 'supplier_name' => 'string', 'expiry_date' => 'date', 'cold_chain' => 'boolean',
+                'received_date' => 'date', 'received_reference' => 'string', 'created_by' => 'integer',
+                'created_at' => 'timestamp', 'updated_at' => 'timestamp',
+            ],
+            'stock_movements' => [
+                'id' => 'integer', 'operation_id' => 'string', 'inventory_item_id' => 'integer',
+                'inventory_batch_id' => 'integer', 'type' => 'string', 'before_quantity' => 'integer',
+                'after_quantity' => 'integer', 'quantity_delta' => 'integer', 'reason' => 'string',
+                'reference_type' => 'string', 'reference_id' => 'string', 'received_reference' => 'string',
+                'user_id' => 'integer', 'created_at' => 'timestamp',
             ],
             'messages' => [
                 'id' => 'integer', 'consumer_id' => 'integer', 'pharmacy_id' => 'integer', 'sender' => 'string',

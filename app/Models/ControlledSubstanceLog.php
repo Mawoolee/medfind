@@ -14,6 +14,7 @@ class ControlledSubstanceLog extends Model
         'quantity',
         'notes',
         'logged_at',
+        'operation_id',
     ];
 
     protected $casts = [

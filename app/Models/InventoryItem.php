@@ -19,6 +19,7 @@ class InventoryItem extends Model
         'status',
         'expiry_date',
         'batch_number',
+        'lot_number',
         'cold_chain',
         'par_level',
         'supplier_id',
@@ -27,6 +28,10 @@ class InventoryItem extends Model
     protected $casts = [
         'expiry_date' => 'date',
         'cold_chain' => 'boolean',
+        'available_stock' => 'integer',
+        'physical_stock' => 'integer',
+        'nearest_valid_expiry' => 'date',
+        'representative_price' => 'decimal:2',
     ];
 
     /**
@@ -67,6 +72,22 @@ class InventoryItem extends Model
     public function controlledLogs(): HasMany
     {
         return $this->hasMany(ControlledSubstanceLog::class);
+    }
+
+    /**
+     * Authoritative stock batches for this pharmacy-and-medicine aggregate.
+     */
+    public function batches(): HasMany
+    {
+        return $this->hasMany(InventoryBatch::class);
+    }
+
+    /**
+     * Immutable stock movement history for this aggregate.
+     */
+    public function stockMovements(): HasMany
+    {
+        return $this->hasMany(StockMovement::class);
     }
 
     /*
@@ -167,9 +188,10 @@ class InventoryItem extends Model
      */
     public function getDaysUntilExpiryAttribute(): ?int
     {
-        if (!$this->expiry_date) {
+        if (! $this->expiry_date) {
             return null;
         }
+
         return now()->startOfDay()->diffInDays($this->expiry_date->startOfDay());
     }
 
@@ -178,7 +200,7 @@ class InventoryItem extends Model
      */
     public function getExpiryStatusAttribute(): string
     {
-        if (!$this->expiry_date) {
+        if (! $this->expiry_date) {
             return 'no_expiry';
         }
         $days = $this->days_until_expiry;
@@ -191,6 +213,7 @@ class InventoryItem extends Model
         if ($days <= 90) {
             return 'short_dated';
         }
+
         return 'ok';
     }
 
@@ -205,6 +228,7 @@ class InventoryItem extends Model
         if ($this->par_level > 0 && $this->stockQuantity <= $this->par_level) {
             return 'low';
         }
+
         return 'ok';
     }
 
@@ -222,6 +246,7 @@ class InventoryItem extends Model
         if ($value >= 10000) {
             return 'B';
         }
+
         return 'C';
     }
 
@@ -250,6 +275,7 @@ class InventoryItem extends Model
         if ((bool) optional($this->medicine)->requiresPrescription) {
             return 'V';
         }
+
         return 'D';
     }
 
@@ -265,6 +291,7 @@ class InventoryItem extends Model
             'B' => ['V' => 'I', 'E' => 'II', 'D' => 'III'],
             'C' => ['V' => 'II', 'E' => 'III', 'D' => 'III'],
         ];
+
         return $map[$abc][$ved] ?? 'III';
     }
 

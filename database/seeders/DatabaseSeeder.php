@@ -2,16 +2,18 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use App\Models\Pharmacy;
-use App\Models\Medicine;
 use App\Models\InventoryItem;
+use App\Models\Medicine;
+use App\Models\Pharmacy;
+use App\Models\User;
+use Database\Seeders\Concerns\SeedsBatchInventory;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Database\Seeders\SearchLogSeeder;
 
 class DatabaseSeeder extends Seeder
 {
+    use SeedsBatchInventory;
+
     public function run(): void
     {
         echo "\n============================================\n";
@@ -29,7 +31,7 @@ class DatabaseSeeder extends Seeder
                 'role' => 'admin',
             ]
         );
-        echo "✅ Admin user: " . $admin->email . "\n";
+        echo '✅ Admin user: '.$admin->email."\n";
 
         // ============================================
         // 2. CREATE PHARMACY OWNER 1
@@ -42,7 +44,7 @@ class DatabaseSeeder extends Seeder
                 'role' => 'pharmacy',
             ]
         );
-        echo "✅ Pharmacy Owner 1: " . $owner1->email . "\n";
+        echo '✅ Pharmacy Owner 1: '.$owner1->email."\n";
 
         // ============================================
         // 3. CREATE PHARMACY OWNER 2
@@ -55,7 +57,7 @@ class DatabaseSeeder extends Seeder
                 'role' => 'pharmacy',
             ]
         );
-        echo "✅ Pharmacy Owner 2: " . $owner2->email . "\n";
+        echo '✅ Pharmacy Owner 2: '.$owner2->email."\n";
 
         // ============================================
         // 4. CREATE PHARMACY 1
@@ -71,7 +73,7 @@ class DatabaseSeeder extends Seeder
                 'status' => 'approved',
             ]
         );
-        echo "✅ Pharmacy 1: " . $pharmacy1->pharmacy_name . "\n";
+        echo '✅ Pharmacy 1: '.$pharmacy1->pharmacy_name."\n";
 
         // ============================================
         // 5. CREATE PHARMACY 2
@@ -87,12 +89,12 @@ class DatabaseSeeder extends Seeder
                 'status' => 'approved',
             ]
         );
-        echo "✅ Pharmacy 2: " . $pharmacy2->pharmacy_name . "\n";
+        echo '✅ Pharmacy 2: '.$pharmacy2->pharmacy_name."\n";
 
         // ============================================
         // 6. CREATE ADDITIONAL PHARMACIES (for map display)
         // ============================================
-        
+
         $pharmacy3 = Pharmacy::updateOrCreate(
             ['pharmacy_name' => 'Mercury Drug - Legazpi'],
             [
@@ -104,7 +106,7 @@ class DatabaseSeeder extends Seeder
                 'status' => 'approved',
             ]
         );
-        echo "✅ Pharmacy 3: " . $pharmacy3->pharmacy_name . "\n";
+        echo '✅ Pharmacy 3: '.$pharmacy3->pharmacy_name."\n";
 
         $pharmacy4 = Pharmacy::updateOrCreate(
             ['pharmacy_name' => 'Bicol Ultra Drug'],
@@ -117,7 +119,7 @@ class DatabaseSeeder extends Seeder
                 'status' => 'approved',
             ]
         );
-        echo "✅ Pharmacy 4: " . $pharmacy4->pharmacy_name . "\n";
+        echo '✅ Pharmacy 4: '.$pharmacy4->pharmacy_name."\n";
 
         $pharmacy5 = Pharmacy::updateOrCreate(
             ['pharmacy_name' => 'South Star Drug'],
@@ -130,7 +132,7 @@ class DatabaseSeeder extends Seeder
                 'status' => 'approved',
             ]
         );
-        echo "✅ Pharmacy 5: " . $pharmacy5->pharmacy_name . "\n";
+        echo '✅ Pharmacy 5: '.$pharmacy5->pharmacy_name."\n";
 
         $pharmacy6 = Pharmacy::updateOrCreate(
             ['pharmacy_name' => 'Generics Pharmacy'],
@@ -143,7 +145,7 @@ class DatabaseSeeder extends Seeder
                 'status' => 'approved',
             ]
         );
-        echo "✅ Pharmacy 6: " . $pharmacy6->pharmacy_name . "\n";
+        echo '✅ Pharmacy 6: '.$pharmacy6->pharmacy_name."\n";
 
         $pharmacy7 = Pharmacy::updateOrCreate(
             ['pharmacy_name' => 'ACE Medical Pharmacy'],
@@ -156,7 +158,7 @@ class DatabaseSeeder extends Seeder
                 'status' => 'approved',
             ]
         );
-        echo "✅ Pharmacy 7: " . $pharmacy7->pharmacy_name . "\n";
+        echo '✅ Pharmacy 7: '.$pharmacy7->pharmacy_name."\n";
 
         // ============================================
         // 7. UPDATE pharmacy_id for pharmacy users
@@ -191,7 +193,7 @@ class DatabaseSeeder extends Seeder
                 $medData
             );
             $createdMedicines[] = $medicine;
-            echo "✅ Medicine: " . $medicine->medicine_name . "\n";
+            echo '✅ Medicine: '.$medicine->medicine_name."\n";
         }
 
         // ============================================
@@ -207,36 +209,36 @@ class DatabaseSeeder extends Seeder
             ['pharmacy_id' => $pharmacy1->id, 'medicine_id' => 2, 'stock' => 23, 'price' => 125.00],
             ['pharmacy_id' => $pharmacy1->id, 'medicine_id' => 3, 'stock' => 12, 'price' => 95.00],
             ['pharmacy_id' => $pharmacy1->id, 'medicine_id' => 6, 'stock' => 8, 'price' => 110.00],
-            
+
             // Pharmacy 2 (Albay Medical Center)
             ['pharmacy_id' => $pharmacy2->id, 'medicine_id' => 1, 'stock' => 28, 'price' => 92.00],
             ['pharmacy_id' => $pharmacy2->id, 'medicine_id' => 2, 'stock' => 8, 'price' => 135.00],
             ['pharmacy_id' => $pharmacy2->id, 'medicine_id' => 4, 'stock' => 15, 'price' => 60.00],
             ['pharmacy_id' => $pharmacy2->id, 'medicine_id' => 5, 'stock' => 20, 'price' => 48.00],
-            
+
             // Pharmacy 3 (Mercury Drug)
             ['pharmacy_id' => $pharmacy3->id, 'medicine_id' => 1, 'stock' => 50, 'price' => 88.00],
             ['pharmacy_id' => $pharmacy3->id, 'medicine_id' => 2, 'stock' => 30, 'price' => 130.00],
             ['pharmacy_id' => $pharmacy3->id, 'medicine_id' => 3, 'stock' => 25, 'price' => 98.00],
             ['pharmacy_id' => $pharmacy3->id, 'medicine_id' => 4, 'stock' => 10, 'price' => 65.00],
-            
+
             // Pharmacy 4 (Bicol Ultra Drug)
             ['pharmacy_id' => $pharmacy4->id, 'medicine_id' => 1, 'stock' => 35, 'price' => 90.00],
             ['pharmacy_id' => $pharmacy4->id, 'medicine_id' => 2, 'stock' => 15, 'price' => 140.00],
             ['pharmacy_id' => $pharmacy4->id, 'medicine_id' => 3, 'stock' => 20, 'price' => 100.00],
             ['pharmacy_id' => $pharmacy4->id, 'medicine_id' => 5, 'stock' => 12, 'price' => 50.00],
-            
+
             // Pharmacy 5 (South Star Drug)
             ['pharmacy_id' => $pharmacy5->id, 'medicine_id' => 1, 'stock' => 40, 'price' => 82.00],
             ['pharmacy_id' => $pharmacy5->id, 'medicine_id' => 2, 'stock' => 5, 'price' => 120.00],
             ['pharmacy_id' => $pharmacy5->id, 'medicine_id' => 3, 'stock' => 18, 'price' => 92.00],
             ['pharmacy_id' => $pharmacy5->id, 'medicine_id' => 6, 'stock' => 10, 'price' => 105.00],
-            
+
             // Pharmacy 6 (Generics Pharmacy)
             ['pharmacy_id' => $pharmacy6->id, 'medicine_id' => 1, 'stock' => 25, 'price' => 75.00],
             ['pharmacy_id' => $pharmacy6->id, 'medicine_id' => 2, 'stock' => 0, 'price' => 110.00],
             ['pharmacy_id' => $pharmacy6->id, 'medicine_id' => 5, 'stock' => 15, 'price' => 45.00],
-            
+
             // Pharmacy 7 (ACE Medical Pharmacy)
             ['pharmacy_id' => $pharmacy7->id, 'medicine_id' => 1, 'stock' => 30, 'price' => 95.00],
             ['pharmacy_id' => $pharmacy7->id, 'medicine_id' => 2, 'stock' => 0, 'price' => 145.00],
@@ -244,15 +246,14 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($inventoryData as $data) {
-            InventoryItem::updateOrCreate(
+            $this->seedBatchInventory(
+                Pharmacy::findOrFail($data['pharmacy_id']),
+                Medicine::findOrFail($data['medicine_id']),
+                $data['stock'],
+                $data['price'],
                 [
-                    'pharmacy_id' => $data['pharmacy_id'],
-                    'medicine_id' => $data['medicine_id'],
-                ],
-                [
-                    'stockQuantity' => $data['stock'],
-                    'price' => $data['price'],
-                    'status' => $data['stock'] > 0 ? 'available' : 'out_of_stock',
+                    'batch_number' => 'SEED-'.$data['pharmacy_id'].'-'.$data['medicine_id'],
+                    'received_reference' => 'database-seeder',
                 ]
             );
             $inventoryCount++;
@@ -270,9 +271,9 @@ class DatabaseSeeder extends Seeder
                 'role' => 'consumer',
             ]
         );
-        echo "✅ Consumer user: " . $consumer->email . "\n";
+        echo '✅ Consumer user: '.$consumer->email."\n";
 
-// ============================================
+        // ============================================
         // 11. SEED SEARCH LOGS (demo data for dashboard)
         // ============================================
         $this->call(SearchLogSeeder::class);
@@ -284,10 +285,10 @@ class DatabaseSeeder extends Seeder
         echo "✅ SEEDING COMPLETED SUCCESSFULLY!\n";
         echo "============================================\n";
         echo "📊 Summary:\n";
-        echo "   - Users: " . User::count() . "\n";
-        echo "   - Pharmacies: " . Pharmacy::count() . "\n";
-        echo "   - Medicines: " . Medicine::count() . "\n";
-        echo "   - Inventory Items: " . InventoryItem::count() . "\n";
+        echo '   - Users: '.User::count()."\n";
+        echo '   - Pharmacies: '.Pharmacy::count()."\n";
+        echo '   - Medicines: '.Medicine::count()."\n";
+        echo '   - Inventory Items: '.InventoryItem::count()."\n";
         echo "============================================\n";
         echo "\n🔑 LOGIN CREDENTIALS:\n";
         echo "   👤 Admin:     admin@medfind.com / password\n";

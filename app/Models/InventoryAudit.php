@@ -15,6 +15,7 @@ class InventoryAudit extends Model
         'before_quantity',
         'after_quantity',
         'notes',
+        'operation_id',
     ];
 
     public function inventoryItem(): BelongsTo

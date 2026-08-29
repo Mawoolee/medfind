@@ -17,6 +17,8 @@ final class OneTimeMigrationUtility
         'medicines',
         'suppliers',
         'inventory_items',
+        'inventory_batches',
+        'stock_movements',
         'messages',
         'cycle_counts',
         'cycle_count_items',
@@ -222,8 +224,10 @@ final class OneTimeMigrationUtility
                 'logo_path' => $nullableOpaque, 'requirements' => ['type' => 'json', 'nullable' => true],
             ]),
             'medicines' => self::table('id', [
-                'id' => $integer, 'medicine_name' => $string, 'dosage' => $string, 'manufacturer' => $string,
-                'requiresPrescription' => ['type' => 'boolean', 'nullable' => false], 'category' => $nullableString,
+                'id' => $integer, 'medicine_name' => $string, 'brand_name' => $nullableString,
+                'dosage' => $string, 'manufacturer' => $string,
+                'requiresPrescription' => ['type' => 'boolean', 'nullable' => false],
+                'cold_chain_required' => ['type' => 'boolean', 'nullable' => false], 'category' => $nullableString,
                 'created_at' => $timestamp, 'updated_at' => $timestamp,
             ]),
             'suppliers' => self::table('id', [
@@ -235,8 +239,27 @@ final class OneTimeMigrationUtility
                 'stockQuantity' => $integer, 'price' => ['type' => 'decimal', 'nullable' => false, 'precision' => 10, 'scale' => 2],
                 'status' => $string, 'created_at' => $timestamp, 'updated_at' => $timestamp,
                 'expiry_date' => ['type' => 'date', 'nullable' => true], 'batch_number' => $nullableString,
-                'cold_chain' => ['type' => 'boolean', 'nullable' => false], 'par_level' => $integer,
+                'lot_number' => $nullableString, 'cold_chain' => ['type' => 'boolean', 'nullable' => false], 'par_level' => $integer,
                 'supplier_id' => $nullableInteger,
+            ]),
+            'inventory_batches' => self::table('id', [
+                'id' => $integer, 'inventory_item_id' => $integer, 'legacy_source_inventory_item_id' => $nullableInteger,
+                'batch_number' => $string, 'lot_number' => $nullableString, 'identity_key' => $string,
+                'quantity_received' => $integer, 'current_quantity' => $integer,
+                'price' => ['type' => 'decimal', 'nullable' => false, 'precision' => 10, 'scale' => 2],
+                'supplier_id' => $nullableInteger, 'supplier_name' => $nullableString,
+                'expiry_date' => ['type' => 'date', 'nullable' => true],
+                'cold_chain' => ['type' => 'boolean', 'nullable' => false],
+                'received_date' => ['type' => 'date', 'nullable' => false],
+                'received_reference' => $nullableString, 'created_by' => $nullableInteger,
+                'created_at' => $timestamp, 'updated_at' => $timestamp,
+            ]),
+            'stock_movements' => self::table('id', [
+                'id' => $integer, 'operation_id' => $string, 'inventory_item_id' => $integer,
+                'inventory_batch_id' => $integer, 'type' => $string,
+                'before_quantity' => $integer, 'after_quantity' => $integer, 'quantity_delta' => $integer,
+                'reason' => $nullableOpaque, 'reference_type' => $nullableString, 'reference_id' => $nullableString,
+                'received_reference' => $nullableString, 'user_id' => $nullableInteger, 'created_at' => $timestamp,
             ]),
             'messages' => self::table('id', [
                 'id' => $integer, 'consumer_id' => $integer, 'pharmacy_id' => $integer, 'message' => $opaque,
@@ -260,7 +283,7 @@ final class OneTimeMigrationUtility
             'controlled_substance_logs' => self::table('id', [
                 'id' => $integer, 'inventory_item_id' => $integer, 'user_id' => $nullableInteger,
                 'action' => $string, 'quantity' => $integer, 'notes' => $nullableOpaque, 'logged_at' => $timestamp,
-                'created_at' => $timestamp, 'updated_at' => $timestamp,
+                'operation_id' => $nullableString, 'created_at' => $timestamp, 'updated_at' => $timestamp,
             ]),
             'returns_recalls' => self::table('id', [
                 'id' => $integer, 'inventory_item_id' => $integer, 'type' => $string, 'quantity' => $integer,
@@ -270,7 +293,7 @@ final class OneTimeMigrationUtility
             'inventory_audits' => self::table('id', [
                 'id' => $integer, 'inventory_item_id' => $integer, 'user_id' => $nullableInteger,
                 'before_quantity' => $integer, 'after_quantity' => $integer, 'notes' => $nullableOpaque,
-                'created_at' => $timestamp, 'updated_at' => $timestamp,
+                'operation_id' => $nullableString, 'created_at' => $timestamp, 'updated_at' => $timestamp,
             ]),
             'search_logs' => self::table('id', [
                 'id' => $integer, 'pharmacy_id' => $integer, 'query' => $nullableString,

@@ -6,6 +6,7 @@ use App\Models\InventoryItem;
 use App\Models\Medicine;
 use App\Models\Pharmacy;
 use App\Models\User;
+use Database\Seeders\Concerns\SeedsBatchInventory;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -13,6 +14,8 @@ use Illuminate\Support\Facades\Schema;
 
 class DemoSeeder extends Seeder
 {
+    use SeedsBatchInventory;
+
     public function run(): void
     {
         echo "\n============================================\n";
@@ -21,6 +24,8 @@ class DemoSeeder extends Seeder
 
         // Disable foreign key checks for truncation
         Schema::disableForeignKeyConstraints();
+        DB::table('stock_movements')->truncate();
+        DB::table('inventory_batches')->truncate();
         DB::table('inventory_items')->truncate();
         DB::table('messages')->truncate();
         DB::table('medicines')->truncate();
@@ -34,10 +39,10 @@ class DemoSeeder extends Seeder
         // ADMIN USER
         // ============================================
         $admin = User::create([
-            'name'     => 'System Admin',
-            'email'    => 'admin@medfind.com',
+            'name' => 'System Admin',
+            'email' => 'admin@medfind.com',
             'password' => Hash::make('password'),
-            'role'     => 'admin',
+            'role' => 'admin',
         ]);
         echo "[2/5] Admin user created: admin@medfind.com\n";
 
@@ -45,17 +50,17 @@ class DemoSeeder extends Seeder
         // CONSUMER USERS
         // ============================================
         $consumer1 = User::create([
-            'name'     => 'Juan Dela Cruz',
-            'email'    => 'consumer1@demo.com',
+            'name' => 'Juan Dela Cruz',
+            'email' => 'consumer1@demo.com',
             'password' => Hash::make('password'),
-            'role'     => 'consumer',
+            'role' => 'consumer',
         ]);
 
         $consumer2 = User::create([
-            'name'     => 'Maria Santos',
-            'email'    => 'consumer2@demo.com',
+            'name' => 'Maria Santos',
+            'email' => 'consumer2@demo.com',
             'password' => Hash::make('password'),
-            'role'     => 'consumer',
+            'role' => 'consumer',
         ]);
         echo "       Consumer users created: consumer1@demo.com, consumer2@demo.com\n";
 
@@ -64,54 +69,54 @@ class DemoSeeder extends Seeder
         // ============================================
         $pharmaciesData = [
             [
-                'name'    => 'Mercury Drug Legazpi',
-                'email'   => 'mercury@demo.com',
-                'owner'   => 'Mercury Drug Owner',
+                'name' => 'Mercury Drug Legazpi',
+                'email' => 'mercury@demo.com',
+                'owner' => 'Mercury Drug Owner',
                 'address' => 'Rizal St, Legazpi City, Albay',
-                'lat'     => 13.1391,
-                'lng'     => 123.7338,
+                'lat' => 13.1391,
+                'lng' => 123.7338,
                 'contact' => '0917-123-4567',
-                'hours'   => 'Mon-Sat 8:00 AM - 9:00 PM',
+                'hours' => 'Mon-Sat 8:00 AM - 9:00 PM',
             ],
             [
-                'name'    => 'Rose Pharmacy Legazpi',
-                'email'   => 'rose@demo.com',
-                'owner'   => 'Rose Pharmacy Owner',
+                'name' => 'Rose Pharmacy Legazpi',
+                'email' => 'rose@demo.com',
+                'owner' => 'Rose Pharmacy Owner',
                 'address' => 'Penaranda St, Legazpi City, Albay',
-                'lat'     => 13.1405,
-                'lng'     => 123.7350,
+                'lat' => 13.1405,
+                'lng' => 123.7350,
                 'contact' => '0918-234-5678',
-                'hours'   => 'Mon-Sat 8:30 AM - 8:30 PM',
+                'hours' => 'Mon-Sat 8:30 AM - 8:30 PM',
             ],
             [
-                'name'    => 'Generika Drugstore Legazpi',
-                'email'   => 'generika@demo.com',
-                'owner'   => 'Generika Drugstore Owner',
+                'name' => 'Generika Drugstore Legazpi',
+                'email' => 'generika@demo.com',
+                'owner' => 'Generika Drugstore Owner',
                 'address' => 'Quezon Ave, Legazpi City, Albay',
-                'lat'     => 13.1420,
-                'lng'     => 123.7325,
+                'lat' => 13.1420,
+                'lng' => 123.7325,
                 'contact' => '0919-345-6789',
-                'hours'   => 'Mon-Sun 7:30 AM - 9:00 PM',
+                'hours' => 'Mon-Sun 7:30 AM - 9:00 PM',
             ],
             [
-                'name'    => 'South Star Drug',
-                'email'   => 'southstar@demo.com',
-                'owner'   => 'South Star Drug Owner',
+                'name' => 'South Star Drug',
+                'email' => 'southstar@demo.com',
+                'owner' => 'South Star Drug Owner',
                 'address' => 'Imperial St, Legazpi City, Albay',
-                'lat'     => 13.1380,
-                'lng'     => 123.7360,
+                'lat' => 13.1380,
+                'lng' => 123.7360,
                 'contact' => '0920-456-7890',
-                'hours'   => 'Mon-Sat 8:00 AM - 10:00 PM',
+                'hours' => 'Mon-Sat 8:00 AM - 10:00 PM',
             ],
             [
-                'name'    => 'TGP Pharmacy Daraga',
-                'email'   => 'tgp@demo.com',
-                'owner'   => 'TGP Pharmacy Owner',
+                'name' => 'TGP Pharmacy Daraga',
+                'email' => 'tgp@demo.com',
+                'owner' => 'TGP Pharmacy Owner',
                 'address' => 'Daraga, Albay',
-                'lat'     => 13.1590,
-                'lng'     => 123.7120,
+                'lat' => 13.1590,
+                'lng' => 123.7120,
                 'contact' => '0921-567-8901',
-                'hours'   => 'Mon-Sat 7:00 AM - 8:00 PM',
+                'hours' => 'Mon-Sat 7:00 AM - 8:00 PM',
             ],
         ];
 
@@ -119,22 +124,22 @@ class DemoSeeder extends Seeder
         foreach ($pharmaciesData as $pData) {
             // Create pharmacy user account
             $user = User::create([
-                'name'     => $pData['owner'],
-                'email'    => $pData['email'],
+                'name' => $pData['owner'],
+                'email' => $pData['email'],
                 'password' => Hash::make('password'),
-                'role'     => 'pharmacy',
+                'role' => 'pharmacy',
             ]);
 
             // Create pharmacy
             $pharmacy = Pharmacy::create([
-                'pharmacy_name'   => $pData['name'],
+                'pharmacy_name' => $pData['name'],
                 'pharmacyAddress' => $pData['address'],
-                'latitude'        => $pData['lat'],
-                'longitude'       => $pData['lng'],
-                'contactNumber'   => $pData['contact'],
+                'latitude' => $pData['lat'],
+                'longitude' => $pData['lng'],
+                'contactNumber' => $pData['contact'],
                 'operating_hours' => $pData['hours'],
-                'status'          => 'approved',
-                'user_id'         => $user->id,
+                'status' => 'approved',
+                'user_id' => $user->id,
             ]);
 
             // Link user to pharmacy
@@ -212,26 +217,29 @@ class DemoSeeder extends Seeder
                 $isRx = $medicine->requiresPrescription;
 
                 // Generate pseudo-random stock (some should be 0 for demo)
-                $seed = ($seed * 1103515245 + 12345) & 0x7fffffff;
+                $seed = ($seed * 1103515245 + 12345) & 0x7FFFFFFF;
                 $stockRaw = $seed % 220; // 0-219
                 // ~10% chance of 0 stock
                 $stock = ($stockRaw < 22) ? 0 : (($stockRaw % 196) + 5);
 
                 // Generate price
-                $seed = ($seed * 1103515245 + 12345) & 0x7fffffff;
+                $seed = ($seed * 1103515245 + 12345) & 0x7FFFFFFF;
                 if ($isRx) {
                     $price = $rxPrices[$seed % count($rxPrices)];
                 } else {
                     $price = $otcPrices[$seed % count($otcPrices)];
                 }
 
-                InventoryItem::create([
-                    'pharmacy_id'   => $pharmacy->id,
-                    'medicine_id'   => $medicine->id,
-                    'stockQuantity' => $stock,
-                    'price'         => $price,
-                    'status'        => $stock > 0 ? 'available' : 'out_of_stock',
-                ]);
+                $this->seedBatchInventory(
+                    $pharmacy,
+                    $medicine,
+                    $stock,
+                    $price,
+                    [
+                        'batch_number' => 'DEMO-'.($pIndex + 1).'-'.($mIndex + 1),
+                        'received_reference' => 'demo-seeder',
+                    ]
+                );
                 $inventoryCount++;
             }
         }
@@ -243,10 +251,10 @@ class DemoSeeder extends Seeder
         echo "\n============================================\n";
         echo "  DEMO SEEDER COMPLETED!\n";
         echo "============================================\n";
-        echo "  Pharmacies:      " . Pharmacy::count() . "\n";
-        echo "  Medicines:       " . Medicine::count() . "\n";
-        echo "  Inventory Items: " . InventoryItem::count() . "\n";
-        echo "  Users:           " . User::count() . "\n";
+        echo '  Pharmacies:      '.Pharmacy::count()."\n";
+        echo '  Medicines:       '.Medicine::count()."\n";
+        echo '  Inventory Items: '.InventoryItem::count()."\n";
+        echo '  Users:           '.User::count()."\n";
         echo "============================================\n";
         echo "\n  LOGIN CREDENTIALS:\n";
         echo "  Admin:      admin@medfind.com / password\n";

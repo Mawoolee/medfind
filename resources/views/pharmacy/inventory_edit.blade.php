@@ -39,7 +39,12 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Batch Number</label>
-                    <input type="text" name="batch_number" value="{{ $item->batch_number }}" class="mt-1 block w-full border border-gray-300 rounded px-2 py-2" />
+                    <input type="text" name="batch_number" value="{{ old('batch_number', $item->batch_number) }}" class="mt-1 block w-full border border-gray-300 rounded px-2 py-2" />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Lot Number</label>
+                    <input type="text" name="lot_number" value="{{ old('lot_number', $item->lot_number) }}" class="mt-1 block w-full border border-gray-300 rounded px-2 py-2" />
                 </div>
 
                 <div>

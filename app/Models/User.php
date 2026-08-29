@@ -50,4 +50,14 @@ class User extends Authenticatable
     {
         return $this->role === 'consumer';
     }
+
+    public function createdInventoryBatches()
+    {
+        return $this->hasMany(InventoryBatch::class, 'created_by');
+    }
+
+    public function stockMovements()
+    {
+        return $this->hasMany(StockMovement::class);
+    }
 }

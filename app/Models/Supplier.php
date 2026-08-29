@@ -9,10 +9,15 @@ class Supplier extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name','contact_person','phone','email','address'];
+    protected $fillable = ['name', 'contact_person', 'phone', 'email', 'address'];
 
     public function inventoryItems()
     {
         return $this->hasMany(InventoryItem::class);
+    }
+
+    public function inventoryBatches()
+    {
+        return $this->hasMany(InventoryBatch::class);
     }
 }

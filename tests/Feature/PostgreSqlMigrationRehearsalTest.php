@@ -2,9 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Database\Migration\LegacyInventoryBackfill;
 use App\Database\Migration\MigrationPreflight;
 use App\Database\Migration\OneTimeMigrationUtility;
 use App\Database\Migration\SourcePreparation;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use PDO;
@@ -19,10 +21,15 @@ final class PostgreSqlMigrationRehearsalTest extends TestCase
     private const CONNECTION = 'rehearsal_pgsql';
 
     private string $host;
+
     private int $port;
+
     private string $username;
+
     private string $pgBin;
+
     private string $workDirectory;
+
     private PDO $admin;
 
     /** @var array<int, string> */
@@ -169,6 +176,7 @@ final class PostgreSqlMigrationRehearsalTest extends TestCase
         }
 
         $this->assertPostTransferVerification($successTarget, $transferManifest);
+        $this->assertBackfillIdempotenceAndRollback($successDatabase);
         $this->assertProvisionalCutoverAndPreWriteRollback($successDatabase);
         self::assertSame($sourceChecksum, $this->checksum($sourcePath));
 
@@ -407,8 +415,9 @@ SQL);
         ]);
         $pdo->exec('UPDATE users SET pharmacy_id = 50 WHERE id = 10');
         $this->insert($pdo, 'medicines', [
-            'id' => 300, 'medicine_name' => 'Amoxicillin — β', 'dosage' => '500mg', 'manufacturer' => 'Fixture Maker',
-            'requiresPrescription' => 1, 'category' => null, 'created_at' => $timestamp, 'updated_at' => $timestamp,
+            'id' => 300, 'medicine_name' => 'Amoxicillin — β', 'brand_name' => 'Fixture Brand',
+            'dosage' => '500mg', 'manufacturer' => 'Fixture Maker',
+            'requiresPrescription' => 1, 'cold_chain_required' => 0, 'category' => null, 'created_at' => $timestamp, 'updated_at' => $timestamp,
         ]);
         $this->insert($pdo, 'suppliers', [
             'id' => 400, 'name' => 'Supplier Fixture', 'contact_person' => null, 'phone' => '', 'email' => null,
@@ -417,7 +426,22 @@ SQL);
         $this->insert($pdo, 'inventory_items', [
             'id' => 700, 'pharmacy_id' => 50, 'medicine_id' => 300, 'stockQuantity' => 17, 'price' => '123.40',
             'status' => 'available', 'created_at' => $timestamp, 'updated_at' => $timestamp, 'expiry_date' => '2030-02-28',
-            'batch_number' => null, 'cold_chain' => 0, 'par_level' => 3, 'supplier_id' => 400,
+            'batch_number' => null, 'lot_number' => null, 'cold_chain' => 0, 'par_level' => 3, 'supplier_id' => 400,
+        ]);
+        $this->insert($pdo, 'inventory_batches', [
+            'id' => 800, 'inventory_item_id' => 700, 'legacy_source_inventory_item_id' => 700,
+            'batch_number' => 'LEGACY-700', 'lot_number' => null, 'identity_key' => 'legacy:700',
+            'quantity_received' => 17, 'current_quantity' => 17, 'price' => '123.40',
+            'supplier_id' => 400, 'supplier_name' => 'Supplier Fixture', 'expiry_date' => '2030-02-28',
+            'cold_chain' => 0, 'received_date' => '2024-02-29', 'received_reference' => 'legacy-inventory:700',
+            'created_by' => null, 'created_at' => $timestamp, 'updated_at' => $timestamp,
+        ]);
+        $this->insert($pdo, 'stock_movements', [
+            'id' => 850, 'operation_id' => 'legacy-backfill:700', 'inventory_item_id' => 700,
+            'inventory_batch_id' => 800, 'type' => 'backfill', 'before_quantity' => 0,
+            'after_quantity' => 17, 'quantity_delta' => 17, 'reason' => 'Legacy inventory migration',
+            'reference_type' => 'inventory_item', 'reference_id' => '700',
+            'received_reference' => 'legacy-inventory:700', 'user_id' => null, 'created_at' => $timestamp,
         ]);
         $this->insert($pdo, 'messages', [
             'id' => 900, 'consumer_id' => 20, 'pharmacy_id' => 50, 'message' => 'consumer asks about sanitized medicine',
@@ -539,8 +563,8 @@ SQL);
     }
 
     /**
-     * @param array<string, mixed> $preflight
-     * @param array<string, mixed> $preparation
+     * @param  array<string, mixed>  $preflight
+     * @param  array<string, mixed>  $preparation
      * @return array<string, mixed>
      */
     private function passingTransferEvidence(array $preflight, array $preparation, string $checksum): array
@@ -671,9 +695,41 @@ SQL);
         )->fetchColumn());
         self::assertSame('Farmácia Fixture — 薬局', $target->query('SELECT pharmacy_name FROM pharmacies WHERE id = 50')->fetchColumn());
         self::assertSame('123.40', (string) $target->query('SELECT price FROM inventory_items WHERE id = 700')->fetchColumn());
+        self::assertSame(1, (int) $target->query('SELECT COUNT(*) FROM inventory_batches WHERE legacy_source_inventory_item_id = 700')->fetchColumn());
+        self::assertSame('legacy:700', $target->query('SELECT identity_key FROM inventory_batches WHERE id = 800')->fetchColumn());
+        self::assertSame(1, (int) $target->query("SELECT COUNT(*) FROM stock_movements WHERE operation_id = 'legacy-backfill:700'")->fetchColumn());
         self::assertSame('opaque-session-payload-never-log', $target->query("SELECT payload FROM sessions WHERE id = 'sanitized-session-id'")->fetchColumn());
         self::assertSame(0, (int) $target->query('SELECT COUNT(*) FROM cache')->fetchColumn());
         self::assertSame(0, (int) $target->query('SELECT COUNT(*) FROM cache_locks')->fetchColumn());
+    }
+
+    private function assertBackfillIdempotenceAndRollback(string $database): void
+    {
+        $this->configurePostgreSqlConnection($database);
+        $connection = DB::connection(self::CONNECTION);
+        $before = [
+            'batches' => (int) $connection->table('inventory_batches')->count(),
+            'movements' => (int) $connection->table('stock_movements')->count(),
+            'stock' => (int) $connection->table('inventory_items')->where('id', 700)->value('stockQuantity'),
+        ];
+        $backfill = new LegacyInventoryBackfill;
+        $backfill->run($connection, CarbonImmutable::parse('2029-06-15'));
+        self::assertSame($before['batches'], (int) $connection->table('inventory_batches')->count());
+        self::assertSame($before['movements'], (int) $connection->table('stock_movements')->count());
+        self::assertSame($before['stock'], (int) $connection->table('inventory_items')->where('id', 700)->value('stockQuantity'));
+
+        try {
+            $backfill->run($connection, CarbonImmutable::parse('2029-06-15'), static function (): void {
+                throw new RuntimeException('Injected PostgreSQL backfill verification failure.');
+            });
+            self::fail('Injected PostgreSQL verification failure must roll back.');
+        } catch (RuntimeException $exception) {
+            self::assertSame('Injected PostgreSQL backfill verification failure.', $exception->getMessage());
+        }
+
+        self::assertSame($before['batches'], (int) $connection->table('inventory_batches')->count());
+        self::assertSame($before['movements'], (int) $connection->table('stock_movements')->count());
+        DB::purge(self::CONNECTION);
     }
 
     private function assertProvisionalCutoverAndPreWriteRollback(string $database): void
@@ -708,7 +764,7 @@ SQL);
     }
 
     /**
-     * @param callable(PDO): void $mutation
+     * @param  callable(PDO): void  $mutation
      * @return array{0: string, 1: string}
      */
     private function mutatedSource(string $purpose, string $sourcePath, callable $mutation): array
