@@ -1,204 +1,171 @@
 @extends('layouts.app')
 
-@section('title', 'Receive Shipment')
+@section('title', 'Add Stock / Receive Delivery')
 
 @section('content')
 <div class="container mx-auto px-4 py-8">
     <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">📥 Receive Shipment</h1>
-        <a href="{{ route('pharmacy.inventory') }}" class="text-blue-600 hover:text-blue-800">
-            <i class="fas fa-arrow-left mr-2"></i>Back to Inventory
-        </a>
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Add Stock / Receive Delivery</h1>
+            <p class="text-sm text-gray-500 mt-1">Each row creates a new, traceable stock batch for an existing medicine.</p>
+        </div>
+        <a href="{{ route('pharmacy.inventory') }}" class="text-blue-600 hover:text-blue-800"><i class="fas fa-arrow-left mr-2"></i>Back to Inventory</a>
     </div>
 
-    @if(session('success'))
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4">{{ session('success') }}</div>
-    @endif
-
-    @if ($errors->any())
+    @if($errors->any())
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4">
             <ul class="list-disc list-inside">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
+                @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
             </ul>
         </div>
     @endif
 
-    <div class="bg-white rounded-lg shadow-lg p-6">
-        <form id="receiving-form" action="{{ route('pharmacy.receiving.store') }}" method="POST">
-            @csrf
+    @if($inventory->isEmpty())
+        <div class="bg-amber-50 border border-amber-300 text-amber-800 rounded-lg p-5">
+            Add a medicine master before receiving stock.
+            <a href="{{ route('pharmacy.inventory.create') }}" class="font-semibold underline">Add New Medicine</a>
+        </div>
+    @else
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <form id="receiving-form" action="{{ route('pharmacy.receiving.store') }}" method="POST">
+                @csrf
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Supplier</label>
-                    <select name="supplier_id" class="mt-1 block w-full border border-gray-300 rounded px-3 py-2">
-                        <option value="">-- Select supplier --</option>
-                        @foreach($suppliers as $sp)
-                            <option value="{{ $sp->id }}">{{ $sp->name }}</option>
-                        @endforeach
-                    </select>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label for="supplier_id" class="block text-sm font-medium text-gray-700">Supplier</label>
+                        <select id="supplier_id" name="supplier_id" class="mt-1 block w-full border border-gray-300 rounded px-3 py-2 @error('supplier_id') border-red-500 @enderror">
+                            <option value="">-- Select supplier --</option>
+                            @foreach($suppliers as $supplier)
+                                <option value="{{ $supplier->id }}" {{ (string) old('supplier_id') === (string) $supplier->id ? 'selected' : '' }}>{{ $supplier->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label for="purchase_order" class="block text-sm font-medium text-gray-700">Purchase Order / Delivery Reference</label>
+                        <input id="purchase_order" type="text" name="purchase_order" value="{{ old('purchase_order') }}" class="mt-1 block w-full border border-gray-300 rounded px-3 py-2" placeholder="PO-0001 / Delivery receipt">
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Purchase Order / Reference</label>
-                    <input type="text" name="purchase_order" class="mt-1 block w-full border border-gray-300 rounded px-3 py-2" placeholder="PO-0001 / Delivery #">
+
+                <div class="mb-4 flex items-center justify-between">
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-800">Received Batches</h2>
+                        <p class="text-sm text-gray-500">A duplicate batch-and-lot combination for the same medicine will be rejected, never overwritten.</p>
+                    </div>
+                    <button type="button" id="add-item" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded text-sm"><i class="fas fa-plus mr-1"></i>Add another batch</button>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Barcode (scan or type)</label>
-                    <input type="text" id="barcode-input" class="mt-1 block w-full border border-gray-300 rounded px-3 py-2" placeholder="Scan barcode/RFID..." autocomplete="off">
-                    <p class="text-xs text-gray-500 mt-1">Scan barcode to auto-fill medicine name.</p>
+
+                @php
+                    $defaultRows = [[
+                        'inventory_item_id' => $selectedInventoryId,
+                        'received_date' => now()->format('Y-m-d'),
+                    ]];
+                    $rows = old('items', $defaultRows);
+                @endphp
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm min-w-[1100px]" id="items-table">
+                        <thead>
+                            <tr class="bg-gray-50 text-left text-gray-600">
+                                <th class="px-2 py-2">Existing Medicine *</th>
+                                <th class="px-2 py-2">Batch # *</th>
+                                <th class="px-2 py-2">Lot #</th>
+                                <th class="px-2 py-2">Quantity *</th>
+                                <th class="px-2 py-2">Price *</th>
+                                <th class="px-2 py-2">Expiry</th>
+                                <th class="px-2 py-2">Date Received *</th>
+                                <th class="px-2 py-2 text-center">Cold Chain</th>
+                                <th class="px-2 py-2"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="items-list">
+                            @foreach($rows as $index => $row)
+                                <tr class="item-row border-t border-gray-200">
+                                    <td class="px-2 py-2">
+                                        <select name="items[{{ $index }}][inventory_item_id]" required class="medicine-select w-56 border border-gray-300 rounded px-2 py-1">
+                                            <option value="">-- Select medicine --</option>
+                                            @foreach($inventory as $aggregate)
+                                                <option value="{{ $aggregate->id }}" data-cold-chain-required="{{ $aggregate->medicine->cold_chain_required ? '1' : '0' }}" {{ (string) ($row['inventory_item_id'] ?? '') === (string) $aggregate->id ? 'selected' : '' }}>
+                                                    {{ $aggregate->medicine->medicine_name }}@if($aggregate->medicine->brand_name) — {{ $aggregate->medicine->brand_name }}@endif @if($aggregate->medicine->dosage) ({{ $aggregate->medicine->dosage }})@endif
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+                                    <td class="px-2 py-2"><input type="text" name="items[{{ $index }}][batch_number]" value="{{ $row['batch_number'] ?? '' }}" required class="w-28 border border-gray-300 rounded px-2 py-1" placeholder="B001"></td>
+                                    <td class="px-2 py-2"><input type="text" name="items[{{ $index }}][lot_number]" value="{{ $row['lot_number'] ?? '' }}" class="w-28 border border-gray-300 rounded px-2 py-1" placeholder="LOT-01"></td>
+                                    <td class="px-2 py-2"><input type="number" name="items[{{ $index }}][quantity]" value="{{ $row['quantity'] ?? '' }}" required min="1" class="w-24 border border-gray-300 rounded px-2 py-1"></td>
+                                    <td class="px-2 py-2"><input type="number" step="0.01" name="items[{{ $index }}][price]" value="{{ $row['price'] ?? '' }}" required min="0" class="w-28 border border-gray-300 rounded px-2 py-1"></td>
+                                    <td class="px-2 py-2"><input type="date" name="items[{{ $index }}][expiry_date]" value="{{ $row['expiry_date'] ?? '' }}" class="w-36 border border-gray-300 rounded px-2 py-1"></td>
+                                    <td class="px-2 py-2"><input type="date" name="items[{{ $index }}][received_date]" value="{{ $row['received_date'] ?? now()->format('Y-m-d') }}" required data-default-date="{{ now()->format('Y-m-d') }}" class="w-36 border border-gray-300 rounded px-2 py-1"></td>
+                                    <td class="px-2 py-2 text-center">
+                                        <input type="hidden" name="items[{{ $index }}][cold_chain]" value="0">
+                                        <input type="checkbox" name="items[{{ $index }}][cold_chain]" value="1" {{ ! empty($row['cold_chain']) ? 'checked' : '' }} class="cold-chain-toggle">
+                                    </td>
+                                    <td class="px-2 py-2 text-center"><button type="button" class="remove-item text-red-500 hover:text-red-700" title="Remove row"><i class="fas fa-trash"></i></button></td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
-            </div>
 
-            <h4 class="text-lg font-semibold text-gray-800 mb-3">Items</h4>
-            <p class="text-sm text-gray-600 mb-3">Verify delivery against purchase order. Controlled substances must be logged separately and stored securely.</p>
-
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm" id="items-table">
-                    <thead>
-                        <tr class="bg-gray-50 text-left text-gray-600">
-                            <th class="px-3 py-2">Medicine</th>
-                            <th class="px-3 py-2">Qty</th>
-                            <th class="px-3 py-2">Price</th>
-                            <th class="px-3 py-2">Batch #</th>
-                            <th class="px-3 py-2">Expiry</th>
-                            <th class="px-3 py-2">Cold Chain</th>
-                            <th class="px-3 py-2">Controlled</th>
-                            <th class="px-3 py-2">Category</th>
-                            <th class="px-3 py-2"></th>
-                        </tr>
-                    </thead>
-                    <tbody id="items-list">
-                        <tr class="item-row border-t border-gray-200">
-                            <td class="px-3 py-2">
-                                <input list="inventory-medicines" type="text" name="items[0][medicine_name]" class="w-full border border-gray-300 rounded px-2 py-1" placeholder="Medicine name" required>
-                            </td>
-                            <td class="px-3 py-2">
-                                <input type="number" name="items[0][quantity]" class="w-20 border border-gray-300 rounded px-2 py-1" placeholder="Qty" required min="1">
-                            </td>
-                            <td class="px-3 py-2">
-                                <input type="number" step="0.01" name="items[0][price]" class="w-24 border border-gray-300 rounded px-2 py-1" placeholder="Price">
-                            </td>
-                            <td class="px-3 py-2">
-                                <input type="text" name="items[0][batch_number]" class="w-24 border border-gray-300 rounded px-2 py-1" placeholder="Batch #">
-                            </td>
-                            <td class="px-3 py-2">
-                                <input type="date" name="items[0][expiry_date]" class="w-32 border border-gray-300 rounded px-2 py-1">
-                            </td>
-                            <td class="px-3 py-2 text-center">
-                                <input type="checkbox" name="items[0][cold_chain]" value="1" class="cold-chain-toggle">
-                            </td>
-                            <td class="px-3 py-2 text-center">
-                                <input type="checkbox" name="items[0][is_controlled]" value="1" class="controlled-toggle">
-                            </td>
-                            <td class="px-3 py-2">
-                                <select name="items[0][category]" class="w-32 border border-gray-300 rounded px-2 py-1">
-                                    <option value="">--</option>
-                                    <option value="analgesic">Analgesic</option>
-                                    <option value="antibiotic">Antibiotic</option>
-                                    <option value="antidiarrheal">Antidiarrheal</option>
-                                    <option value="antihistamine">Antihistamine</option>
-                                    <option value="nsaid">NSAID</option>
-                                    <option value="controlled">Controlled</option>
-                                    <option value="vitamin">Vitamin</option>
-                                    <option value="supplement">Supplement</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </td>
-                            <td class="px-3 py-2 text-center">
-                                <button type="button" class="remove-item text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <datalist id="inventory-medicines">
-                @foreach($inventory as $inv)
-                    <option value="{{ $inv->medicine->medicine_name }}"></option>
-                @endforeach
-            </datalist>
-
-            <div class="mt-4 flex items-center gap-2">
-                <button type="button" id="add-item" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded text-sm">
-                    <i class="fas fa-plus mr-1"></i>Add another item
-                </button>
-            </div>
-
-            <div class="mt-6 flex items-center gap-3">
-                <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg">
-                    <i class="fas fa-check mr-2"></i>Process Shipment
-                </button>
-                <a href="{{ route('pharmacy.inventory') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-lg">Cancel</a>
-            </div>
-        </form>
-    </div>
+                <div class="mt-6 flex items-center gap-3">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg"><i class="fas fa-check mr-2"></i>Process Delivery</button>
+                    <a href="{{ route('pharmacy.inventory') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-lg">Cancel</a>
+                </div>
+            </form>
+        </div>
+    @endif
 </div>
 @endsection
 
 @push('scripts')
 <script>
-(function(){
-    let idx = 1;
+(() => {
     const list = document.getElementById('items-list');
+    const addButton = document.getElementById('add-item');
+    if (!list || !addButton) return;
 
     function reindexNames() {
-        const rows = list.querySelectorAll('.item-row');
-        rows.forEach(function(row, i){
-            row.querySelectorAll('[name]').forEach(function(input){
-                const base = input.name.replace(/items\[\d+\]/, '');
-                input.name = 'items[' + i + ']' + base;
+        list.querySelectorAll('.item-row').forEach((row, index) => {
+            row.querySelectorAll('[name]').forEach(input => {
+                input.name = input.name.replace(/items\[\d+\]/, `items[${index}]`);
             });
         });
     }
 
-    document.getElementById('add-item').addEventListener('click', function(){
-        const tpl = document.querySelector('.item-row');
-        const newRow = tpl.cloneNode(true);
-        newRow.querySelectorAll('input').forEach(function(input){ input.value = ''; });
-        const sel = newRow.querySelector('select');
-        if (sel) sel.selectedIndex = 0;
+    function syncColdChain(row) {
+        const select = row.querySelector('.medicine-select');
+        const checkbox = row.querySelector('.cold-chain-toggle');
+        const required = select?.selectedOptions[0]?.dataset.coldChainRequired === '1';
+        if (required && checkbox) checkbox.checked = true;
+        if (checkbox) checkbox.title = required ? 'Required by the medicine master' : 'Mark if this batch requires cold-chain handling';
+    }
+
+    addButton.addEventListener('click', () => {
+        const newRow = list.querySelector('.item-row').cloneNode(true);
+        newRow.querySelectorAll('input').forEach(input => {
+            if (input.type === 'hidden') input.value = '0';
+            else if (input.type === 'checkbox') input.checked = false;
+            else if (input.type === 'date' && input.dataset.defaultDate) input.value = input.dataset.defaultDate;
+            else input.value = '';
+        });
+        newRow.querySelectorAll('select').forEach(select => select.selectedIndex = 0);
         list.appendChild(newRow);
         reindexNames();
+        syncColdChain(newRow);
     });
 
-    // Remove row (keep at least one)
-    list.addEventListener('click', function(e){
-        const btn = e.target.closest('.remove-item');
-        if (!btn) return;
-        const rows = list.querySelectorAll('.item-row');
-        if (rows.length <= 1) { return; }
-        btn.closest('.item-row').remove();
+    list.addEventListener('click', event => {
+        const button = event.target.closest('.remove-item');
+        if (!button || list.querySelectorAll('.item-row').length === 1) return;
+        button.closest('.item-row').remove();
         reindexNames();
     });
 
-    // Barcode auto-fill: on Enter, fill the first empty medicine name field.
-    const barcodeInput = document.getElementById('barcode-input');
-    barcodeInput.addEventListener('keydown', function(e){
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            const val = barcodeInput.value.trim();
-            if (!val) return;
-            const rows = list.querySelectorAll('.item-row');
-            for (const row of rows) {
-                const nameInput = row.querySelector('input[name*="medicine_name"]');
-                if (nameInput && !nameInput.value) {
-                    nameInput.value = val;
-                    barcodeInput.value = '';
-                    break;
-                }
-            }
-        }
+    list.addEventListener('change', event => {
+        if (event.target.classList.contains('medicine-select')) syncColdChain(event.target.closest('.item-row'));
     });
 
-    // Controlled toggle: if checked, default category to controlled.
-    list.addEventListener('change', function(e){
-        if (e.target.classList && e.target.classList.contains('controlled-toggle') && e.target.checked) {
-            const row = e.target.closest('.item-row');
-            const cat = row.querySelector('select[name*="category"]');
-            if (cat) cat.value = 'controlled';
-        }
-    });
+    list.querySelectorAll('.item-row').forEach(syncColdChain);
 })();
 </script>
 @endpush

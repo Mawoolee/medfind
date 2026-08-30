@@ -64,6 +64,7 @@ abstract class MedicineMasterRequest extends PharmacyInventoryRequest
     {
         return collect($this->validated())
             ->only([
+                'medicine_id',
                 'medicine_name',
                 'brand_name',
                 'dosage',

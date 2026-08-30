@@ -1,81 +1,83 @@
 <?php
-// app/Http/Controllers/PharmacyDashboardController.php
 
 namespace App\Http\Controllers;
 
-use App\Models\Pharmacy;
+use App\Domain\Inventory\InventoryAggregateQuery;
+use App\Events\MessageSent;
 use App\Models\InventoryItem;
 use App\Models\Message;
+use App\Models\Pharmacy;
 use App\Models\SearchLog;
+use App\Services\PrescriptionService;
 use Illuminate\Http\Request;
 
 class PharmacyDashboardController extends Controller
 {
-    public function index()
+    public function index(InventoryAggregateQuery $aggregateQuery)
     {
-        // Get the pharmacy associated with the logged-in user
-        $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
-
-        if (!$pharmacy) {
+        $pharmacy = Pharmacy::query()->where('user_id', auth()->id())->first();
+        if (! $pharmacy) {
             return redirect()->back()->with('error', 'No pharmacy assigned to your account.');
         }
 
-        // Get inventory count
-        $inventoryCount = InventoryItem::where('pharmacy_id', $pharmacy->id)->count();
+        $inventoryCount = InventoryItem::query()->where('pharmacy_id', $pharmacy->id)->count();
+        $inStockCount = $aggregateQuery->available(
+            InventoryItem::query()->where('pharmacy_id', $pharmacy->id)
+        )->count();
 
-        // Get items in stock
-        $inStockCount = InventoryItem::where('pharmacy_id', $pharmacy->id)
-            ->where('stockQuantity', '>', 0)
-            ->count();
-
-        // Get messages count
-        $messageCount = Message::where('pharmacy_id', $pharmacy->id)->count();
-
-        // Get unread messages count
-        $unreadCount = Message::where('pharmacy_id', $pharmacy->id)
+        $messageCount = Message::query()->where('pharmacy_id', $pharmacy->id)->count();
+        $unreadCount = Message::query()
+            ->where('pharmacy_id', $pharmacy->id)
             ->where('is_read', false)
             ->count();
 
-        // Low stock alerts (at or below par level)
-        $lowStockItems = InventoryItem::with('medicine')
-            ->where('pharmacy_id', $pharmacy->id)
-            ->belowPar()
-            ->orderBy('stockQuantity', 'asc')
+        $lowStockCount = $aggregateQuery->belowPar(
+            InventoryItem::query()->where('pharmacy_id', $pharmacy->id)
+        )->count();
+        $lowStockQuery = InventoryItem::query()
+            ->with('medicine')
+            ->where('pharmacy_id', $pharmacy->id);
+        $aggregateQuery->withProjections($lowStockQuery);
+        $aggregateQuery->belowPar($lowStockQuery);
+        $lowStockItems = $lowStockQuery->orderBy('available_stock')->limit(10)->get();
+
+        $expiringQuery = InventoryItem::query()
+            ->with('medicine')
+            ->where('pharmacy_id', $pharmacy->id);
+        $aggregateQuery->withProjections($expiringQuery);
+        $aggregateQuery->expiringWithin($expiringQuery, 90);
+        $expiringItems = $aggregateQuery
+            ->orderByNearestValidExpiry($expiringQuery)
             ->limit(10)
             ->get();
+        $expiredCount = $aggregateQuery->expiredPhysicalStock(
+            InventoryItem::query()->where('pharmacy_id', $pharmacy->id)
+        )->count();
 
-        // Expired / expiring soon (FEFO)
-        $expiringItems = InventoryItem::with('medicine')
+        $recentQuery = InventoryItem::query()
+            ->with('medicine')
             ->where('pharmacy_id', $pharmacy->id)
-            ->whereNotNull('expiry_date')
-            ->where('expiry_date', '<=', now()->addDays(90)->endOfDay())
-            ->orderBy('expiry_date', 'asc')
-            ->limit(10)
-            ->get();
+            ->orderByDesc('updated_at')
+            ->limit(5);
+        $aggregateQuery->withProjections($recentQuery);
+        $recentInventory = $recentQuery->get();
 
-        $expiredCount = InventoryItem::where('pharmacy_id', $pharmacy->id)
-            ->whereNotNull('expiry_date')
-            ->where('expiry_date', '<', now()->startOfDay())
-            ->count();
-
-$lowStockCount = $lowStockItems->count();
-
-        // Search tracking stats (per thesis: "track number of searches made for their store daily")
-        $searchCountTotal = SearchLog::where('pharmacy_id', $pharmacy->id)->count();
-        $searchCountToday = SearchLog::where('pharmacy_id', $pharmacy->id)
+        $searchCountTotal = SearchLog::query()->where('pharmacy_id', $pharmacy->id)->count();
+        $searchCountToday = SearchLog::query()
+            ->where('pharmacy_id', $pharmacy->id)
             ->whereDate('created_at', today())
             ->count();
-        $searchCountWeek = SearchLog::where('pharmacy_id', $pharmacy->id)
+        $searchCountWeek = SearchLog::query()
+            ->where('pharmacy_id', $pharmacy->id)
             ->where('created_at', '>=', now()->subDays(7)->startOfDay())
             ->count();
-
-        // Top searched medicines for this pharmacy (derived from search logs)
-        $topSearchQueries = SearchLog::where('pharmacy_id', $pharmacy->id)
+        $topSearchQueries = SearchLog::query()
+            ->where('pharmacy_id', $pharmacy->id)
             ->whereNotNull('query')
             ->selectRaw('query, COUNT(*) as total')
             ->groupBy('query')
-            ->orderBy('total', 'desc')
-            ->orderBy('query', 'asc')
+            ->orderByDesc('total')
+            ->orderBy('query')
             ->limit(5)
             ->get();
 
@@ -89,176 +91,119 @@ $lowStockCount = $lowStockItems->count();
             'lowStockCount',
             'expiringItems',
             'expiredCount',
+            'recentInventory',
             'searchCountTotal',
             'searchCountToday',
             'searchCountWeek',
-            'topSearchQueries'
+            'topSearchQueries',
         ));
     }
 
     public function inventory()
     {
-        $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
-
-        if (!$pharmacy) {
-            return redirect()->back()->with('error', 'No pharmacy assigned.');
-        }
-
-        $inventory = InventoryItem::with('medicine')
-            ->where('pharmacy_id', $pharmacy->id)
-            ->get();
-
-        $inventoryMedicineNames = $inventory->pluck('medicine.medicine_name')->filter()->unique()->values()->toArray();
-
-        return view('pharmacy.inventory', compact('pharmacy', 'inventory', 'inventoryMedicineNames'));
+        return redirect()->route('pharmacy.inventory');
     }
 
-    public function updateInventory(Request $request)
+    public function updateInventory()
     {
-        $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
-
-        if (!$pharmacy) {
-            return redirect()->back()->with('error', 'No pharmacy assigned.');
-        }
-
-        // Update individual item
-        if ($request->has('update_id')) {
-            $item = InventoryItem::where('id', $request->update_id)
-                ->where('pharmacy_id', $pharmacy->id)
-                ->first();
-
-            if ($item) {
-                if ($request->has('stock') && isset($request->stock[$item->id])) {
-                    $item->stockQuantity = $request->stock[$item->id];
-                }
-                if ($request->has('price') && isset($request->price[$item->id])) {
-                    $item->price = $request->price[$item->id];
-                }
-                $item->save();
-                return redirect()->back()->with('success', 'Inventory updated successfully!');
-            }
-        }
-
-        // Update multiple items
-        if ($request->has('stock')) {
-            foreach ($request->stock as $itemId => $stock) {
-                $item = InventoryItem::where('id', $itemId)
-                    ->where('pharmacy_id', $pharmacy->id)
-                    ->first();
-
-                if ($item) {
-                    $item->stockQuantity = $stock;
-                    if (isset($request->price[$itemId])) {
-                        $item->price = $request->price[$itemId];
-                    }
-                    $item->save();
-                }
-            }
-            return redirect()->back()->with('success', 'All inventory updated successfully!');
-        }
-
-        return redirect()->back()->with('error', 'No changes made.');
+        return redirect()->back()->with(
+            'error',
+            'Direct total-stock editing is disabled. Use Add Stock for increases and an authorized stock operation for decreases.'
+        );
     }
 
-public function messages(Request $request)
+    public function messages(Request $request)
     {
-        $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
-
-        if (!$pharmacy) {
+        $pharmacy = Pharmacy::query()->where('user_id', auth()->id())->first();
+        if (! $pharmacy) {
             return redirect()->back()->with('error', 'No pharmacy assigned.');
         }
 
-        // Status filter: all | unread | read
-        $status = $request->query('status', 'all');
-        if (!in_array($status, ['all', 'unread', 'read'])) {
+        $status = (string) $request->query('status', 'all');
+        if (! in_array($status, ['all', 'unread', 'read'], true)) {
             $status = 'all';
         }
 
-        $query = Message::where('pharmacy_id', $pharmacy->id)->with('consumer');
-
+        $query = Message::query()->where('pharmacy_id', $pharmacy->id)->with('consumer');
         if ($status === 'unread') {
             $query->where('is_read', false);
         } elseif ($status === 'read') {
             $query->where('is_read', true);
         }
 
-        $messages = $query->orderBy('created_at', 'desc')->get();
+        $messages = $query->orderByDesc('created_at')->get();
 
         return view('pharmacy.messages', compact('pharmacy', 'messages', 'status'));
     }
 
-    public function replyMessage(Request $request, $id)
+    public function replyMessage(Request $request, int|string $id)
     {
         $request->validate([
-            'reply' => 'required|string|max:1000',
-            'attachments' => 'nullable|array|max:10',
-            'attachments.*' => 'file|mimes:jpeg,jpg,png,gif,webp,pdf,doc,docx,xls,xlsx,csv|max:10240',
+            'reply' => ['required', 'string', 'max:1000'],
+            'attachments' => ['nullable', 'array', 'max:10'],
+            'attachments.*' => ['file', 'mimes:jpeg,jpg,png,gif,webp,pdf,doc,docx,xls,xlsx,csv', 'max:10240'],
         ]);
 
-        $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
-
-        if (!$pharmacy) {
+        $pharmacy = Pharmacy::query()->where('user_id', auth()->id())->first();
+        if (! $pharmacy) {
             return redirect()->back()->with('error', 'No pharmacy assigned.');
         }
 
-        $message = Message::where('id', $id)
+        $message = Message::query()
+            ->whereKey($id)
             ->where('pharmacy_id', $pharmacy->id)
             ->first();
-
-        if (!$message) {
+        if (! $message) {
             return redirect()->back()->with('error', 'Message not found.');
         }
 
-        // Create a new message row from pharmacy (instead of overwriting reply field)
-        $newMsg = Message::create([
+        $newMessage = Message::query()->create([
             'consumer_id' => $message->consumer_id,
             'pharmacy_id' => $pharmacy->id,
-            'sender'      => 'pharmacy',
-            'message'     => $request->reply,
-            'is_read'     => true,
+            'sender' => 'pharmacy',
+            'message' => $request->string('reply')->toString(),
+            'is_read' => true,
         ]);
 
-        // Handle file attachments
         if ($request->hasFile('attachments')) {
-            $svc = app(\App\Services\PrescriptionService::class);
+            $prescriptions = app(PrescriptionService::class);
             $attachmentData = [];
             foreach ($request->file('attachments') as $file) {
                 $attachmentData[] = [
-                    'path' => $svc->store($file),
+                    'path' => $prescriptions->store($file),
                     'name' => $file->getClientOriginalName(),
                     'mime' => $file->getClientMimeType(),
                 ];
             }
-            $newMsg->attachments = $attachmentData;
-            $newMsg->save();
+            $newMessage->attachments = $attachmentData;
+            $newMessage->save();
         }
 
-        // Also mark the original as read
         $message->is_read = true;
         $message->save();
 
-        \App\Events\MessageSent::dispatch(
-            $newMsg->id,
+        MessageSent::dispatch(
+            $newMessage->id,
             $message->consumer_id,
             $pharmacy->id,
-            $request->reply,
+            $request->string('reply')->toString(),
             auth()->user()->name,
             'pharmacy_to_consumer',
-            $request->reply
+            $request->string('reply')->toString(),
         );
 
         return redirect()->back()->with('success', 'Reply sent successfully!');
     }
 
-    public function markRead($id)
+    public function markRead(int|string $id)
     {
-        $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
-
-        if (!$pharmacy) {
+        $pharmacy = Pharmacy::query()->where('user_id', auth()->id())->first();
+        if (! $pharmacy) {
             return redirect()->back()->with('error', 'No pharmacy assigned.');
         }
 
-        $message = Message::where('id', $id)
+        $message = Message::query()
+            ->whereKey($id)
             ->where('pharmacy_id', $pharmacy->id)
             ->first();
 

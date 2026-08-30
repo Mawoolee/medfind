@@ -99,7 +99,7 @@ Implement the redesign incrementally in PHP 8.2+/Laravel 12. Preserve `Inventory
     - Implement idempotent chunked reconciliation after date boundaries and register the schedule without changing unrelated deployment configuration.
     - Dependencies: 3.4.
     - _Requirements: 4.1-4.10, 9.4_
-  - [ ] 3.10 Write Property 1 test: Medicine edits preserve batch stock
+  - [x] 3.10 Write Property 1 test: Medicine edits preserve batch stock
     - **Property 1: Medicine edits preserve batch stock**
     - Use a dedicated property test file and the required feature/property annotation.
     - Dependencies: 1.1, 3.3.

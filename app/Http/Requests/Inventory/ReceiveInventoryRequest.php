@@ -37,7 +37,7 @@ final class ReceiveInventoryRequest extends PharmacyInventoryRequest
             'items.*.supplier_name' => ['nullable', 'string', 'max:255'],
             'items.*.expiry_date' => ['nullable', 'date_format:Y-m-d'],
             'items.*.cold_chain' => ['sometimes', 'boolean'],
-            'items.*.received_date' => ['nullable', 'date_format:Y-m-d'],
+            'items.*.received_date' => ['required', 'date_format:Y-m-d'],
             'items.*.received_reference' => ['nullable', 'string', 'max:255'],
         ];
     }

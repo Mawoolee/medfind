@@ -1,0 +1,112 @@
+{
+    "manifest_version": 1,
+    "phase": "approved_recovery_final_verification",
+    "generated_at": "2026-08-30T00:00:28+00:00",
+    "all_gates_passed": true,
+    "abort_required": false,
+    "app_restart_permitted": true,
+    "source_checksums_preserved": true,
+    "canonical_migrations_verified": 23,
+    "canonical_equivalence": {
+        "users": {
+            "rows": 3,
+            "canonical_sha256": "c9e1f31ccd7649231559bbf71c9260b657c42a01a9bee43e7b3f3220c439a346",
+            "equivalent": true
+        },
+        "pharmacies": {
+            "rows": 5,
+            "canonical_sha256": "c273f7744c9b0163e3c0c22ef54cbe394b75731000f9fbee5c10723bd5ec4df2",
+            "equivalent": true
+        },
+        "medicines": {
+            "rows": 6,
+            "canonical_sha256": "0b7ffc641b3babaf930665105d6ab2d45ec5b53fab86ac3fe5ca0a248cd782a4",
+            "equivalent": true
+        },
+        "suppliers": {
+            "rows": 0,
+            "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "equivalent": true
+        },
+        "inventory_items": {
+            "rows": 12,
+            "canonical_sha256": "d7605e06516a91a9841b03a8bbd0e0e439bc29b26785e5c836bcc84321f93541",
+            "equivalent": true
+        },
+        "inventory_batches": {
+            "rows": 12,
+            "canonical_sha256": "742742c37658da1eaccd3c67daa6e6adb70c67ea62438e9839bd870199b19292",
+            "equivalent": true
+        },
+        "stock_movements": {
+            "rows": 12,
+            "canonical_sha256": "0c07a00c01b69a33b9e902b6d57ac1bc723a4bb21c45c14d533c752aed9afd6c",
+            "equivalent": true
+        },
+        "messages": {
+            "rows": 0,
+            "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "equivalent": true
+        },
+        "cycle_counts": {
+            "rows": 0,
+            "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "equivalent": true
+        },
+        "cycle_count_items": {
+            "rows": 0,
+            "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "equivalent": true
+        },
+        "controlled_substance_logs": {
+            "rows": 0,
+            "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "equivalent": true
+        },
+        "returns_recalls": {
+            "rows": 0,
+            "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "equivalent": true
+        },
+        "inventory_audits": {
+            "rows": 0,
+            "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "equivalent": true
+        },
+        "search_logs": {
+            "rows": 0,
+            "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "equivalent": true
+        },
+        "notifications": {
+            "rows": 0,
+            "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "equivalent": true
+        },
+        "activity_logs": {
+            "rows": 0,
+            "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "equivalent": true
+        },
+        "survey_responses": {
+            "rows": 0,
+            "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "equivalent": true
+        }
+    },
+    "forced_logout_verified": true,
+    "postgresql_foreign_keys": 27,
+    "inventory_invariants": {
+        "aggregate_mismatches": 0,
+        "legacy_batch_mismatches": 0,
+        "backfill_movements": 12,
+        "duplicate_identity_groups": 0,
+        "invalid_quantities": 0,
+        "approved_pharmacies": 5
+    },
+    "sequence_count_verified": 16,
+    "query_smoke": {
+        "expiring_rows": 0,
+        "fefo_rows": 12
+    }
+}

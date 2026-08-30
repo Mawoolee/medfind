@@ -6,6 +6,8 @@ use InvalidArgumentException;
 
 final class BatchIdentity
 {
+    public const DIGEST_PREFIX = 'sha256:';
+
     public static function key(string $batchNumber, ?string $lotNumber): string
     {
         $batch = self::normalize($batchNumber);
@@ -14,7 +16,10 @@ final class BatchIdentity
             throw new InvalidArgumentException('Batch number must contain at least one non-whitespace character.');
         }
 
-        return 'batch:'.$batch.'|lot:'.self::normalize($lotNumber ?? '');
+        $lot = self::normalize($lotNumber ?? '');
+        $framedTuple = pack('N', strlen($batch)).$batch.pack('N', strlen($lot)).$lot;
+
+        return self::DIGEST_PREFIX.hash('sha256', $framedTuple);
     }
 
     public static function legacy(int $inventoryItemId): string

@@ -1,0 +1,358 @@
+{
+    "manifest_version": 1,
+    "phase": "transactional_authoritative_transfer",
+    "generated_at": "2026-08-29T23:56:16+00:00",
+    "transfer_passed": true,
+    "abort_required": false,
+    "cutover_performed": false,
+    "runtime_change_permitted": false,
+    "source_mutation_permitted": false,
+    "target_application_traffic_permitted": false,
+    "resumption_policy": "discard_and_recreate_unaccepted_target",
+    "schema_status": "canonical_migrations_must_be_applied_before_transfer",
+    "operational_tables": {
+        "migrations": "retained_from_canonical_laravel_migrations",
+        "cache": "not_transferred_and_must_remain_empty",
+        "cache_locks": "not_transferred_and_must_remain_empty"
+    },
+    "backup": {
+        "reference": "recovery-source-20260830.sqlite",
+        "checksum_sha256": "b23589695ddddcc5437aed7fe75f45148f805627db39f34489c4b78ffca0617d",
+        "restoration_tested": true
+    },
+    "gates": {
+        "preflight_passed": {
+            "passed": true,
+            "reason": "verified"
+        },
+        "source_preparation_passed": {
+            "passed": true,
+            "reason": "verified"
+        },
+        "backup_is_restorable": {
+            "passed": true,
+            "reason": "verified"
+        },
+        "canonical_schema_created": {
+            "passed": true,
+            "reason": "verified"
+        },
+        "canonical_migrations_verified": {
+            "passed": true,
+            "reason": "verified"
+        },
+        "target_is_unaccepted": {
+            "passed": true,
+            "reason": "verified"
+        },
+        "target_application_traffic_disabled": {
+            "passed": true,
+            "reason": "verified"
+        },
+        "source_checksum_preserved_before_transfer": {
+            "passed": true,
+            "reason": "verified"
+        },
+        "source_connection_is_read_only_sqlite": {
+            "passed": true,
+            "reason": "verified"
+        },
+        "target_connection_is_postgresql": {
+            "passed": true,
+            "reason": "verified"
+        },
+        "session_decision_valid": {
+            "passed": true,
+            "reason": "forced_logout_approved"
+        },
+        "source_and_target_schema_available": {
+            "passed": true,
+            "reason": "verified"
+        },
+        "target_transfer_tables_empty": {
+            "passed": true,
+            "reason": "verified"
+        },
+        "transactional_transfer": {
+            "passed": true,
+            "reason": "committed_to_unaccepted_target"
+        },
+        "authoritative_equivalence": {
+            "passed": true,
+            "reason": "verified"
+        }
+    },
+    "tables": {
+        "users": {
+            "source": {
+                "row_count": 3,
+                "primary_key_minimum": 1,
+                "primary_key_maximum": 3,
+                "canonical_sha256": "c9e1f31ccd7649231559bbf71c9260b657c42a01a9bee43e7b3f3220c439a346"
+            },
+            "target": {
+                "row_count": 3,
+                "primary_key_minimum": 1,
+                "primary_key_maximum": 3,
+                "canonical_sha256": "c9e1f31ccd7649231559bbf71c9260b657c42a01a9bee43e7b3f3220c439a346"
+            },
+            "equivalent": true
+        },
+        "pharmacies": {
+            "source": {
+                "row_count": 5,
+                "primary_key_minimum": 1,
+                "primary_key_maximum": 5,
+                "canonical_sha256": "c273f7744c9b0163e3c0c22ef54cbe394b75731000f9fbee5c10723bd5ec4df2"
+            },
+            "target": {
+                "row_count": 5,
+                "primary_key_minimum": 1,
+                "primary_key_maximum": 5,
+                "canonical_sha256": "c273f7744c9b0163e3c0c22ef54cbe394b75731000f9fbee5c10723bd5ec4df2"
+            },
+            "equivalent": true
+        },
+        "medicines": {
+            "source": {
+                "row_count": 6,
+                "primary_key_minimum": 1,
+                "primary_key_maximum": 6,
+                "canonical_sha256": "0b7ffc641b3babaf930665105d6ab2d45ec5b53fab86ac3fe5ca0a248cd782a4"
+            },
+            "target": {
+                "row_count": 6,
+                "primary_key_minimum": 1,
+                "primary_key_maximum": 6,
+                "canonical_sha256": "0b7ffc641b3babaf930665105d6ab2d45ec5b53fab86ac3fe5ca0a248cd782a4"
+            },
+            "equivalent": true
+        },
+        "suppliers": {
+            "source": {
+                "row_count": 0,
+                "primary_key_minimum": null,
+                "primary_key_maximum": null,
+                "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "target": {
+                "row_count": 0,
+                "primary_key_minimum": null,
+                "primary_key_maximum": null,
+                "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "equivalent": true
+        },
+        "inventory_items": {
+            "source": {
+                "row_count": 12,
+                "primary_key_minimum": 1,
+                "primary_key_maximum": 12,
+                "canonical_sha256": "d7605e06516a91a9841b03a8bbd0e0e439bc29b26785e5c836bcc84321f93541"
+            },
+            "target": {
+                "row_count": 12,
+                "primary_key_minimum": 1,
+                "primary_key_maximum": 12,
+                "canonical_sha256": "d7605e06516a91a9841b03a8bbd0e0e439bc29b26785e5c836bcc84321f93541"
+            },
+            "equivalent": true
+        },
+        "inventory_batches": {
+            "source": {
+                "row_count": 12,
+                "primary_key_minimum": 1,
+                "primary_key_maximum": 12,
+                "canonical_sha256": "742742c37658da1eaccd3c67daa6e6adb70c67ea62438e9839bd870199b19292"
+            },
+            "target": {
+                "row_count": 12,
+                "primary_key_minimum": 1,
+                "primary_key_maximum": 12,
+                "canonical_sha256": "742742c37658da1eaccd3c67daa6e6adb70c67ea62438e9839bd870199b19292"
+            },
+            "equivalent": true
+        },
+        "stock_movements": {
+            "source": {
+                "row_count": 12,
+                "primary_key_minimum": 1,
+                "primary_key_maximum": 12,
+                "canonical_sha256": "0c07a00c01b69a33b9e902b6d57ac1bc723a4bb21c45c14d533c752aed9afd6c"
+            },
+            "target": {
+                "row_count": 12,
+                "primary_key_minimum": 1,
+                "primary_key_maximum": 12,
+                "canonical_sha256": "0c07a00c01b69a33b9e902b6d57ac1bc723a4bb21c45c14d533c752aed9afd6c"
+            },
+            "equivalent": true
+        },
+        "messages": {
+            "source": {
+                "row_count": 0,
+                "primary_key_minimum": null,
+                "primary_key_maximum": null,
+                "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "target": {
+                "row_count": 0,
+                "primary_key_minimum": null,
+                "primary_key_maximum": null,
+                "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "equivalent": true
+        },
+        "cycle_counts": {
+            "source": {
+                "row_count": 0,
+                "primary_key_minimum": null,
+                "primary_key_maximum": null,
+                "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "target": {
+                "row_count": 0,
+                "primary_key_minimum": null,
+                "primary_key_maximum": null,
+                "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "equivalent": true
+        },
+        "cycle_count_items": {
+            "source": {
+                "row_count": 0,
+                "primary_key_minimum": null,
+                "primary_key_maximum": null,
+                "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "target": {
+                "row_count": 0,
+                "primary_key_minimum": null,
+                "primary_key_maximum": null,
+                "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "equivalent": true
+        },
+        "controlled_substance_logs": {
+            "source": {
+                "row_count": 0,
+                "primary_key_minimum": null,
+                "primary_key_maximum": null,
+                "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "target": {
+                "row_count": 0,
+                "primary_key_minimum": null,
+                "primary_key_maximum": null,
+                "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "equivalent": true
+        },
+        "returns_recalls": {
+            "source": {
+                "row_count": 0,
+                "primary_key_minimum": null,
+                "primary_key_maximum": null,
+                "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "target": {
+                "row_count": 0,
+                "primary_key_minimum": null,
+                "primary_key_maximum": null,
+                "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "equivalent": true
+        },
+        "inventory_audits": {
+            "source": {
+                "row_count": 0,
+                "primary_key_minimum": null,
+                "primary_key_maximum": null,
+                "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "target": {
+                "row_count": 0,
+                "primary_key_minimum": null,
+                "primary_key_maximum": null,
+                "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "equivalent": true
+        },
+        "search_logs": {
+            "source": {
+                "row_count": 0,
+                "primary_key_minimum": null,
+                "primary_key_maximum": null,
+                "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "target": {
+                "row_count": 0,
+                "primary_key_minimum": null,
+                "primary_key_maximum": null,
+                "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "equivalent": true
+        },
+        "notifications": {
+            "source": {
+                "row_count": 0,
+                "primary_key_minimum": null,
+                "primary_key_maximum": null,
+                "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "target": {
+                "row_count": 0,
+                "primary_key_minimum": null,
+                "primary_key_maximum": null,
+                "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "equivalent": true
+        },
+        "activity_logs": {
+            "source": {
+                "row_count": 0,
+                "primary_key_minimum": null,
+                "primary_key_maximum": null,
+                "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "target": {
+                "row_count": 0,
+                "primary_key_minimum": null,
+                "primary_key_maximum": null,
+                "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "equivalent": true
+        },
+        "survey_responses": {
+            "source": {
+                "row_count": 0,
+                "primary_key_minimum": null,
+                "primary_key_maximum": null,
+                "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "target": {
+                "row_count": 0,
+                "primary_key_minimum": null,
+                "primary_key_maximum": null,
+                "canonical_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "equivalent": true
+        }
+    },
+    "normalization": {
+        "invalid_value_count": 0,
+        "timezone_interpretation": "UTC for timezone-naive SQLite timestamps",
+        "json_semantics_validated": true,
+        "binary_float_decimal_conversion_used": false,
+        "sql_null_preserved_distinctly": true
+    },
+    "sequence_status": {
+        "state": "pending_task_3_8_repair_and_verification",
+        "cutover_blocked_until_verified": true
+    },
+    "metadata": {
+        "purpose": "approved_old_sqlite_snapshot_recovery",
+        "source_snapshot_date": "2026-08-17",
+        "sessions": "excluded_for_forced_logout"
+    }
+}

@@ -129,6 +129,15 @@
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse($items as $item)
+                        @php
+                            $available = (int) $item->available_stock;
+                            $isOut = $available === 0;
+                            $isLow = ! $isOut && $item->par_level > 0 && $available <= $item->par_level;
+                            $nearestExpiry = $item->nearest_valid_expiry;
+                            $daysToExpiry = $nearestExpiry
+                                ? (int) now()->startOfDay()->diffInDays($nearestExpiry->startOfDay(), false)
+                                : null;
+                        @endphp
                         <tr class="hover:bg-gray-50 transition">
                             <td class="px-4 py-3">
                                 <p class="text-sm font-medium text-gray-800">{{ $item->pharmacy?->pharmacy_name }}</p>
@@ -138,23 +147,23 @@
                                 <p class="text-xs text-gray-400">{{ $item->medicine?->dosage }}</p>
                             </td>
                             <td class="px-4 py-3 text-sm text-gray-600">{{ $item->medicine?->category ?? '—' }}</td>
-                            <td class="px-4 py-3 text-sm font-mono font-medium {{ $item->stockQuantity <= 0 ? 'text-red-600' : ($item->stock_status === 'low' ? 'text-yellow-600' : 'text-gray-800') }}">
-                                {{ $item->stockQuantity }}
+                            <td class="px-4 py-3 text-sm font-mono font-medium {{ $isOut ? 'text-red-600' : ($isLow ? 'text-yellow-600' : 'text-gray-800') }}">
+                                {{ $available }}
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-700">₱{{ number_format($item->price, 2) }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-700">₱{{ number_format((float) $item->representative_price, 2) }}</td>
                             <td class="px-4 py-3 text-sm">
-                                @if($item->expiry_date)
-                                    <span class="{{ $item->expiry_status === 'expired' ? 'text-red-600 font-semibold' : ($item->expiry_status === 'critical' ? 'text-orange-600' : 'text-gray-600') }}">
-                                        {{ $item->expiry_date->format('M d, Y') }}
+                                @if($nearestExpiry)
+                                    <span class="{{ $daysToExpiry !== null && $daysToExpiry <= 30 ? 'text-orange-600 font-semibold' : 'text-gray-600' }}">
+                                        {{ $nearestExpiry->format('M d, Y') }}
                                     </span>
                                 @else
                                     <span class="text-gray-400">—</span>
                                 @endif
                             </td>
                             <td class="px-4 py-3">
-                                @if($item->stockQuantity <= 0)
+                                @if($isOut)
                                     <span class="px-2 py-1 rounded-full text-xs bg-red-100 text-red-700 font-medium">Out of Stock</span>
-                                @elseif($item->stock_status === 'low')
+                                @elseif($isLow)
                                     <span class="px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-700 font-medium">Low Stock</span>
                                 @else
                                     <span class="px-2 py-1 rounded-full text-xs bg-green-100 text-green-700 font-medium">In Stock</span>

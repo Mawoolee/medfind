@@ -14,6 +14,11 @@ final class Property3AggregateCreationTest extends PropertyTestCase
 {
     use RefreshDatabase;
 
+    protected function shouldSeed(): bool
+    {
+        return false;
+    }
+
     /** **Validates: Requirements 2.4** */
     public function test_aggregate_creation_is_idempotent(): void
     {

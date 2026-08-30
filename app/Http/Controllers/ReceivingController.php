@@ -2,128 +2,112 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Pharmacy;
+use App\Domain\Inventory\BatchStockService;
+use App\Domain\Inventory\Data\StockOperationContext;
+use App\Domain\Inventory\Exceptions\ColdChainRequired;
+use App\Domain\Inventory\Exceptions\DuplicateBatchIdentity;
+use App\Http\Requests\Inventory\ReceiveInventoryRequest;
+use App\Models\ControlledSubstanceLog;
 use App\Models\InventoryItem;
 use App\Models\Medicine;
+use App\Models\Pharmacy;
 use App\Models\Supplier;
-use App\Models\ControlledSubstanceLog;
-use App\Events\InventoryUpdated;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ReceivingController extends Controller
 {
-    // Show receive shipment UI
-    public function create()
+    public function create(Request $request)
     {
-        $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
-        if (!$pharmacy) return redirect()->back()->with('error', 'No pharmacy assigned.');
+        $pharmacy = Pharmacy::query()->where('user_id', auth()->id())->first();
+        if (! $pharmacy) {
+            return redirect()->back()->with('error', 'No pharmacy assigned.');
+        }
 
-        $suppliers = Supplier::orderBy('name')->get();
-        $inventory = InventoryItem::with('medicine')
+        $selectedInventoryId = $request->integer('inventory_item_id') ?: null;
+        if ($selectedInventoryId !== null) {
+            InventoryItem::query()
+                ->whereKey($selectedInventoryId)
+                ->where('pharmacy_id', $pharmacy->id)
+                ->firstOrFail();
+        }
+
+        $suppliers = Supplier::query()->orderBy('name')->get();
+        $inventory = InventoryItem::query()
+            ->with('medicine')
             ->where('pharmacy_id', $pharmacy->id)
+            ->orderBy(
+                Medicine::query()
+                    ->select('medicine_name')
+                    ->whereColumn('medicines.id', 'inventory_items.medicine_id')
+                    ->limit(1)
+            )
             ->get();
 
-        return view('pharmacy.receiving_create', compact('pharmacy', 'suppliers', 'inventory'));
+        return view('pharmacy.receiving_create', compact(
+            'pharmacy',
+            'suppliers',
+            'inventory',
+            'selectedInventoryId',
+        ));
     }
 
-    // Process received items
-    public function store(Request $request)
+    public function store(ReceiveInventoryRequest $request, BatchStockService $stockService)
     {
-        $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
-        if (!$pharmacy) return redirect()->back()->with('error', 'No pharmacy assigned.');
-
-        $data = $request->validate([
-            'supplier_id' => 'nullable|exists:suppliers,id',
-            'purchase_order' => 'nullable|string|max:255',
-            'items' => 'required|array',
-            'items.*.medicine_name' => 'required|string',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.price' => 'nullable|numeric|min:0',
-            'items.*.batch_number' => 'nullable|string|max:255',
-            'items.*.expiry_date' => 'nullable|date',
-            'items.*.cold_chain' => 'nullable',
-            'items.*.is_controlled' => 'nullable',
-            'items.*.category' => 'nullable|string|max:255',
-        ]);
-
         $processed = 0;
-        $createdInventoryIds = [];
+        $failedIndex = 0;
 
-        DB::transaction(function () use ($data, $pharmacy, &$processed, &$createdInventoryIds) {
-            foreach ($data['items'] as $it) {
-                if (empty($it['medicine_name'])) continue;
+        try {
+            DB::transaction(function () use ($request, $stockService, &$processed, &$failedIndex): void {
+                $items = $request->validated('items');
 
-                $medicine = Medicine::firstOrCreate(
-                    ['medicine_name' => $it['medicine_name']],
-                    [
-                        'dosage' => $it['dosage'] ?? '',
-                        'manufacturer' => $it['manufacturer'] ?? '',
-                        'category' => $it['category'] ?? null,
-                        'requiresPrescription' => !empty($it['is_controlled']) ? true : ((bool) optional(Medicine::where('medicine_name', $it['medicine_name'])->first())->requiresPrescription),
-                    ]
-                );
+                foreach (array_keys($items) as $index) {
+                    $failedIndex = (int) $index;
+                    $aggregate = InventoryItem::query()
+                        ->with('medicine')
+                        ->whereKey($items[$index]['inventory_item_id'])
+                        ->where('pharmacy_id', $request->pharmacy()->id)
+                        ->lockForUpdate()
+                        ->firstOrFail();
+                    $receipt = $request->receiptData((int) $index);
+                    $context = new StockOperationContext(
+                        type: 'receipt',
+                        actorId: $request->user()->id,
+                        reason: 'Received stock delivery',
+                        referenceType: 'purchase_order',
+                        referenceId: $receipt->receivedReference,
+                        receivedReference: $receipt->receivedReference,
+                    );
+                    $result = $stockService->receive($aggregate, $receipt, $context);
 
-                // If the medicine already existed, update its category if provided.
-                if (!empty($it['category'])) {
-                    $medicine->category = $it['category'];
-                    $medicine->save();
+                    if ($result->aggregate->is_controlled) {
+                        ControlledSubstanceLog::query()->create([
+                            'inventory_item_id' => $result->aggregate->id,
+                            'user_id' => $request->user()->id,
+                            'action' => 'received',
+                            'quantity' => $receipt->quantityReceived,
+                            'notes' => 'Received batch '.$receipt->batchNumber
+                                .($receipt->receivedReference ? ' (Reference: '.$receipt->receivedReference.')' : ''),
+                            'logged_at' => now(),
+                            'operation_id' => $result->operationId,
+                        ]);
+                    }
+
+                    $processed++;
                 }
+            });
+        } catch (DuplicateBatchIdentity $exception) {
+            return redirect()->back()
+                ->withErrors(["items.{$failedIndex}.batch_number" => $exception->getMessage()])
+                ->withInput();
+        } catch (ColdChainRequired $exception) {
+            return redirect()->back()
+                ->withErrors(["items.{$failedIndex}.cold_chain" => $exception->getMessage()])
+                ->withInput();
+        }
 
-                $existing = InventoryItem::where('pharmacy_id', $pharmacy->id)
-                    ->where('medicine_id', $medicine->id)
-                    ->first();
-
-                $before = $existing->stockQuantity ?? 0;
-                $increment = intval($it['quantity']);
-
-                $inv = InventoryItem::updateOrCreate(
-                    [
-                        'pharmacy_id' => $pharmacy->id,
-                        'medicine_id' => $medicine->id,
-                    ],
-                    [
-                        'stockQuantity' => $before + $increment,
-                        'price' => $it['price'] ?? ($existing->price ?? 0),
-                        'batch_number' => $it['batch_number'] ?? ($existing->batch_number ?? null),
-                        'expiry_date' => !empty($it['expiry_date']) ? $it['expiry_date'] : ($existing->expiry_date ?? null),
-                        'cold_chain' => !empty($it['cold_chain']),
-                        'supplier_id' => $data['supplier_id'] ?? ($existing->supplier_id ?? null),
-                        'status' => 'available',
-                    ]
-                );
-
-$after = $inv->stockQuantity;
-                $inv->recordAudit($before, $after, 'Received via shipment (PO: ' . ($data['purchase_order'] ?? 'N/A') . ')');
-
-                // Broadcast real-time inventory update to public map & pharmacy channel
-                InventoryUpdated::dispatch(
-                    $pharmacy->id,
-                    $inv->medicine_id,
-                    $inv->medicine->medicine_name ?? null,
-                    (int) $inv->stockQuantity,
-                    (float) $inv->price,
-                    (bool) optional($inv->medicine)->requiresPrescription
-                );
-
-                // Controlled substance handling: create a separate logbook entry.
-                if (!empty($it['is_controlled']) || $inv->is_controlled) {
-                    ControlledSubstanceLog::create([
-                        'inventory_item_id' => $inv->id,
-                        'user_id' => auth()->id(),
-                        'action' => 'received',
-                        'quantity' => $increment,
-                        'notes' => 'Received controlled substance. PO: ' . ($data['purchase_order'] ?? 'N/A') . ', Batch: ' . ($it['batch_number'] ?? 'N/A'),
-                        'logged_at' => now(),
-                    ]);
-                }
-
-                $createdInventoryIds[] = $inv->id;
-                $processed++;
-            }
-        });
-
-        return redirect()->route('pharmacy.inventory')
-            ->with('success', "Shipment processed: {$processed} item(s) received successfully.");
+        return redirect()
+            ->route('pharmacy.inventory')
+            ->with('success', "Shipment processed: {$processed} batch(es) received. Previous batches were preserved.");
     }
 }

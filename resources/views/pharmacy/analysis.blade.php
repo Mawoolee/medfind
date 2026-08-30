@@ -77,8 +77,8 @@
                         @forelse($sorted as $item)
                             <tr class="border-t border-gray-200">
                                 <td class="px-4 py-3 font-medium">{{ $item->medicine->medicine_name }}</td>
-                                <td class="px-4 py-3">{{ $item->stockQuantity }}</td>
-                                <td class="px-4 py-3">₱{{ number_format($item->price, 2) }}</td>
+                                <td class="px-4 py-3">{{ $item->available_stock }}</td>
+                                <td class="px-4 py-3">₱{{ number_format((float) $item->representative_price, 2) }}</td>
                                 <td class="px-4 py-3">₱{{ number_format($item->value, 2) }}</td>
                                 <td class="px-4 py-3">
                                     <span class="px-2 py-1 rounded text-xs font-semibold {{ $item->abc === 'A' ? 'bg-red-100 text-red-700' : ($item->abc === 'B' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700') }}">{{ $item->abc }}</span>

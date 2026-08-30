@@ -9,16 +9,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('messages', function (Blueprint $table) {
-            if (!Schema::hasColumn('messages', 'verified_by')) {
+            if (! Schema::hasColumn('messages', 'verified_by')) {
                 $table->foreignId('verified_by')->nullable()->constrained('users')->onDelete('set null');
             }
-            if (!Schema::hasColumn('messages', 'verification_status')) {
+            if (! Schema::hasColumn('messages', 'verification_status')) {
                 $table->string('verification_status')->nullable()->index();
             }
-            if (!Schema::hasColumn('messages', 'verification_notes')) {
+            if (! Schema::hasColumn('messages', 'verification_notes')) {
                 $table->text('verification_notes')->nullable();
             }
-            if (!Schema::hasColumn('messages', 'verified_at')) {
+            if (! Schema::hasColumn('messages', 'verified_at')) {
                 $table->timestamp('verified_at')->nullable();
             }
         });
@@ -32,6 +32,7 @@ return new class extends Migration
                 $table->dropColumn('verified_by');
             }
             if (Schema::hasColumn('messages', 'verification_status')) {
+                $table->dropIndex(['verification_status']);
                 $table->dropColumn('verification_status');
             }
             if (Schema::hasColumn('messages', 'verification_notes')) {

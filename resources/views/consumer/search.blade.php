@@ -23,11 +23,11 @@
                                 <div class="flex items-center gap-2 mb-1">
                                     <h3 class="font-semibold text-[#191970]">{{ $item->medicine->medicine_name }}</h3>
                                     <span class="text-xs bg-[#191970] text-[#D9F855] px-2 py-0.5 rounded-full">
-                                        {{ $item->stockQuantity > 0 ? 'In Stock' : 'Out of Stock' }}
+                                        {{ $item->available_stock > 0 ? 'In Stock' : 'Out of Stock' }}
                                     </span>
                                 </div>
                                 <p class="text-sm text-gray-500">{{ $item->medicine->dosage }} • {{ $item->medicine->manufacturer }}</p>
-                                <p class="text-sm font-semibold text-[#191970] mt-1">₱{{ number_format($item->price, 2) }}</p>
+                                <p class="text-sm font-semibold text-[#191970] mt-1">₱{{ number_format($item->representative_price, 2) }}</p>
                                 <div class="flex items-center gap-2 mt-2">
                                     <i class="fas fa-store text-[#9400D3] text-xs"></i>
                                     <span class="text-sm text-gray-600">{{ $item->pharmacy->pharmacy_name }}</span>

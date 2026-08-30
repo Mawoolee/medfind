@@ -1,0 +1,157 @@
+{
+    "manifest_version": 1,
+    "phase": "approved_recovery_sequence_repair",
+    "generated_at": "2026-08-29T23:57:09+00:00",
+    "all_sequences_repaired": true,
+    "all_probes_passed": true,
+    "row_counts_unchanged": true,
+    "abort_required": false,
+    "app_restart_permitted": false,
+    "sequence_count": 16,
+    "sequences": {
+        "users": {
+            "sequence": "public.users_id_seq",
+            "row_count": 3,
+            "imported_maximum": 3,
+            "probe_next_value": 4,
+            "restored_last_value": 3,
+            "restored_is_called": true,
+            "collision_safe": true
+        },
+        "pharmacies": {
+            "sequence": "public.pharmacies_id_seq",
+            "row_count": 5,
+            "imported_maximum": 5,
+            "probe_next_value": 6,
+            "restored_last_value": 5,
+            "restored_is_called": true,
+            "collision_safe": true
+        },
+        "medicines": {
+            "sequence": "public.medicines_id_seq",
+            "row_count": 6,
+            "imported_maximum": 6,
+            "probe_next_value": 7,
+            "restored_last_value": 6,
+            "restored_is_called": true,
+            "collision_safe": true
+        },
+        "suppliers": {
+            "sequence": "public.suppliers_id_seq",
+            "row_count": 0,
+            "imported_maximum": null,
+            "probe_next_value": 1,
+            "restored_last_value": 1,
+            "restored_is_called": false,
+            "collision_safe": true
+        },
+        "inventory_items": {
+            "sequence": "public.inventory_items_id_seq",
+            "row_count": 12,
+            "imported_maximum": 12,
+            "probe_next_value": 13,
+            "restored_last_value": 12,
+            "restored_is_called": true,
+            "collision_safe": true
+        },
+        "inventory_batches": {
+            "sequence": "public.inventory_batches_id_seq",
+            "row_count": 12,
+            "imported_maximum": 12,
+            "probe_next_value": 13,
+            "restored_last_value": 12,
+            "restored_is_called": true,
+            "collision_safe": true
+        },
+        "stock_movements": {
+            "sequence": "public.stock_movements_id_seq",
+            "row_count": 12,
+            "imported_maximum": 12,
+            "probe_next_value": 13,
+            "restored_last_value": 12,
+            "restored_is_called": true,
+            "collision_safe": true
+        },
+        "messages": {
+            "sequence": "public.messages_id_seq",
+            "row_count": 0,
+            "imported_maximum": null,
+            "probe_next_value": 1,
+            "restored_last_value": 1,
+            "restored_is_called": false,
+            "collision_safe": true
+        },
+        "cycle_counts": {
+            "sequence": "public.cycle_counts_id_seq",
+            "row_count": 0,
+            "imported_maximum": null,
+            "probe_next_value": 1,
+            "restored_last_value": 1,
+            "restored_is_called": false,
+            "collision_safe": true
+        },
+        "cycle_count_items": {
+            "sequence": "public.cycle_count_items_id_seq",
+            "row_count": 0,
+            "imported_maximum": null,
+            "probe_next_value": 1,
+            "restored_last_value": 1,
+            "restored_is_called": false,
+            "collision_safe": true
+        },
+        "controlled_substance_logs": {
+            "sequence": "public.controlled_substance_logs_id_seq",
+            "row_count": 0,
+            "imported_maximum": null,
+            "probe_next_value": 1,
+            "restored_last_value": 1,
+            "restored_is_called": false,
+            "collision_safe": true
+        },
+        "returns_recalls": {
+            "sequence": "public.returns_recalls_id_seq",
+            "row_count": 0,
+            "imported_maximum": null,
+            "probe_next_value": 1,
+            "restored_last_value": 1,
+            "restored_is_called": false,
+            "collision_safe": true
+        },
+        "inventory_audits": {
+            "sequence": "public.inventory_audits_id_seq",
+            "row_count": 0,
+            "imported_maximum": null,
+            "probe_next_value": 1,
+            "restored_last_value": 1,
+            "restored_is_called": false,
+            "collision_safe": true
+        },
+        "search_logs": {
+            "sequence": "public.search_logs_id_seq",
+            "row_count": 0,
+            "imported_maximum": null,
+            "probe_next_value": 1,
+            "restored_last_value": 1,
+            "restored_is_called": false,
+            "collision_safe": true
+        },
+        "activity_logs": {
+            "sequence": "public.activity_logs_id_seq",
+            "row_count": 0,
+            "imported_maximum": null,
+            "probe_next_value": 1,
+            "restored_last_value": 1,
+            "restored_is_called": false,
+            "collision_safe": true
+        },
+        "survey_responses": {
+            "sequence": "public.survey_responses_id_seq",
+            "row_count": 0,
+            "imported_maximum": null,
+            "probe_next_value": 1,
+            "restored_last_value": 1,
+            "restored_is_called": false,
+            "collision_safe": true
+        }
+    }
+}

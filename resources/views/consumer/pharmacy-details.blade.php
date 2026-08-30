@@ -71,8 +71,8 @@
                                      '{{ addslashes($item->medicine->manufacturer ?? '') }}',
                                      '{{ addslashes($item->medicine->category ?? '') }}',
                                      {{ $item->medicine->requiresPrescription ? 'true' : 'false' }},
-                                     {{ $item->price }},
-                                     {{ $item->stockQuantity }}
+                                     {{ (float) $item->representative_price }},
+                                     {{ (int) $item->available_stock }}
                                  )">
                                 <div>
                                     <p class="font-bold text-[#191970] text-base leading-snug">
@@ -92,9 +92,9 @@
                                 </div>
                                 <div class="shrink-0 flex flex-col items-end gap-1">
                                     <span class="bg-[#191970] text-[#D9F855] text-sm font-bold px-3 py-1 rounded-full inline-block shadow-sm">
-                                        ₱{{ number_format($item->price, 0) }}
+                                        ₱{{ number_format($item->representative_price, 0) }}
                                     </span>
-                                    <span class="text-xs text-gray-400">{{ $item->stockQuantity }} pcs</span>
+                                    <span class="text-xs text-gray-400">{{ $item->available_stock }} pcs</span>
                                 </div>
                             </div>
                         @endforeach

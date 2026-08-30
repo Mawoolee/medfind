@@ -2,100 +2,98 @@
 
 namespace App\Http\Controllers;
 
+use App\Domain\Inventory\InventoryAggregateQuery;
 use App\Events\InventoryUpdated;
+use App\Http\Requests\Inventory\StoreMedicineRequest;
+use App\Http\Requests\Inventory\UpdateMedicineRequest;
 use App\Models\InventoryItem;
 use App\Models\Medicine;
 use App\Models\Pharmacy;
-use App\Models\Supplier;
+use App\Services\MedicineMasterService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class InventoryController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, InventoryAggregateQuery $aggregateQuery)
     {
-        $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
+        $pharmacy = Pharmacy::query()->where('user_id', auth()->id())->first();
         if (! $pharmacy) {
             return redirect()->back()->with('error', 'No pharmacy assigned.');
         }
 
-        $q = $request->query('q', '');
-        $category = $request->query('category', '');
-        $sort = $request->query('sort', 'recent');
-        $stock = $request->query('stock', '');
-        $coldChain = $request->query('cold_chain', '');
+        $q = (string) $request->query('q', '');
+        $category = (string) $request->query('category', '');
+        $sort = (string) $request->query('sort', 'recent');
+        $stock = (string) $request->query('stock', '');
+        $coldChain = (string) $request->query('cold_chain', '');
 
-        $query = InventoryItem::with('medicine', 'supplier')
+        $query = InventoryItem::query()
+            ->with('medicine')
+            ->withCount('batches')
             ->where('pharmacy_id', $pharmacy->id);
+        $aggregateQuery->withProjections($query);
 
-        if (! empty($q)) {
-            $query->whereHas('medicine', function ($mq) use ($q) {
-                $mq->where('medicine_name', 'like', "%{$q}%")
-                    ->orWhere('manufacturer', 'like', "%{$q}%");
-            });
-        }
-
-        if (! empty($category)) {
-            $query->whereHas('medicine', function ($mq) use ($category) {
-                $mq->where('category', $category);
-            });
-        }
-
-        if (! empty($coldChain)) {
-            $query->where('cold_chain', true);
-        }
-
-        switch ($stock) {
-            case 'low':
-                $query->belowPar();
-                break;
-            case 'out':
-                $query->outOfStock();
-                break;
-            case 'in':
-                $query->where('stockQuantity', '>', 0);
-                break;
-            case 'expiring':
-                $query->expiringWithin(90);
-                break;
-            case 'expired':
-                $query->expired();
-                break;
-        }
-
-        switch ($sort) {
-            case 'fefo':
-                $query->fefo();
-                break;
-            case 'name':
-                $query->whereHas('medicine', function ($mq) {
-                    $mq->orderBy('medicine_name');
+        if ($q !== '') {
+            $query->whereHas('medicine', function (Builder $medicine) use ($q): void {
+                $medicine->where(function (Builder $search) use ($q): void {
+                    $search->where('medicine_name', 'like', "%{$q}%")
+                        ->orWhere('brand_name', 'like', "%{$q}%")
+                        ->orWhere('manufacturer', 'like', "%{$q}%");
                 });
-                break;
-            case 'low':
-                $query->orderBy('stockQuantity', 'asc');
-                break;
-            case 'high':
-                $query->orderBy('stockQuantity', 'desc');
-                break;
-            default:
-                $query->orderBy('created_at', 'desc');
-                break;
+            });
         }
+
+        if ($category !== '') {
+            $query->whereHas('medicine', fn (Builder $medicine) => $medicine->where('category', $category));
+        }
+
+        if ($coldChain !== '') {
+            $query->where(function (Builder $inventory): void {
+                $inventory
+                    ->whereHas('medicine', fn (Builder $medicine) => $medicine->where('cold_chain_required', true))
+                    ->orWhereHas('batches', fn (Builder $batch) => $batch->available()->where('cold_chain', true));
+            });
+        }
+
+        match ($stock) {
+            'low' => $aggregateQuery->belowPar($query),
+            'out' => $aggregateQuery->outOfStock($query),
+            'in' => $aggregateQuery->available($query),
+            'expiring' => $aggregateQuery->expiringWithin($query, 90),
+            'expired' => $aggregateQuery->expiredPhysicalStock($query),
+            default => $query,
+        };
+
+        match ($sort) {
+            'fefo' => $aggregateQuery->orderByNearestValidExpiry($query)->orderBy('id'),
+            'name' => $query->orderBy(
+                Medicine::query()
+                    ->select('medicine_name')
+                    ->whereColumn('medicines.id', 'inventory_items.medicine_id')
+                    ->limit(1)
+            ),
+            'low' => $query->orderBy('available_stock')->orderBy('id'),
+            'high' => $query->orderByDesc('available_stock')->orderBy('id'),
+            default => $query->orderByDesc('updated_at')->orderByDesc('id'),
+        };
 
         $inventory = $query->paginate(15)->withQueryString();
+        $inventoryMedicineNames = $inventory->getCollection()
+            ->pluck('medicine.medicine_name')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
 
-        $inventoryMedicineNames = $inventory->pluck('medicine')->filter()->map(function ($m) {
-            return $m->medicine_name;
-        })->unique()->values()->toArray();
-
-        // Available categories for the filter dropdown (from medicines in this pharmacy).
-        $categories = Medicine::whereIn('id', InventoryItem::where('pharmacy_id', $pharmacy->id)->pluck('medicine_id'))
+        $categories = Medicine::query()
+            ->whereIn('id', InventoryItem::query()->where('pharmacy_id', $pharmacy->id)->pluck('medicine_id'))
             ->whereNotNull('category')
+            ->orderBy('category')
             ->pluck('category')
             ->unique()
             ->values()
-            ->toArray();
+            ->all();
 
         return view('pharmacy.inventory', compact(
             'pharmacy',
@@ -112,35 +110,29 @@ class InventoryController extends Controller
 
     public function create()
     {
-        $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
+        $pharmacy = Pharmacy::query()->where('user_id', auth()->id())->first();
         if (! $pharmacy) {
             return redirect()->back()->with('error', 'No pharmacy assigned.');
         }
 
-        $medicines = Medicine::with([
-            'inventory' => fn ($query) => $query
-                ->where('pharmacy_id', $pharmacy->id)
-                ->with('supplier'),
-        ])->orderBy('medicine_name')->get();
+        $medicines = Medicine::query()
+            ->with(['inventory' => fn ($query) => $query->where('pharmacy_id', $pharmacy->id)])
+            ->orderBy('medicine_name')
+            ->get();
 
-        $medicineAutofill = $medicines->mapWithKeys(function (Medicine $medicine) {
-            $inventory = $medicine->inventory->first();
+        $medicineAutofill = $medicines->mapWithKeys(function (Medicine $medicine): array {
+            $aggregate = $medicine->inventory->first();
 
             return [
                 (string) $medicine->id => [
-                    'generic_name' => $medicine->medicine_name,
+                    'medicine_name' => $medicine->medicine_name,
                     'brand_name' => $medicine->brand_name,
                     'dosage' => $medicine->dosage,
-                    'batch_number' => $inventory?->batch_number,
-                    'lot_number' => $inventory?->lot_number,
-                    'price' => $inventory ? (string) $inventory->price : '',
-                    'stock_quantity' => $inventory?->stockQuantity ?? 0,
-                    'par_level' => $inventory?->par_level ?? 0,
                     'category' => $medicine->category,
-                    'supplier_name' => $inventory?->supplier?->name,
                     'manufacturer' => $medicine->manufacturer,
-                    'expiry_date' => $inventory?->expiry_date?->format('Y-m-d'),
-                    'cold_chain' => (bool) ($inventory?->cold_chain ?? false),
+                    'requires_prescription' => (bool) $medicine->requiresPrescription,
+                    'cold_chain_required' => (bool) $medicine->cold_chain_required,
+                    'par_level' => $aggregate?->par_level ?? 0,
                 ],
             ];
         });
@@ -148,267 +140,137 @@ class InventoryController extends Controller
         return view('pharmacy.inventory_create', compact('pharmacy', 'medicines', 'medicineAutofill'));
     }
 
-    public function store(Request $request)
+    public function store(StoreMedicineRequest $request, MedicineMasterService $medicineMaster)
     {
-        $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
-        if (! $pharmacy) {
-            return redirect()->back()->with('error', 'No pharmacy assigned.');
-        }
-
-        $data = $request->validate([
-            'medicine_id' => 'nullable|exists:medicines,id',
-            'medicine_name' => 'nullable|string|max:255',
-            'brand_name' => 'nullable|string|max:255',
-            'dosage' => 'nullable|string|max:255',
-            'batch_number' => 'nullable|string|max:255',
-            'lot_number' => 'nullable|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'stockQuantity' => 'required|integer|min:0',
-            'par_level' => 'nullable|integer|min:0',
-            'category' => 'nullable|string|max:255',
-            'supplier_name' => 'nullable|string|max:255',
-            'supplier_id' => 'nullable|exists:suppliers,id',
-            'manufacturer' => 'nullable|string|max:255',
-            'expiry_date' => 'nullable|date',
-            'cold_chain' => 'nullable|boolean',
-        ]);
-
-        if (empty($data['medicine_id']) && blank($data['medicine_name'] ?? null)) {
-            return redirect()->back()
-                ->withErrors(['medicine_name' => 'The generic name field is required when no existing medicine is selected.'])
-                ->with('error', 'Please select or enter a medicine name.')
-                ->withInput();
-        }
-
-        if (array_key_exists('medicine_name', $data) && blank($data['medicine_name'])) {
-            return redirect()->back()
-                ->withErrors(['medicine_name' => 'The generic name field is required.'])
-                ->withInput();
-        }
-
-        [$medicine, $item] = DB::transaction(function () use ($data, $pharmacy) {
-            if (empty($data['medicine_id'])) {
-                $medicine = Medicine::create([
-                    'medicine_name' => trim($data['medicine_name']),
-                    'brand_name' => $data['brand_name'] ?? null,
-                    'dosage' => $data['dosage'] ?? '',
-                    'manufacturer' => $data['manufacturer'] ?? '',
-                    'category' => $data['category'] ?? null,
-                ]);
-            } else {
-                $medicine = Medicine::findOrFail($data['medicine_id']);
-                $medicineUpdates = [];
-
-                foreach (['brand_name', 'dosage', 'manufacturer', 'category'] as $field) {
-                    if (array_key_exists($field, $data)) {
-                        $medicineUpdates[$field] = in_array($field, ['dosage', 'manufacturer'], true)
-                            ? (string) ($data[$field] ?? '')
-                            : $data[$field];
-                    }
-                }
-
-                if (array_key_exists('medicine_name', $data)) {
-                    $medicineUpdates['medicine_name'] = trim($data['medicine_name']);
-                }
-
-                if ($medicineUpdates !== []) {
-                    $medicine->update($medicineUpdates);
-                }
-            }
-
-            $existing = InventoryItem::where('pharmacy_id', $pharmacy->id)
-                ->where('medicine_id', $medicine->id)
-                ->first();
-            $before = (int) ($existing?->stockQuantity ?? 0);
-
-            $optionalValue = static fn (string $key, mixed $fallback = null): mixed => array_key_exists($key, $data)
-                ? $data[$key]
-                : $fallback;
-
-            $supplierId = $existing?->supplier_id;
-            if (array_key_exists('supplier_name', $data)) {
-                $supplierName = trim((string) ($data['supplier_name'] ?? ''));
-                $supplierId = null;
-
-                if ($supplierName !== '') {
-                    $normalizedSupplierName = mb_strtolower($supplierName, 'UTF-8');
-                    $supplier = Supplier::whereRaw('LOWER(TRIM(name)) = ?', [$normalizedSupplierName])->first();
-                    $supplier ??= Supplier::create(['name' => $supplierName]);
-                    $supplierId = $supplier->id;
-                }
-            } elseif (array_key_exists('supplier_id', $data)) {
-                $supplierId = $data['supplier_id'];
-            }
-
-            $item = InventoryItem::updateOrCreate(
-                ['pharmacy_id' => $pharmacy->id, 'medicine_id' => $medicine->id],
-                [
-                    'stockQuantity' => $data['stockQuantity'],
-                    'price' => $data['price'],
-                    'status' => 'available',
-                    'expiry_date' => $optionalValue('expiry_date', $existing?->expiry_date),
-                    'batch_number' => $optionalValue('batch_number', $existing?->batch_number),
-                    'lot_number' => $optionalValue('lot_number', $existing?->lot_number),
-                    'cold_chain' => ! empty($data['cold_chain']),
-                    'par_level' => $optionalValue('par_level', $existing?->par_level ?? 0) ?? 0,
-                    'supplier_id' => $supplierId,
-                ]
-            );
-
-            $item->recordAudit($before, (int) $item->stockQuantity, 'Added/updated inventory item');
-
-            return [$medicine, $item];
-        });
-
-        // Broadcast real-time inventory update to public map & pharmacy channel
-        InventoryUpdated::dispatch(
-            $pharmacy->id,
-            $item->medicine_id,
-            $medicine->medicine_name,
-            (int) $item->stockQuantity,
-            (float) $item->price,
-            (bool) $medicine->requiresPrescription
+        $aggregate = $medicineMaster->createForPharmacy(
+            $request->pharmacy(),
+            $request->medicineAttributes(),
+            $request->parLevel(),
         );
 
-        return redirect()->route('pharmacy.inventory')->with('success', 'Inventory item added/updated successfully.');
+        return redirect()
+            ->route('pharmacy.inventory')
+            ->with('success', "{$aggregate->medicine->medicine_name} was added to the medicine catalog. Use Add Stock to receive a batch.");
     }
 
-    public function edit($id)
+    public function edit(int|string $id, InventoryAggregateQuery $aggregateQuery)
     {
-        $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
+        $pharmacy = Pharmacy::query()->where('user_id', auth()->id())->first();
         if (! $pharmacy) {
             return redirect()->back()->with('error', 'No pharmacy assigned.');
         }
 
-        $item = InventoryItem::with('medicine', 'supplier')->where('id', $id)->where('pharmacy_id', $pharmacy->id)->firstOrFail();
-        $suppliers = Supplier::orderBy('name')->get();
+        $query = InventoryItem::query()
+            ->with('medicine')
+            ->whereKey($id)
+            ->where('pharmacy_id', $pharmacy->id);
+        $aggregateQuery->withProjections($query);
+        $item = $query->firstOrFail();
 
-        return view('pharmacy.inventory_edit', compact('pharmacy', 'item', 'suppliers'));
+        return view('pharmacy.inventory_edit', compact('pharmacy', 'item'));
     }
 
-    public function update(Request $request, $id)
-    {
-        $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
-        if (! $pharmacy) {
-            return redirect()->back()->with('error', 'No pharmacy assigned.');
-        }
-
-        $item = InventoryItem::where('id', $id)->where('pharmacy_id', $pharmacy->id)->firstOrFail();
-
-        $data = $request->validate([
-            'price' => 'required|numeric|min:0',
-            'stockQuantity' => 'required|integer|min:0',
-            'expiry_date' => 'nullable|date',
-            'batch_number' => 'nullable|string|max:255',
-            'lot_number' => 'nullable|string|max:255',
-            'cold_chain' => 'nullable|boolean',
-            'par_level' => 'nullable|integer|min:0',
-            'supplier_id' => 'nullable|exists:suppliers,id',
-        ]);
-
-        $before = $item->stockQuantity;
-
-        $item->price = $data['price'];
-        $item->stockQuantity = $data['stockQuantity'];
-        $item->expiry_date = $data['expiry_date'] ?? null;
-        $item->batch_number = $data['batch_number'] ?? null;
-        $item->lot_number = $data['lot_number'] ?? null;
-        $item->cold_chain = ! empty($data['cold_chain']);
-        $item->par_level = $data['par_level'] ?? 0;
-        $item->supplier_id = $data['supplier_id'] ?? null;
-        $item->save();
-
-        $item->recordAudit($before, $item->stockQuantity, 'Manual stock update');
-
-        // Broadcast real-time inventory update to public map & pharmacy channel
-        InventoryUpdated::dispatch(
-            $pharmacy->id,
-            $item->medicine_id,
-            $item->medicine->medicine_name ?? null,
-            (int) $item->stockQuantity,
-            (float) $item->price,
-            (bool) optional($item->medicine)->requiresPrescription
+    public function update(
+        UpdateMedicineRequest $request,
+        int|string $id,
+        MedicineMasterService $medicineMaster,
+    ) {
+        $aggregate = $medicineMaster->updateForPharmacy(
+            $request->aggregate(),
+            $request->medicineAttributes(),
+            $request->parLevel(),
         );
 
-        return redirect()->route('pharmacy.inventory')->with('success', 'Inventory item updated.');
+        return redirect()
+            ->route('pharmacy.inventory')
+            ->with('success', "{$aggregate->medicine->medicine_name} medicine details were updated. Batch stock was not changed.");
     }
 
-    public function destroy($id)
+    public function destroy(int|string $id)
     {
-        $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
+        $pharmacy = Pharmacy::query()->where('user_id', auth()->id())->first();
         if (! $pharmacy) {
             return redirect()->back()->with('error', 'No pharmacy assigned.');
         }
 
-        $item = InventoryItem::where('id', $id)->where('pharmacy_id', $pharmacy->id)->first();
-        if ($item) {
-            $medicineId = $item->medicine_id;
-            $medicineName = $item->medicine->medicine_name ?? null;
-            $price = (float) $item->price;
-            $prescription = (bool) optional($item->medicine)->requiresPrescription;
-            $item->delete();
-
-            // Broadcast real-time inventory update (stock 0) to public map & pharmacy channel
-            InventoryUpdated::dispatch(
-                $pharmacy->id,
-                $medicineId,
-                $medicineName,
-                0,
-                $price,
-                $prescription
-            );
-        }
-
-        return redirect()->route('pharmacy.inventory')->with('success', 'Inventory item deleted.');
-    }
-
-    public function export(Request $request)
-    {
-        $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
-        if (! $pharmacy) {
-            return redirect()->back()->with('error', 'No pharmacy assigned.');
-        }
-
-        $items = InventoryItem::with('medicine', 'supplier')
+        $item = InventoryItem::query()
+            ->with('medicine')
+            ->whereKey($id)
             ->where('pharmacy_id', $pharmacy->id)
-            ->get();
+            ->firstOrFail();
+
+        if ($item->batches()->exists() || $item->audits()->exists() || $item->stockMovements()->exists()) {
+            return redirect()->back()->with('error', 'Medicine inventory with batch or stock history cannot be deleted.');
+        }
+
+        $medicineId = $item->medicine_id;
+        $medicineName = $item->medicine?->medicine_name;
+        $prescription = (bool) $item->medicine?->requiresPrescription;
+        $item->delete();
+
+        InventoryUpdated::dispatch(
+            $pharmacy->id,
+            $medicineId,
+            $medicineName,
+            0,
+            0,
+            $prescription,
+        );
+
+        return redirect()->route('pharmacy.inventory')->with('success', 'Medicine was removed from this pharmacy catalog.');
+    }
+
+    public function export(Request $request, InventoryAggregateQuery $aggregateQuery)
+    {
+        $pharmacy = Pharmacy::query()->where('user_id', auth()->id())->first();
+        if (! $pharmacy) {
+            return redirect()->back()->with('error', 'No pharmacy assigned.');
+        }
+
+        $query = InventoryItem::query()
+            ->with('medicine')
+            ->withCount('batches')
+            ->where('pharmacy_id', $pharmacy->id)
+            ->orderBy('id');
+        $aggregateQuery->withProjections($query);
+        $items = $query->get();
 
         $filename = 'inventory_'.date('Y-m-d_His').'.csv';
-
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ];
 
-        $callback = function () use ($items) {
+        $callback = static function () use ($items): void {
             $out = fopen('php://output', 'w');
             fputcsv($out, [
                 'Generic Name', 'Brand Name', 'Dosage', 'Manufacturer', 'Category',
-                'Stock', 'Price', 'Batch', 'Lot', 'Expiry', 'Cold Chain',
-                'Par Level', 'Supplier', 'Segregation', 'ABC', 'VED', 'ABC-VED',
+                'Available Stock', 'Physical Stock', 'Representative Price', 'Batch Count',
+                'Nearest Valid Expiry', 'Cold Chain Required', 'Par Level',
+                'Segregation', 'ABC', 'VED', 'ABC-VED',
             ]);
 
             foreach ($items as $item) {
                 fputcsv($out, [
-                    optional($item->medicine)->medicine_name,
-                    optional($item->medicine)->brand_name,
-                    optional($item->medicine)->dosage,
-                    optional($item->medicine)->manufacturer,
-                    optional($item->medicine)->category,
-                    $item->stockQuantity,
-                    $item->price,
-                    $item->batch_number,
-                    $item->lot_number,
-                    optional($item->expiry_date)->format('Y-m-d'),
-                    $item->cold_chain ? 'Yes' : 'No',
+                    $item->medicine?->medicine_name,
+                    $item->medicine?->brand_name,
+                    $item->medicine?->dosage,
+                    $item->medicine?->manufacturer,
+                    $item->medicine?->category,
+                    $item->available_stock,
+                    $item->physical_stock,
+                    $item->representative_price,
+                    $item->batches_count,
+                    $item->nearest_valid_expiry?->format('Y-m-d'),
+                    $item->medicine?->cold_chain_required ? 'Yes' : 'No',
                     $item->par_level,
-                    optional($item->supplier)->name,
                     $item->segregation,
                     $item->abc_class,
                     $item->ved_class,
                     $item->abc_ved_class,
                 ]);
             }
+
             fclose($out);
         };
 

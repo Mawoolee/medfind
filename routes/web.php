@@ -1,14 +1,24 @@
 <?php
+
 // routes/web.php
 
-use App\Http\Controllers\ConsumerController;
-use App\Http\Controllers\PharmacyDashboardController;
 use App\Http\Controllers\AdminDashboardController;
-use App\Http\Controllers\MessageController;
-use App\Http\Controllers\InventoryController;
-use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\AdminInventoryController;
+use App\Http\Controllers\AnalysisController;
+use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\ConsumerController;
+use App\Http\Controllers\ControlledSubstanceController;
+use App\Http\Controllers\CycleCountController;
+use App\Http\Controllers\InventoryBatchController;
+use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PharmacyDashboardController;
+use App\Http\Controllers\PharmacyProfileController;
+use App\Http\Controllers\PharmacyRequirementsController;
+use App\Http\Controllers\ReceivingController;
+use App\Http\Controllers\ReturnRecallController;
+use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SurveyController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,7 +31,7 @@ Route::get('/', [ConsumerController::class, 'index'])->name('home');
 // DASHBOARD ROUTE (Redirects based on role)
 // ============================================
 Route::get('/dashboard', function () {
-    if (!auth()->check()) {
+    if (! auth()->check()) {
         return redirect()->route('login');
     }
 
@@ -81,7 +91,9 @@ Route::middleware(['auth', 'role:consumer'])->prefix('consumer')->name('consumer
     Route::get('/messages/{pharmacyId}', [MessageController::class, 'consumerChat'])->name('messages.chat');
     Route::get('/prescription/{message}', [MessageController::class, 'consumerPrescription'])->name('prescription.view');
     Route::get('/attachment/{message}/{index}', [MessageController::class, 'consumerAttachment'])->name('attachment.view');
-    Route::get('/profile', function() { return view('consumer.profile'); })->name('profile.settings');
+    Route::get('/profile', function () {
+        return view('consumer.profile');
+    })->name('profile.settings');
 });
 
 // ============================================
@@ -91,6 +103,7 @@ Route::middleware(['auth', 'role:pharmacy,pharmacy_operator', 'pharmacy.pending'
     Route::get('/dashboard', [PharmacyDashboardController::class, 'index'])->name('dashboard');
     // Inventory management (CRUD, search, pagination)
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory');
+    Route::get('/inventory/batches', [InventoryBatchController::class, 'index'])->name('inventory.batches');
     Route::get('/inventory/create', [InventoryController::class, 'create'])->name('inventory.create');
     Route::post('/inventory', [InventoryController::class, 'store'])->name('inventory.store');
     Route::get('/inventory/{id}/edit', [InventoryController::class, 'edit'])->name('inventory.edit');
@@ -100,15 +113,15 @@ Route::middleware(['auth', 'role:pharmacy,pharmacy_operator', 'pharmacy.pending'
     Route::post('/inventory/update', [PharmacyDashboardController::class, 'updateInventory'])->name('inventory.bulk-update');
 
     // Receiving & suppliers
-    Route::get('/receiving/create', [\App\Http\Controllers\ReceivingController::class, 'create'])->name('receiving.create');
-    Route::post('/receiving', [\App\Http\Controllers\ReceivingController::class, 'store'])->name('receiving.store');
+    Route::get('/receiving/create', [ReceivingController::class, 'create'])->name('receiving.create');
+    Route::post('/receiving', [ReceivingController::class, 'store'])->name('receiving.store');
 
-    Route::get('/suppliers', [\App\Http\Controllers\SupplierController::class, 'index'])->name('suppliers.index');
-    Route::get('/suppliers/create', [\App\Http\Controllers\SupplierController::class, 'create'])->name('suppliers.create');
-    Route::post('/suppliers', [\App\Http\Controllers\SupplierController::class, 'store'])->name('suppliers.store');
-    Route::get('/suppliers/{id}/edit', [\App\Http\Controllers\SupplierController::class, 'edit'])->name('suppliers.edit');
-    Route::put('/suppliers/{id}', [\App\Http\Controllers\SupplierController::class, 'update'])->name('suppliers.update');
-    Route::delete('/suppliers/{id}', [\App\Http\Controllers\SupplierController::class, 'destroy'])->name('suppliers.destroy');
+    Route::get('/suppliers', [SupplierController::class, 'index'])->name('suppliers.index');
+    Route::get('/suppliers/create', [SupplierController::class, 'create'])->name('suppliers.create');
+    Route::post('/suppliers', [SupplierController::class, 'store'])->name('suppliers.store');
+    Route::get('/suppliers/{id}/edit', [SupplierController::class, 'edit'])->name('suppliers.edit');
+    Route::put('/suppliers/{id}', [SupplierController::class, 'update'])->name('suppliers.update');
+    Route::delete('/suppliers/{id}', [SupplierController::class, 'destroy'])->name('suppliers.destroy');
     Route::get('/messages', [PharmacyDashboardController::class, 'messages'])->name('messages');
     Route::post('/message/reply/{id}', [PharmacyDashboardController::class, 'replyMessage'])->name('message.reply');
     Route::get('/message/mark-read/{id}', [PharmacyDashboardController::class, 'markRead'])->name('message.mark-read');
@@ -126,36 +139,36 @@ Route::middleware(['auth', 'role:pharmacy,pharmacy_operator', 'pharmacy.pending'
     Route::get('/attachment/{message}/{index}', [MessageController::class, 'pharmacyAttachment'])->name('attachment.view');
 
     // Inventory Analysis (ABC/VED)
-    Route::get('/analysis', [\App\Http\Controllers\AnalysisController::class, 'index'])->name('analysis');
+    Route::get('/analysis', [AnalysisController::class, 'index'])->name('analysis');
 
     // Cycle counts
-    Route::get('/cycle-counts', [\App\Http\Controllers\CycleCountController::class, 'index'])->name('cycle-counts.index');
-    Route::get('/cycle-counts/create', [\App\Http\Controllers\CycleCountController::class, 'create'])->name('cycle-counts.create');
-    Route::post('/cycle-counts', [\App\Http\Controllers\CycleCountController::class, 'store'])->name('cycle-counts.store');
-    Route::get('/cycle-counts/{id}/count', [\App\Http\Controllers\CycleCountController::class, 'show'])->name('cycle-counts.show');
-    Route::post('/cycle-counts/{id}/complete', [\App\Http\Controllers\CycleCountController::class, 'complete'])->name('cycle-counts.complete');
+    Route::get('/cycle-counts', [CycleCountController::class, 'index'])->name('cycle-counts.index');
+    Route::get('/cycle-counts/create', [CycleCountController::class, 'create'])->name('cycle-counts.create');
+    Route::post('/cycle-counts', [CycleCountController::class, 'store'])->name('cycle-counts.store');
+    Route::get('/cycle-counts/{id}/count', [CycleCountController::class, 'show'])->name('cycle-counts.show');
+    Route::post('/cycle-counts/{id}/complete', [CycleCountController::class, 'complete'])->name('cycle-counts.complete');
 
     // Returns & recalls
-    Route::get('/returns', [\App\Http\Controllers\ReturnRecallController::class, 'index'])->name('returns.index');
-    Route::get('/returns/create', [\App\Http\Controllers\ReturnRecallController::class, 'create'])->name('returns.create');
-    Route::post('/returns', [\App\Http\Controllers\ReturnRecallController::class, 'store'])->name('returns.store');
-    Route::post('/returns/{id}/status', [\App\Http\Controllers\ReturnRecallController::class, 'updateStatus'])->name('returns.status');
+    Route::get('/returns', [ReturnRecallController::class, 'index'])->name('returns.index');
+    Route::get('/returns/create', [ReturnRecallController::class, 'create'])->name('returns.create');
+    Route::post('/returns', [ReturnRecallController::class, 'store'])->name('returns.store');
+    Route::post('/returns/{id}/status', [ReturnRecallController::class, 'updateStatus'])->name('returns.status');
 
     // Controlled substance logbook
-    Route::get('/controlled-substances', [\App\Http\Controllers\ControlledSubstanceController::class, 'index'])->name('controlled-substances.index');
-    Route::get('/controlled-substances/log', [\App\Http\Controllers\ControlledSubstanceController::class, 'create'])->name('controlled-substances.create');
-    Route::post('/controlled-substances/log', [\App\Http\Controllers\ControlledSubstanceController::class, 'store'])->name('controlled-substances.store');
+    Route::get('/controlled-substances', [ControlledSubstanceController::class, 'index'])->name('controlled-substances.index');
+    Route::get('/controlled-substances/log', [ControlledSubstanceController::class, 'create'])->name('controlled-substances.create');
+    Route::post('/controlled-substances/log', [ControlledSubstanceController::class, 'store'])->name('controlled-substances.store');
 
     // Inventory audit log
     Route::get('/audit-log', [AuditLogController::class, 'index'])->name('audit-log');
 
     // Pharmacy profile
-    Route::get('/profile', [\App\Http\Controllers\PharmacyProfileController::class, 'edit'])->name('profile.edit');
-    Route::put('/profile', [\App\Http\Controllers\PharmacyProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile', [PharmacyProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [PharmacyProfileController::class, 'update'])->name('profile.update');
 
     // Requirements upload
-    Route::get('/requirements', [\App\Http\Controllers\PharmacyRequirementsController::class, 'show'])->name('requirements');
-    Route::post('/requirements', [\App\Http\Controllers\PharmacyRequirementsController::class, 'store'])->name('requirements.store');
+    Route::get('/requirements', [PharmacyRequirementsController::class, 'show'])->name('requirements');
+    Route::post('/requirements', [PharmacyRequirementsController::class, 'store'])->name('requirements.store');
 
     // Inventory CSV export
     Route::get('/inventory/export', [InventoryController::class, 'export'])->name('inventory.export');
@@ -167,7 +180,7 @@ Route::middleware(['auth', 'role:pharmacy,pharmacy_operator', 'pharmacy.pending'
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
-// Users
+    // Users
     Route::get('/users', [AdminDashboardController::class, 'users'])->name('users');
     Route::get('/user/{user}/edit', [AdminDashboardController::class, 'editUser'])->name('user.edit');
     Route::put('/user/{user}', [AdminDashboardController::class, 'updateUser'])->name('user.update');
@@ -190,7 +203,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('/medicine/{medicine}', [AdminDashboardController::class, 'updateMedicine'])->name('medicine.update');
     Route::delete('/medicine/{medicine}', [AdminDashboardController::class, 'destroyMedicine'])->name('medicine.delete');
 
-// Logs
+    // Logs
     Route::get('/logs', [AdminDashboardController::class, 'logs'])->name('logs');
 
     // Activity Log
@@ -209,4 +222,3 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Serve a private requirement file securely
     Route::get('/pharmacy/{pharmacy}/requirement/{key}', [AdminDashboardController::class, 'serveRequirement'])->name('requirement.file');
 });
-

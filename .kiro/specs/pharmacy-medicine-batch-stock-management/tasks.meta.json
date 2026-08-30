@@ -13,9 +13,8 @@
       "lastRunTimestamp": 1788021050234
     },
     "3.10 Write Property 1 test: Medicine edits preserve batch stock": {
-      "status": "failed",
-      "failingExample": "Fatal error: Allowed memory size of 536870912 bytes exhausted (tried to allocate 32768 bytes) in  on line 1\nFatal error: Allowed memory size of 536870912 bytes exhausted (tried to allocate 32768 bytes) in C:\\medfind\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Exceptions\\Handler.php on line 1",
-      "lastRunTimestamp": 1788021222051
+      "status": "passed",
+      "lastRunTimestamp": 1788025764105
     }
   },
   "executionHistory": {}

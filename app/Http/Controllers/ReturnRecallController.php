@@ -2,108 +2,118 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Pharmacy;
+use App\Domain\Inventory\BatchStockService;
+use App\Domain\Inventory\Data\StockOperationContext;
+use App\Domain\Inventory\Exceptions\InsufficientAvailableStock;
+use App\Domain\Inventory\InventoryAggregateQuery;
 use App\Models\InventoryItem;
+use App\Models\Pharmacy;
 use App\Models\ReturnRecall;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ReturnRecallController extends Controller
 {
     public function index()
     {
-        $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
-        if (!$pharmacy) {
+        $pharmacy = Pharmacy::query()->where('user_id', auth()->id())->first();
+        if (! $pharmacy) {
             return redirect()->back()->with('error', 'No pharmacy assigned.');
         }
 
-        $records = ReturnRecall::with(['inventoryItem.medicine', 'requestedBy'])
-            ->whereHas('inventoryItem', function ($q) use ($pharmacy) {
-                $q->where('pharmacy_id', $pharmacy->id);
-            })
-            ->orderBy('created_at', 'desc')
+        $records = ReturnRecall::query()
+            ->with(['inventoryItem.medicine', 'requestedBy'])
+            ->whereHas('inventoryItem', fn ($query) => $query->where('pharmacy_id', $pharmacy->id))
+            ->orderByDesc('created_at')
             ->get();
 
         return view('pharmacy.returns_index', compact('pharmacy', 'records'));
     }
 
-    public function create()
+    public function create(InventoryAggregateQuery $aggregateQuery)
     {
-        $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
-        if (!$pharmacy) {
+        $pharmacy = Pharmacy::query()->where('user_id', auth()->id())->first();
+        if (! $pharmacy) {
             return redirect()->back()->with('error', 'No pharmacy assigned.');
         }
 
-        $inventory = InventoryItem::with('medicine')
+        $query = InventoryItem::query()
+            ->with('medicine')
             ->where('pharmacy_id', $pharmacy->id)
-            ->orderBy('created_at', 'desc')
-            ->get();
+            ->orderByDesc('updated_at');
+        $aggregateQuery->withProjections($query);
+        $inventory = $query->get();
 
         return view('pharmacy.returns_create', compact('pharmacy', 'inventory'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request, BatchStockService $stockService)
     {
-        $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
-        if (!$pharmacy) {
+        $pharmacy = Pharmacy::query()->where('user_id', auth()->id())->first();
+        if (! $pharmacy) {
             return redirect()->back()->with('error', 'No pharmacy assigned.');
         }
 
         $data = $request->validate([
-            'inventory_item_id' => 'required|exists:inventory_items,id',
-            'type' => 'required|in:return,recall',
-            'quantity' => 'required|integer|min:1',
-            'reason' => 'nullable|string',
+            'inventory_item_id' => ['required', 'exists:inventory_items,id'],
+            'type' => ['required', 'in:return,recall'],
+            'quantity' => ['required', 'integer', 'min:1'],
+            'reason' => ['nullable', 'string'],
         ]);
-
-        $item = InventoryItem::where('id', $data['inventory_item_id'])
+        $item = InventoryItem::query()
+            ->whereKey($data['inventory_item_id'])
             ->where('pharmacy_id', $pharmacy->id)
             ->firstOrFail();
 
-        if ($data['quantity'] > $item->stockQuantity) {
-            return redirect()->back()->with('error', 'Quantity exceeds current stock.')->withInput();
+        try {
+            DB::transaction(function () use ($request, $stockService, $data, $item): void {
+                $record = ReturnRecall::query()->create([
+                    'inventory_item_id' => $item->id,
+                    'type' => $data['type'],
+                    'quantity' => (int) $data['quantity'],
+                    'reason' => $data['reason'] ?? null,
+                    'status' => 'pending',
+                    'requested_by' => $request->user()->id,
+                ]);
+                $stockService->decreaseFefo(
+                    $item,
+                    (int) $data['quantity'],
+                    new StockOperationContext(
+                        type: 'fefo_decrease',
+                        actorId: $request->user()->id,
+                        reason: 'Return/Recall ('.$data['type'].')'.(! empty($data['reason']) ? ': '.$data['reason'] : ''),
+                        referenceType: 'return_recall',
+                        referenceId: $record->id,
+                        operationId: (string) Str::uuid(),
+                    ),
+                );
+            });
+        } catch (InsufficientAvailableStock $exception) {
+            return redirect()->back()
+                ->withErrors(['quantity' => "Quantity exceeds available stock ({$exception->available})."])
+                ->withInput();
         }
 
-        DB::transaction(function () use ($data, $item) {
-            $rr = ReturnRecall::create([
-                'inventory_item_id' => $item->id,
-                'type' => $data['type'],
-                'quantity' => $data['quantity'],
-                'reason' => $data['reason'] ?? null,
-                'status' => 'pending',
-                'requested_by' => auth()->id(),
-            ]);
-
-            // Decrement stock immediately (pending confirmation).
-            $before = $item->stockQuantity;
-            $item->stockQuantity -= $data['quantity'];
-            $item->save();
-            $item->recordAudit($before, $item->stockQuantity, 'Return/Recall (' . $data['type'] . ')');
-        });
-
-        return redirect()->route('pharmacy.returns.index')
-            ->with('success', (strtoupper($data['type']) === 'RECALL' ? 'Recall' : 'Return') . ' recorded. Stock adjusted.');
+        return redirect()
+            ->route('pharmacy.returns.index')
+            ->with('success', ucfirst($data['type']).' recorded. Stock was deducted from batches in FEFO order.');
     }
 
-    public function updateStatus(Request $request, $id)
+    public function updateStatus(Request $request, int|string $id)
     {
-        $pharmacy = Pharmacy::where('user_id', auth()->id())->first();
-        if (!$pharmacy) {
+        $pharmacy = Pharmacy::query()->where('user_id', auth()->id())->first();
+        if (! $pharmacy) {
             return redirect()->back()->with('error', 'No pharmacy assigned.');
         }
 
-        $record = ReturnRecall::where('id', $id)->first();
-        if (!$record || $record->inventoryItem->pharmacy_id != $pharmacy->id) {
-            return redirect()->back()->with('error', 'Record not found.');
-        }
+        $record = ReturnRecall::query()
+            ->whereKey($id)
+            ->whereHas('inventoryItem', fn ($query) => $query->where('pharmacy_id', $pharmacy->id))
+            ->firstOrFail();
+        $data = $request->validate(['status' => ['required', 'in:pending,approved,completed,rejected']]);
+        $record->update(['status' => $data['status']]);
 
-        $data = $request->validate([
-            'status' => 'required|in:pending,approved,completed,rejected',
-        ]);
-
-        $record->status = $data['status'];
-        $record->save();
-
-        return redirect()->back()->with('success', 'Status updated to ' . ucfirst($data['status']) . '.');
+        return redirect()->back()->with('success', 'Status updated to '.ucfirst($data['status']).'.');
     }
 }

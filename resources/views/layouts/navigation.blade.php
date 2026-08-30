@@ -2,9 +2,9 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             {{-- Logo --}}
-            <div class="flex items-center">
-                <a href="{{ route('home') }}" class="flex items-center gap-2">
-                    <img src="{{ asset('images/Final Logo MedFind.png') }}" alt="MedFind" class="h-12 w-12 object-contain" width="48" height="48">
+            <div class="flex min-w-0 items-center">
+                <a href="{{ route('home') }}" class="relative block h-16 w-24 shrink-0 overflow-hidden sm:w-32 lg:w-36" aria-label="MedFind home">
+                    <img src="{{ asset('images/Final Logo MedFind.png') }}" alt="MedFind" class="absolute left-0 top-1/2 h-auto w-full max-w-none -translate-y-1/2" width="2000" height="2000">
                 </a>
             </div>
 

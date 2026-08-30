@@ -67,10 +67,12 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('controlled_substance_logs', function (Blueprint $table) {
+            $table->dropIndex(['operation_id']);
             $table->dropColumn('operation_id');
         });
 
         Schema::table('inventory_audits', function (Blueprint $table) {
+            $table->dropIndex(['operation_id']);
             $table->dropColumn('operation_id');
         });
 

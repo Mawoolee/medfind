@@ -50,6 +50,28 @@ final class InventoryAggregateQuery
         ]);
     }
 
+    public function orderByNearestValidExpiry(Builder $query, ?CarbonImmutable $asOf = null): Builder
+    {
+        $date = $this->asOf($asOf)->toDateString();
+        $nearestValidExpiry = InventoryBatch::query()
+            ->select('expiry_date')
+            ->whereColumn('inventory_item_id', 'inventory_items.id')
+            ->where('current_quantity', '>', 0)
+            ->whereNotNull('expiry_date')
+            ->whereDate('expiry_date', '>=', $date)
+            ->orderBy('expiry_date')
+            ->orderBy('received_date')
+            ->orderBy('id')
+            ->limit(1);
+
+        return $query
+            ->orderByRaw(
+                "CASE WHEN ({$nearestValidExpiry->toSql()}) IS NULL THEN 1 ELSE 0 END",
+                $nearestValidExpiry->getBindings()
+            )
+            ->orderBy('nearest_valid_expiry');
+    }
+
     public function withRepresentativePrice(Builder $query, ?CarbonImmutable $asOf = null): Builder
     {
         $this->ensureBaseColumns($query);

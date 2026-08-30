@@ -13,6 +13,11 @@ final class Property2MedicineMasterRoundTripTest extends PropertyTestCase
 {
     use RefreshDatabase;
 
+    protected function shouldSeed(): bool
+    {
+        return false;
+    }
+
     /** **Validates: Requirements 2.1, 2.2** */
     public function test_medicine_master_fields_round_trip_through_storage(): void
     {
