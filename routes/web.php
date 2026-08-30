@@ -18,6 +18,7 @@ use App\Http\Controllers\PharmacyProfileController;
 use App\Http\Controllers\PharmacyRequirementsController;
 use App\Http\Controllers\ReceivingController;
 use App\Http\Controllers\ReturnRecallController;
+use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SurveyController;
 use Illuminate\Support\Facades\Route;
@@ -115,6 +116,10 @@ Route::middleware(['auth', 'role:pharmacy,pharmacy_operator', 'pharmacy.pending'
     // Receiving & suppliers
     Route::get('/receiving/create', [ReceivingController::class, 'create'])->name('receiving.create');
     Route::post('/receiving', [ReceivingController::class, 'store'])->name('receiving.store');
+
+    // Basic sales (stock deduction only)
+    Route::get('/sales/create', [SaleController::class, 'create'])->name('sales.create');
+    Route::post('/sales', [SaleController::class, 'store'])->name('sales.store');
 
     Route::get('/suppliers', [SupplierController::class, 'index'])->name('suppliers.index');
     Route::get('/suppliers/create', [SupplierController::class, 'create'])->name('suppliers.create');

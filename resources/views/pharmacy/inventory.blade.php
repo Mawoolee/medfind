@@ -14,7 +14,7 @@
             <a href="{{ route('pharmacy.receiving.create') }}" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded text-sm"><i class="fas fa-truck-ramp-box mr-1"></i>Add Stock</a>
             <a href="{{ route('pharmacy.inventory.batches') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded text-sm"><i class="fas fa-layer-group mr-1"></i>View Stock Batches</a>
             <a href="{{ route('pharmacy.inventory.export') }}" class="bg-gray-700 hover:bg-gray-800 text-white px-3 py-2 rounded text-sm"><i class="fas fa-file-csv mr-1"></i>Export CSV</a>
-            <a href="{{ route('pharmacy.dashboard') }}" class="text-blue-600 hover:text-blue-800 px-2 py-2 text-sm">Back to Dashboard</a>
+            <x-back-button :href="route('pharmacy.dashboard')" label="Back to Pharmacy Dashboard" />
         </div>
     </div>
 
@@ -33,8 +33,8 @@
                 </div>
                 <select name="category" class="px-3 py-2 border border-gray-300 rounded">
                     <option value="">All Categories</option>
-                    @foreach($categories as $cat)
-                        <option value="{{ $cat }}" {{ $category === $cat ? 'selected' : '' }}>{{ ucfirst($cat) }}</option>
+                    @foreach($categoryOptions as $value => $label)
+                        <option value="{{ $value }}" {{ $category === $value ? 'selected' : '' }}>{{ $label }}</option>
                     @endforeach
                 </select>
                 <select name="stock" class="px-3 py-2 border border-gray-300 rounded">
@@ -52,19 +52,14 @@
                     <option value="low" {{ $sort === 'low' ? 'selected' : '' }}>Stock: Low to High</option>
                     <option value="high" {{ $sort === 'high' ? 'selected' : '' }}>Stock: High to Low</option>
                 </select>
-                <div class="flex items-center gap-2">
-                    <label class="flex items-center text-sm text-gray-600 whitespace-nowrap">
-                        <input type="checkbox" name="cold_chain" value="1" {{ $coldChain !== '' ? 'checked' : '' }} class="mr-1"> Cold Chain
-                    </label>
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm">Filter</button>
-                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm">Filter</button>
             </form>
             <p id="inventorySearchResultCount" class="mt-3 text-sm text-gray-500">Showing {{ $inventory->total() }} medicine(s).</p>
             <script>window.inventoryMedicineNames = @json($inventoryMedicineNames);</script>
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full min-w-[1050px]">
+            <table class="w-full min-w-[950px]">
                 <thead>
                     <tr class="bg-gray-50 text-left text-sm text-gray-600">
                         <th class="px-4 py-3">Medicine</th>
@@ -72,7 +67,6 @@
                         <th class="px-4 py-3">Total Available</th>
                         <th class="px-4 py-3">Par Level</th>
                         <th class="px-4 py-3">Nearest Valid Expiry</th>
-                        <th class="px-4 py-3">Batches</th>
                         <th class="px-4 py-3">Current Price</th>
                         <th class="px-4 py-3">Status</th>
                         <th class="px-4 py-3">Actions</th>
@@ -113,7 +107,6 @@
                                     <span class="text-gray-400">No dated available batch</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3"><span class="font-semibold">{{ $item->batches_count }}</span></td>
                             <td class="px-4 py-3">₱{{ number_format((float) $item->representative_price, 2) }}</td>
                             <td class="px-4 py-3">
                                 @if($isOut)
@@ -133,7 +126,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="9" class="px-4 py-10 text-center text-gray-500">No medicines found. Add a medicine master to get started.</td></tr>
+                        <tr><td colspan="8" class="px-4 py-10 text-center text-gray-500">No medicines found. Add a medicine master to get started.</td></tr>
                     @endforelse
                 </tbody>
             </table>

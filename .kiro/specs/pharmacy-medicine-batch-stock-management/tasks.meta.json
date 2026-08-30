@@ -15,6 +15,22 @@
     "3.10 Write Property 1 test: Medicine edits preserve batch stock": {
       "status": "passed",
       "lastRunTimestamp": 1788025764105
+    },
+    "3.17 Write Property 8 test: Aggregate quantity and status projection": {
+      "status": "passed",
+      "lastRunTimestamp": 1788062764055
+    },
+    "3.19 Write Property 10 test: Nearest valid expiry follows FEFO": {
+      "status": "passed",
+      "lastRunTimestamp": 1788062766570
+    },
+    "3.18 Write Property 9 test: Representative price is deterministic": {
+      "status": "passed",
+      "lastRunTimestamp": 1788062775356
+    },
+    "11.2 Write Property 21 test: Basic sales are atomic FEFO operations": {
+      "status": "passed",
+      "lastRunTimestamp": 1788067781875
     }
   },
   "executionHistory": {}

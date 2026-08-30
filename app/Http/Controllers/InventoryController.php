@@ -10,6 +10,7 @@ use App\Models\InventoryItem;
 use App\Models\Medicine;
 use App\Models\Pharmacy;
 use App\Services\MedicineMasterService;
+use App\Support\MedicineCategory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
@@ -23,14 +24,12 @@ class InventoryController extends Controller
         }
 
         $q = (string) $request->query('q', '');
-        $category = (string) $request->query('category', '');
+        $category = MedicineCategory::optionValue((string) $request->query('category', ''));
         $sort = (string) $request->query('sort', 'recent');
         $stock = (string) $request->query('stock', '');
-        $coldChain = (string) $request->query('cold_chain', '');
 
         $query = InventoryItem::query()
             ->with('medicine')
-            ->withCount('batches')
             ->where('pharmacy_id', $pharmacy->id);
         $aggregateQuery->withProjections($query);
 
@@ -45,15 +44,8 @@ class InventoryController extends Controller
         }
 
         if ($category !== '') {
-            $query->whereHas('medicine', fn (Builder $medicine) => $medicine->where('category', $category));
-        }
-
-        if ($coldChain !== '') {
-            $query->where(function (Builder $inventory): void {
-                $inventory
-                    ->whereHas('medicine', fn (Builder $medicine) => $medicine->where('cold_chain_required', true))
-                    ->orWhereHas('batches', fn (Builder $batch) => $batch->available()->where('cold_chain', true));
-            });
+            $query->whereHas('medicine', fn (Builder $medicine) => $medicine
+                ->whereRaw('LOWER(TRIM(category)) = LOWER(TRIM(?))', [$category]));
         }
 
         match ($stock) {
@@ -86,14 +78,12 @@ class InventoryController extends Controller
             ->values()
             ->all();
 
-        $categories = Medicine::query()
-            ->whereIn('id', InventoryItem::query()->where('pharmacy_id', $pharmacy->id)->pluck('medicine_id'))
+        $storedCategories = Medicine::query()
+            ->whereIn('id', InventoryItem::query()->where('pharmacy_id', $pharmacy->id)->select('medicine_id'))
             ->whereNotNull('category')
             ->orderBy('category')
-            ->pluck('category')
-            ->unique()
-            ->values()
-            ->all();
+            ->pluck('category');
+        $categoryOptions = MedicineCategory::optionsWithCustom($storedCategories);
 
         return view('pharmacy.inventory', compact(
             'pharmacy',
@@ -103,8 +93,7 @@ class InventoryController extends Controller
             'category',
             'sort',
             'stock',
-            'coldChain',
-            'categories'
+            'categoryOptions'
         ));
     }
 
@@ -128,7 +117,7 @@ class InventoryController extends Controller
                     'medicine_name' => $medicine->medicine_name,
                     'brand_name' => $medicine->brand_name,
                     'dosage' => $medicine->dosage,
-                    'category' => $medicine->category,
+                    'category' => MedicineCategory::optionValue($medicine->category),
                     'manufacturer' => $medicine->manufacturer,
                     'requires_prescription' => (bool) $medicine->requiresPrescription,
                     'cold_chain_required' => (bool) $medicine->cold_chain_required,
@@ -137,7 +126,16 @@ class InventoryController extends Controller
             ];
         });
 
-        return view('pharmacy.inventory_create', compact('pharmacy', 'medicines', 'medicineAutofill'));
+        $categoryOptions = MedicineCategory::optionsWithCustom([old('category')]);
+        $selectedCategory = MedicineCategory::optionValue(old('category'));
+
+        return view('pharmacy.inventory_create', compact(
+            'pharmacy',
+            'medicines',
+            'medicineAutofill',
+            'categoryOptions',
+            'selectedCategory'
+        ));
     }
 
     public function store(StoreMedicineRequest $request, MedicineMasterService $medicineMaster)
@@ -166,8 +164,18 @@ class InventoryController extends Controller
             ->where('pharmacy_id', $pharmacy->id);
         $aggregateQuery->withProjections($query);
         $item = $query->firstOrFail();
+        $selectedCategory = MedicineCategory::optionValue(old('category', $item->medicine->category));
+        $categoryOptions = MedicineCategory::optionsWithCustom([
+            $item->medicine->category,
+            old('category'),
+        ]);
 
-        return view('pharmacy.inventory_edit', compact('pharmacy', 'item'));
+        return view('pharmacy.inventory_edit', compact(
+            'pharmacy',
+            'item',
+            'categoryOptions',
+            'selectedCategory'
+        ));
     }
 
     public function update(

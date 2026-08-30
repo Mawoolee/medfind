@@ -9,7 +9,7 @@
             <h1 class="text-2xl font-bold text-gray-800">Edit Medicine</h1>
             <p class="text-sm text-gray-500 mt-1">This page changes product identity and par level only. Existing batches are preserved.</p>
         </div>
-        <a href="{{ route('pharmacy.inventory') }}" class="text-blue-600 hover:text-blue-800"><i class="fas fa-arrow-left mr-2"></i>Back</a>
+        <x-back-button :href="route('pharmacy.inventory')" label="Back to Inventory" />
     </div>
 
     @if(session('error'))
@@ -55,8 +55,8 @@
                     <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
                     <select id="category" name="category" class="mt-1 block w-full border border-gray-300 rounded px-3 py-2">
                         <option value="">-- Select --</option>
-                        @foreach(['analgesic' => 'Analgesic', 'antibiotic' => 'Antibiotic', 'antidiarrheal' => 'Antidiarrheal', 'antihistamine' => 'Antihistamine', 'nsaid' => 'NSAID', 'controlled' => 'Controlled', 'vitamin' => 'Vitamin', 'supplement' => 'Supplement', 'other' => 'Other'] as $value => $label)
-                            <option value="{{ $value }}" {{ old('category', $item->medicine->category) === $value ? 'selected' : '' }}>{{ $label }}</option>
+                        @foreach($categoryOptions as $value => $label)
+                            <option value="{{ $value }}" {{ $selectedCategory === $value ? 'selected' : '' }}>{{ $label }}</option>
                         @endforeach
                     </select>
                 </div>

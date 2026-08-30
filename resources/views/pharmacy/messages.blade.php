@@ -9,9 +9,7 @@
     <div class="w-96 flex-shrink-0 border-r flex flex-col" style="background:#191970;border-color:rgba(148,0,211,0.3);">
         <div class="px-5 py-4 border-b flex items-center justify-between" style="border-color:rgba(148,0,211,0.3);">
             <h2 class="text-white font-bold text-lg">Messages</h2>
-            <a href="{{ route('pharmacy.dashboard') }}" class="text-gray-400 hover:text-[#D9F855] text-sm transition">
-                <i class="fas fa-arrow-left mr-1"></i> Back
-            </a>
+            <x-back-button :href="route('pharmacy.dashboard')" label="Back to Pharmacy Dashboard" class="shrink-0 bg-[#191970] hover:!bg-white" />
         </div>
         <div class="flex-1 overflow-y-auto">
             @php $grouped = $messages->groupBy('consumer_id'); @endphp

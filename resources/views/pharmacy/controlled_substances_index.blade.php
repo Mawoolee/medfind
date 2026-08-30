@@ -11,9 +11,7 @@
                class="bg-[#9400D3] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#7a00b0] transition">
                 <i class="fas fa-plus mr-2"></i>Log Entry
             </a>
-            <a href="{{ route('pharmacy.dashboard') }}" class="text-[#9400D3] hover:text-[#7a00b0] text-sm font-medium">
-                <i class="fas fa-arrow-left mr-2"></i>Back
-            </a>
+            <x-back-button :href="route('pharmacy.dashboard')" label="Back to Pharmacy Dashboard" />
         </div>
     </div>
 

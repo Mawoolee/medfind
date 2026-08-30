@@ -333,6 +333,58 @@ Implement the redesign incrementally in PHP 8.2+/Laravel 12. Preserve `Inventory
   - Review `git status --short` and the complete diff to confirm unrelated uncommitted Railway, PostgreSQL, Reverb, JavaScript, layout, and prepared form changes remain intact.
   - Ensure all tests pass, ask the user if questions arise.
 
+- [x] 11. Implement the approved Basic Record Sale workflow
+  - [x] 11.1 Add and verify Basic Record Sale stock deduction
+    - Add the fifth dashboard inventory action, named pharmacy sale routes, scoped request/controller/service, and responsive repeatable-row Blade form.
+    - Process all rows in one transaction through `FEFOAllocator`, with duplicate prevention, pharmacy isolation, actionable insufficiency, one operation ID/reference/actor, synchronized aggregates, and no POS scope or manual batch input.
+    - Add focused service and feature coverage for routes/UI, validation recovery, multi-line FEFO allocation, ledger correlation, ownership, and rollback.
+    - Dependencies: existing FEFOAllocator and stock ledger implementation; do not execute any other incomplete task.
+    - _Requirements: 14.1-14.10_
+  - [x] 11.2 Write Property 21 test: Basic sales are atomic FEFO operations
+    - **Property 21: Basic sales are atomic FEFO operations**
+    - Exercise generated multi-item quantities and verify exact deductions plus shared operation/reference/actor metadata.
+    - Dependencies: 11.1.
+    - **Validates: Requirements 14.3-14.8**
+  - [x] 11.3 Make every Record Sale Medicine selector searchable
+    - Progressively enhance the named scoped aggregate select with a dependency-free accessible combobox that searches generic name, brand, dosage, and available-stock text while submitting only an explicit option ID.
+    - Support pointer and keyboard selection, invalid-edit clearing, click-away dismissal, no-results feedback, unique dynamic-row IDs, restored validation state, removal/renumbering, and focused rendered-contract coverage.
+    - Dependencies: 11.1; do not execute any other incomplete task.
+    - _Requirements: 14.2, 14.3, 14.9, 14.11_
+  - [x] 11.4 Prioritize Record Sale in the dashboard action grid
+    - Order all eight cards with Record Sale first beside Manage Inventory and use four XL columns while preserving one phone column, two medium columns, and every existing card action.
+    - Add focused dashboard assertions for the complete order and responsive grid classes.
+    - Dependencies: 11.1; do not execute any other incomplete task.
+    - _Requirements: 14.1_
+  - [x] 11.5 Standardize dashboard action buttons and statistic colors
+    - Apply one full-width, centered, wrapping-safe Admin-style size and appearance contract to all eight action links without changing their colors, content, routes, order, badge, or responsive grid.
+    - Replace dynamic statistic color interpolation with explicit matching value/icon classes and add focused dashboard contract coverage.
+    - Dependencies: 11.4; do not execute any other incomplete task.
+    - _Requirements: 14.1, 14.12_
+
+- [x] 12. Unify medicine category catalogs and inventory filtering
+  - Introduce one canonical category source for Add/Edit Medicine and Manage Inventory; merge only the authenticated pharmacy's nonblank custom values, deduplicate case-insensitively, preserve custom selections, and use portable case-insensitive filtering.
+  - Add focused unit and feature coverage for canonical rendering, tenant isolation, deduplication, legacy casing, custom filtering, and Add/Edit selection.
+  - Dependencies: existing InventoryController medicine management; do not execute any other incomplete task.
+  - _Requirements: 5.11-5.13_
+
+- [x] 13. Remove the cold-chain filter from Manage Inventory
+  - Remove only the visible list control and its legacy query behavior while retaining search, category, stock, sort, and all cold-chain domain fields and workflows.
+  - Add focused feature coverage proving the control is absent and old bookmarked query parameters no longer narrow inventory.
+  - Dependencies: existing aggregate inventory list; do not execute any other incomplete task.
+  - _Requirements: 5.1, 5.10, 13.1_
+
+- [x] 14. Remove aggregate batch counts from Manage Inventory
+  - Remove the Batches count column and index count query while retaining View Batches actions, batch traceability workflows, and aggregate CSV Batch Count output.
+  - Add focused inventory feature coverage for the main page and export contract.
+  - Dependencies: existing aggregate inventory list and batch pages; do not execute any other incomplete task.
+  - _Requirements: 5.2, 5.3, 9.5, 13.1_
+
+- [x] 15. Standardize standalone pharmacy Back navigation
+  - Add one reusable accessible MedFind-purple left-arrow and `Back` Blade component, then use deterministic named parent routes on every standalone pharmacy page while excluding the Pharmacy Dashboard root.
+  - Preserve separate form `Cancel` actions and add static inventory, component-contract, and representative rendered-route coverage.
+  - Dependencies: existing pharmacy pages and named routes; do not execute any other incomplete task.
+  - _Requirements: 11.8, 13.1_
+
 ## Notes
 
 - No task is optional; every implementation and test item is required for this redesign.

@@ -7,11 +7,20 @@
     <div class="flex items-center justify-between mb-6">
         <div>
             <h1 class="text-2xl font-bold text-gray-800">📋 Inventory Audit Log</h1>
-            <p class="text-sm text-gray-500 mt-1">Every stock change recorded — who changed what, when, and by how much.</p>
+            <p class="text-sm text-gray-500 mt-1">Every available-stock change recorded — who changed what, when, and by how much.</p>
         </div>
-        <a href="{{ route('pharmacy.inventory') }}" class="text-[#9400D3] hover:text-[#7a00b0] text-sm font-medium">
-            <i class="fas fa-arrow-left mr-2"></i>Back to Inventory
-        </a>
+        <x-back-button :href="route('pharmacy.dashboard')" label="Back to Pharmacy Dashboard" />
+    </div>
+
+    {{-- What the recorded quantities actually measure --}}
+    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6 flex items-start gap-3">
+        <i class="fas fa-circle-info text-amber-500 mt-0.5"></i>
+        <p class="text-sm text-amber-800 leading-relaxed">
+            These figures are <span class="font-semibold">available stock</span> — the quantity across batches that have
+            <span class="font-semibold">not expired</span>. They are not physical stock, so expired units still on the shelf are excluded.
+            A decrease can therefore mean a batch reached its expiry date rather than stock being dispensed or removed.
+            Check the notes column for the reason behind each change.
+        </p>
     </div>
 
     {{-- Filters --}}
@@ -49,35 +58,47 @@
                 </a>
             @endif
         </form>
+        <p class="text-xs text-gray-400 mt-3">
+            Date filters use pharmacy local time ({{ config('app.timezone') }}) and cover the whole selected day.
+        </p>
     </div>
 
-    {{-- Summary Cards --}}
+    {{-- Summary Cards (pharmacy-wide, not affected by the filters above) --}}
+    <div class="flex flex-wrap items-baseline justify-between gap-2 mb-2">
+        <h2 class="text-sm font-semibold text-gray-600 uppercase tracking-wide">Pharmacy-wide totals</h2>
+        <p class="text-xs text-gray-400">
+            <i class="fas fa-info-circle mr-1"></i>All entries for this pharmacy — the filters above do not change these numbers.
+        </p>
+    </div>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 flex items-center gap-4">
-            <div class="w-10 h-10 rounded-full bg-[#9400D3]/10 flex items-center justify-center">
+            <div class="w-10 h-10 rounded-full bg-[#9400D3]/10 flex items-center justify-center shrink-0">
                 <i class="fas fa-history text-[#9400D3]"></i>
             </div>
             <div>
                 <p class="text-xs text-gray-500">Total Entries</p>
                 <p class="text-xl font-bold text-gray-800">{{ number_format($totalCount) }}</p>
+                <p class="text-[11px] text-gray-400">All dates, unfiltered</p>
             </div>
         </div>
         <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 flex items-center gap-4">
-            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center shrink-0">
                 <i class="fas fa-arrow-up text-green-600"></i>
             </div>
             <div>
-                <p class="text-xs text-gray-500">Stock Increases</p>
+                <p class="text-xs text-gray-500">Available Stock Increases</p>
                 <p class="text-xl font-bold text-green-700">{{ number_format($increaseCount) }}</p>
+                <p class="text-[11px] text-gray-400">All dates, unfiltered</p>
             </div>
         </div>
         <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 flex items-center gap-4">
-            <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+            <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
                 <i class="fas fa-arrow-down text-red-600"></i>
             </div>
             <div>
-                <p class="text-xs text-gray-500">Stock Decreases</p>
+                <p class="text-xs text-gray-500">Available Stock Decreases</p>
                 <p class="text-xl font-bold text-red-700">{{ number_format($decreaseCount) }}</p>
+                <p class="text-[11px] text-gray-400">All dates, unfiltered</p>
             </div>
         </div>
     </div>
@@ -88,11 +109,20 @@
             <table class="w-full">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200 text-left text-xs uppercase tracking-wide text-gray-500">
-                        <th class="px-4 py-3">Date & Time</th>
+                        <th class="px-4 py-3">Date &amp; Time</th>
                         <th class="px-4 py-3">Medicine</th>
-                        <th class="px-4 py-3">Before</th>
-                        <th class="px-4 py-3">After</th>
-                        <th class="px-4 py-3">Change</th>
+                        <th class="px-4 py-3">
+                            Available Before
+                            <span class="block font-normal normal-case tracking-normal text-[10px] text-gray-400">Expired batches excluded</span>
+                        </th>
+                        <th class="px-4 py-3">
+                            Available After
+                            <span class="block font-normal normal-case tracking-normal text-[10px] text-gray-400">Expired batches excluded</span>
+                        </th>
+                        <th class="px-4 py-3">
+                            Change in Available
+                            <span class="block font-normal normal-case tracking-normal text-[10px] text-gray-400">May be expiry, not a dispense</span>
+                        </th>
                         <th class="px-4 py-3">Changed By</th>
                         <th class="px-4 py-3">Notes</th>
                     </tr>

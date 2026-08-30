@@ -17,7 +17,7 @@
         </div>
         <div class="flex flex-wrap items-center gap-2">
             <a href="{{ route('pharmacy.receiving.create', $selectedInventory ? ['inventory_item_id' => $selectedInventory->id] : []) }}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm"><i class="fas fa-plus mr-1"></i>Add Stock</a>
-            <a href="{{ route('pharmacy.inventory') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded text-sm">Manage Inventory</a>
+            <x-back-button :href="route('pharmacy.inventory')" label="Back to Inventory" />
         </div>
     </div>
 

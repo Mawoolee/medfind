@@ -6,6 +6,10 @@
 <div class="min-h-screen" style="background:#f0f0ff;"> 
 <div class="container mx-auto px-4 max-w-3xl" style="padding-top:60px;padding-bottom:40px;">
 
+ <div class="mb-4">
+ <x-back-button :href="route('pharmacy.profile.edit')" label="Back to Pharmacy Profile" />
+ </div>
+
  <div class="flex items-center gap-3 mb-6">
  <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style="background:#191970;">
  <i class="fas fa-file-medical text-white text-lg"></i>
@@ -118,11 +122,6 @@
  </button>
  </form>
 
- <div class="mt-5 text-center">
- <a href="{{ route('pharmacy.profile.edit') }}" class="text-sm hover:underline" style="color:#9400D3;">
- <i class="fas fa-arrow-left mr-1"></i> Back to Profile
- </a>
- </div>
 </div>
 </div>
 

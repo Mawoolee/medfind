@@ -6,9 +6,12 @@
 <div class="container mx-auto px-4 py-8">
     <div class="flex items-center justify-between mb-6">
         <h1 class="text-2xl font-bold text-gray-800">↩️ Returns & Recalls</h1>
-        <a href="{{ route('pharmacy.returns.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
-            <i class="fas fa-plus mr-2"></i>New Return / Recall
-        </a>
+        <div class="flex flex-wrap items-center gap-2">
+            <a href="{{ route('pharmacy.returns.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+                <i class="fas fa-plus mr-2"></i>New Return / Recall
+            </a>
+            <x-back-button :href="route('pharmacy.dashboard')" label="Back to Pharmacy Dashboard" />
+        </div>
     </div>
 
     @if(session('success'))

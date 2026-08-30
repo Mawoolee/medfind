@@ -17,11 +17,7 @@
                 <p class="text-sm text-gray-500">Manage your pharmacy information</p>
             </div>
         </div>
-        <a href="{{ route('pharmacy.dashboard') }}"
-            class="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-full border transition-colors hover:bg-white"
-            style="color:#191970;border-color:#191970;">
-            <i class="fas fa-arrow-left"></i> Back
-        </a>
+        <x-back-button :href="route('pharmacy.dashboard')" label="Back to Pharmacy Dashboard" />
     </div>
 
     {{-- Flash messages --}}

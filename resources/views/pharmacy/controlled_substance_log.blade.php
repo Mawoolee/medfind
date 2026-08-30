@@ -6,7 +6,7 @@
 <div class="container mx-auto px-4 py-8 max-w-2xl">
     <div class="flex items-center justify-between mb-6">
         <div><h1 class="text-2xl font-bold text-gray-800">Log Controlled Substance</h1><p class="text-sm text-gray-500 mt-1">Stock decreases are allocated to available batches in FEFO order.</p></div>
-        <a href="{{ route('pharmacy.controlled-substances.index') }}" class="text-purple-700 hover:text-purple-900 text-sm font-medium"><i class="fas fa-arrow-left mr-2"></i>Back to Logbook</a>
+        <x-back-button :href="route('pharmacy.controlled-substances.index')" label="Back to Controlled Substances" />
     </div>
 
     @if($errors->any())

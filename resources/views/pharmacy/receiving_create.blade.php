@@ -9,7 +9,7 @@
             <h1 class="text-2xl font-bold text-gray-800">Add Stock / Receive Delivery</h1>
             <p class="text-sm text-gray-500 mt-1">Each row creates a new, traceable stock batch for an existing medicine.</p>
         </div>
-        <a href="{{ route('pharmacy.inventory') }}" class="text-blue-600 hover:text-blue-800"><i class="fas fa-arrow-left mr-2"></i>Back to Inventory</a>
+        <x-back-button :href="route('pharmacy.inventory')" label="Back to Inventory" />
     </div>
 
     @if($errors->any())

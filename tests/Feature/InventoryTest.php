@@ -9,6 +9,7 @@ use App\Models\Pharmacy;
 use App\Models\StockMovement;
 use App\Models\Supplier;
 use App\Models\User;
+use App\Support\MedicineCategory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
@@ -40,16 +41,34 @@ class InventoryTest extends TestCase
         $this->actingAs($consumer)->get(route('pharmacy.inventory'))->assertRedirect();
     }
 
-    public function test_pharmacy_user_can_view_inventory_list(): void
+    public function test_pharmacy_user_can_view_inventory_list_without_aggregate_batch_count(): void
     {
         [$user, $pharmacy] = $this->makePharmacyUser();
         $medicine = Medicine::factory()->create();
-        InventoryItem::factory()->create(['pharmacy_id' => $pharmacy->id, 'medicine_id' => $medicine->id]);
+        $item = InventoryItem::factory()->create([
+            'pharmacy_id' => $pharmacy->id,
+            'medicine_id' => $medicine->id,
+        ]);
+        InventoryBatch::factory()->count(3)->depleted()->create([
+            'inventory_item_id' => $item->id,
+        ]);
 
         $this->actingAs($user)
             ->get(route('pharmacy.inventory'))
             ->assertOk()
-            ->assertSee($medicine->medicine_name);
+            ->assertSee($medicine->medicine_name)
+            ->assertSee('View Stock Batches')
+            ->assertSee('View Batches')
+            ->assertSee(route('pharmacy.inventory.batches'), false)
+            ->assertSee(route('pharmacy.inventory.batches', ['inventory_item_id' => $item->id]), false)
+            ->assertSee('href="'.route('pharmacy.dashboard').'"', false)
+            ->assertSee('aria-label="Back to Pharmacy Dashboard"', false)
+            ->assertDontSee('<th class="px-4 py-3">Batches</th>', false)
+            ->assertDontSee('<span class="font-semibold">3</span>', false)
+            ->assertViewHas('inventory', fn ($inventory): bool => ! array_key_exists(
+                'batches_count',
+                $inventory->first()->getAttributes(),
+            ));
     }
 
     public function test_inventory_list_is_paginated(): void
@@ -75,6 +94,49 @@ class InventoryTest extends TestCase
             ->get(route('pharmacy.inventory', ['stock' => 'out']))
             ->assertOk()
             ->assertSee($medicine->medicine_name);
+    }
+
+    public function test_inventory_list_hides_cold_chain_filter_and_keeps_other_controls(): void
+    {
+        [$user] = $this->makePharmacyUser();
+
+        $this->actingAs($user)
+            ->get(route('pharmacy.inventory'))
+            ->assertOk()
+            ->assertViewMissing('coldChain')
+            ->assertDontSee('name="cold_chain"', false)
+            ->assertDontSee('Cold Chain')
+            ->assertSee('name="q"', false)
+            ->assertSee('name="category"', false)
+            ->assertSee('name="stock"', false)
+            ->assertSee('name="sort"', false)
+            ->assertSee('>Filter</button>', false);
+    }
+
+    public function test_legacy_cold_chain_query_does_not_filter_inventory(): void
+    {
+        [$user, $pharmacy] = $this->makePharmacyUser();
+        $coldChainMedicine = Medicine::factory()->create([
+            'medicine_name' => 'Cold Storage Medicine',
+            'cold_chain_required' => true,
+        ]);
+        $standardMedicine = Medicine::factory()->create([
+            'medicine_name' => 'Standard Storage Medicine',
+            'cold_chain_required' => false,
+        ]);
+
+        foreach ([$coldChainMedicine, $standardMedicine] as $medicine) {
+            InventoryItem::factory()->create([
+                'pharmacy_id' => $pharmacy->id,
+                'medicine_id' => $medicine->id,
+            ]);
+        }
+
+        $this->actingAs($user)
+            ->get(route('pharmacy.inventory', ['cold_chain' => '1']))
+            ->assertOk()
+            ->assertSee('Cold Storage Medicine')
+            ->assertSee('Standard Storage Medicine');
     }
 
     public function test_pharmacy_user_can_view_create_form(): void
@@ -258,11 +320,22 @@ class InventoryTest extends TestCase
     public function test_pharmacy_user_can_export_inventory_as_csv(): void
     {
         [$user, $pharmacy] = $this->makePharmacyUser();
-        InventoryItem::factory()->create(['pharmacy_id' => $pharmacy->id]);
+        $item = InventoryItem::factory()->create(['pharmacy_id' => $pharmacy->id]);
+        InventoryBatch::factory()->count(2)->depleted()->create([
+            'inventory_item_id' => $item->id,
+        ]);
 
         $response = $this->actingAs($user)->get(route('pharmacy.inventory.export'));
         $response->assertOk();
         $this->assertStringContainsString('text/csv', $response->headers->get('Content-Type'));
+
+        $lines = preg_split('/\r\n|\r|\n/', trim($response->streamedContent()));
+        $header = str_getcsv($lines[0]);
+        $row = str_getcsv($lines[1]);
+        $batchCountIndex = array_search('Batch Count', $header, true);
+
+        $this->assertNotFalse($batchCountIndex);
+        $this->assertSame('2', $row[$batchCountIndex]);
     }
 
     public function test_new_medicine_and_complete_batch_fields_are_persisted_in_separate_steps(): void
@@ -477,5 +550,127 @@ class InventoryTest extends TestCase
             ->assertSee('value="User Edited Brand"', false)
             ->assertSee('value="Preserved Manufacturer"', false)
             ->assertSee('name="cold_chain_required" value="1" checked', false);
+    }
+
+    public function test_inventory_category_filter_has_the_complete_catalog_and_only_current_pharmacy_custom_values(): void
+    {
+        [$user, $pharmacy] = $this->makePharmacyUser();
+        [, $otherPharmacy] = $this->makePharmacyUser();
+
+        foreach (['Analgesic', 'Antibiotic', 'Legacy Care', 'legacy care', '   '] as $index => $category) {
+            $medicine = Medicine::factory()->create([
+                'medicine_name' => 'Own Medicine '.$index,
+                'category' => $category,
+            ]);
+            InventoryItem::factory()->create([
+                'pharmacy_id' => $pharmacy->id,
+                'medicine_id' => $medicine->id,
+            ]);
+        }
+
+        $otherMedicine = Medicine::factory()->create([
+            'medicine_name' => 'Other Pharmacy Medicine',
+            'category' => 'Other Pharmacy Secret',
+        ]);
+        InventoryItem::factory()->create([
+            'pharmacy_id' => $otherPharmacy->id,
+            'medicine_id' => $otherMedicine->id,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('pharmacy.inventory'));
+
+        $response->assertOk()
+            ->assertViewHas('categoryOptions', function (array $options): bool {
+                $customMatches = collect($options)
+                    ->filter(fn (string $label, string $value): bool => mb_strtolower($value) === 'legacy care');
+
+                return array_slice($options, 0, 9, true) === MedicineCategory::canonicalOptions()
+                    && $customMatches->count() === 1
+                    && ! collect(array_keys($options))->contains(
+                        fn (string $value): bool => mb_strtolower($value) === 'other pharmacy secret'
+                    );
+            });
+
+        foreach (MedicineCategory::canonicalOptions() as $value => $label) {
+            $this->assertSame(1, preg_match(
+                '/<option value="'.preg_quote($value, '/').'"\s*>'.preg_quote($label, '/').'<\/option>/',
+                $response->getContent(),
+            ));
+        }
+
+        $this->assertSame(1, preg_match_all('/<option value="legacy care"\s*>/i', $response->getContent()));
+        $response->assertDontSee('Other Pharmacy Secret');
+    }
+
+    public function test_inventory_category_filter_matches_legacy_casing_and_custom_categories(): void
+    {
+        [$user, $pharmacy] = $this->makePharmacyUser();
+
+        $legacyCanonical = Medicine::factory()->create([
+            'medicine_name' => 'Legacy Title Analgesic',
+            'category' => 'Analgesic',
+        ]);
+        $custom = Medicine::factory()->create([
+            'medicine_name' => 'Custom Category Medicine',
+            'category' => 'Specialty Care',
+        ]);
+        $unmatched = Medicine::factory()->create([
+            'medicine_name' => 'Unmatched Antibiotic',
+            'category' => 'Antibiotic',
+        ]);
+
+        foreach ([$legacyCanonical, $custom, $unmatched] as $medicine) {
+            InventoryItem::factory()->create([
+                'pharmacy_id' => $pharmacy->id,
+                'medicine_id' => $medicine->id,
+            ]);
+        }
+
+        $this->actingAs($user)
+            ->get(route('pharmacy.inventory', ['category' => 'analgesic']))
+            ->assertOk()
+            ->assertSee('Legacy Title Analgesic')
+            ->assertDontSee('Custom Category Medicine')
+            ->assertDontSee('Unmatched Antibiotic');
+
+        $this->actingAs($user)
+            ->get(route('pharmacy.inventory', ['category' => 'specialty care']))
+            ->assertOk()
+            ->assertSee('Custom Category Medicine')
+            ->assertDontSee('Legacy Title Analgesic')
+            ->assertDontSee('Unmatched Antibiotic');
+    }
+
+    public function test_add_and_edit_forms_share_the_catalog_and_preserve_old_or_current_custom_selection(): void
+    {
+        [$user, $pharmacy] = $this->makePharmacyUser();
+        $medicine = Medicine::factory()->create([
+            'medicine_name' => 'Legacy Custom Medicine',
+            'category' => 'Legacy Compound',
+        ]);
+        $item = InventoryItem::factory()->create([
+            'pharmacy_id' => $pharmacy->id,
+            'medicine_id' => $medicine->id,
+        ]);
+
+        $editResponse = $this->actingAs($user)->get(route('pharmacy.inventory.edit', $item->id));
+        $createResponse = $this->actingAs($user)
+            ->withSession(['_old_input' => ['category' => 'Old Custom Category']])
+            ->get(route('pharmacy.inventory.create'));
+
+        foreach ([$createResponse, $editResponse] as $response) {
+            $response->assertOk()
+                ->assertViewHas('categoryOptions', fn (array $options): bool => array_slice($options, 0, 9, true) === MedicineCategory::canonicalOptions()
+                );
+        }
+
+        $createResponse->assertSee(
+            '<option value="Old Custom Category" selected>Old Custom Category</option>',
+            false,
+        );
+        $editResponse->assertSee(
+            '<option value="Legacy Compound" selected>Legacy Compound</option>',
+            false,
+        );
     }
 }

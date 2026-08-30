@@ -246,8 +246,11 @@ Creates a UUID operation identifier and records:
 - Add Medicine form contains only master fields plus par level and preserves old input.
 - Receiving form retains repeatable rows but each row selects an existing scoped aggregate and includes batch, lot, quantity, price, supplier text, expiry, cold-chain, received date, and reference.
 - Aggregate inventory is card/table responsive, with one medicine row and explicit Add Stock, View Batches, and Edit Medicine/Par actions.
+- The main inventory table omits aggregate batch-count values; operators reach batch numbers, lots, and traceability through the retained View Batches actions and batch/receiving pages.
 - Batch views visually separate Available, Depleted, and Expired stock and show physical expired quantities only to authorized pharmacy users.
 - Dashboard exposes four distinct actions: Manage Inventory, Add New Medicine, Add Stock/Receive Delivery, and View Stock Batches.
+- One `MedicineCategory` source owns the nine canonical option values and labels used by Add Medicine, Edit Medicine, and the inventory filter. The inventory filter appends only case-insensitively unique, nonblank categories from the authenticated pharmacy and compares trimmed categories with portable case-folded SQL; Edit Medicine appends its current custom value so legacy data remains selectable.
+- One `back-button` Blade component provides the same accessible MedFind-purple left-arrow and `Back` link on every standalone pharmacy page. Each page supplies a deterministic named route to its dashboard or workflow parent; the Pharmacy dashboard is excluded as the navigation root, while form `Cancel` actions remain separate.
 
 ## Data Models
 
@@ -483,6 +486,25 @@ For all aggregate projections, inventory analysis receives a stock value equal t
 For all pairs of distinct pharmacies and all aggregates and batches owned by either pharmacy, an authenticated Pharmacy_Operator can list and mutate only records belonging to the Pharmacy_Operator pharmacy.
 
 **Validates: Requirements 10.1, 10.2**
+
+## Approved Ad-Hoc Design: Basic Record Sale
+
+The Basic_Record_Sale is a thin HTTP workflow over a dedicated transactional `BasicSaleService`; it introduces no POS or sale-header table. Existing `StockMovement` rows preserve each batch allocation, actor, timestamp, reason, `Sale_Reference`, and shared operation ID. One `InventoryAudit` per changed aggregate shares that operation ID and stores the `Sale_Reference` in its notes, so the existing immutable ledger is sufficient.
+
+- Add `GET pharmacy.sales.create` and `POST pharmacy.sales.store` inside the existing pharmacy middleware group, a `SaleController`, and `RecordSaleRequest`.
+- Place Record Sale first in the eight-card dashboard action grid beside Manage Inventory; retain one phone column and two medium columns, with four columns and two complete rows at XL widths.
+- Render every dashboard action link with the same full-width, centered, wrapping-safe dimensions and transition contract while preserving its color and content; map each statistic to explicit matching `*-600` value and `*-200` icon classes so the production build discovers every color.
+- The responsive Blade form renders repeatable aggregate-and-positive-quantity rows only, plus read-only server-reference/timestamp/staff context and optional notes; it never exposes a batch selector. Its catalog contains only saleable aggregates owned by the authenticated pharmacy and clearly handles an empty catalog.
+- Each Medicine field progressively enhances its named pharmacy-scoped aggregate `<select>` into a dependency-free combobox. The visible search input has no submitted name, edits clear the selected identifier until an option is explicitly chosen, result labels include generic name, brand, dosage, and Available_Stock, and per-row IDs plus initialization hooks cover initial, added, and validation-restored rows. The combobox supports pointer selection, click-away dismissal, no-results feedback, and standard Arrow/Enter/Escape behavior with listbox ARIA relationships.
+- `RecordSaleRequest` validates indexed fields and rejects duplicate aggregate rows. The service independently rejects duplicate/invalid lines, resolves every aggregate through one pharmacy-scoped locked query, and returns a not-found result for any missing or foreign identifier.
+- `BasicSaleService` generates one Sale_Reference and one `StockOperationContext`, opens one outer transaction, and invokes `FEFOAllocator::decrease()` for each line. Nested allocator work therefore shares operation/reference/actor metadata, excludes expired batches, follows deterministic FEFO, synchronizes aggregates, and fully rolls back when any later line fails.
+- Insufficient-stock errors identify the failing row and report requested and currently available quantities while returning all submitted rows as old input.
+
+### Property 21: Basic sales are atomic FEFO operations
+
+For all valid multi-item sale quantities within Available_Stock, recording a Basic_Record_Sale reduces each aggregate by exactly its requested quantity through FEFO and every movement/audit shares one operation ID, Sale_Reference, and actor; if any line exceeds Available_Stock, every aggregate, batch, movement, and audit remains unchanged.
+
+**Validates: Requirements 14.3-14.8**
 
 ## Error Handling
 

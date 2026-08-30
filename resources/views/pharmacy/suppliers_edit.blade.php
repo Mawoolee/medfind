@@ -2,6 +2,7 @@
 
 @section('content')
 <div class="container">
+    <x-back-button :href="route('pharmacy.suppliers.index')" label="Back to Suppliers" />
     <h3>Edit Supplier</h3>
 
     @if ($errors->any())

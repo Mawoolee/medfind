@@ -4,7 +4,10 @@
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h3>Suppliers</h3>
-        <a href="{{ route('pharmacy.suppliers.create') }}" class="btn btn-primary">Add Supplier</a>
+        <div class="d-flex align-items-center gap-2">
+            <a href="{{ route('pharmacy.suppliers.create') }}" class="btn btn-primary">Add Supplier</a>
+            <x-back-button :href="route('pharmacy.dashboard')" label="Back to Pharmacy Dashboard" />
+        </div>
     </div>
 
     @if(session('success'))

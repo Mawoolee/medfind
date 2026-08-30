@@ -43,6 +43,8 @@ MedFind currently stores pharmacy-level medicine totals and batch attributes on 
 - **Inventory_Audit workflow**: The existing pharmacy audit-log query and display flow.
 - **Implementation**: The code and database changes produced from this specification.
 - **Automated test suite**: The PHPUnit, Eris, Playwright, migration rehearsal, formatting, and build checks used to verify the Implementation.
+- **Basic_Record_Sale**: A pharmacy-only, stock-deduction workflow that records one or more sold medicine quantities without payment, customer, discount, receipt, or full-POS behavior.
+- **Sale_Reference**: A server-generated identifier shared by every Stock_Movement and Inventory_Audit created for one Basic_Record_Sale.
 
 ## Requirements
 
@@ -126,6 +128,9 @@ MedFind currently stores pharmacy-level medicine totals and batch attributes on 
 8. WHEN a valid batch quantity correction is submitted, THE Inventory_Batch_Service SHALL record a Stock_Movement and an Inventory_Audit.
 9. IF a batch edit would duplicate another Batch_Identity_Key in the Pharmacy_Inventory_Aggregate, THEN THE Inventory_Batch_Service SHALL reject the edit without changing stock.
 10. THE pharmacy inventory page and batch detail page SHALL support phone, tablet, and desktop viewport widths without hiding required actions.
+11. THE pharmacy inventory category filter SHALL always render the canonical Analgesic, Antibiotic, Antidiarrheal, Antihistamine, NSAID, Controlled, Vitamin, Supplement, and Other options with stable lower-case values.
+12. THE pharmacy inventory category filter SHALL merge nonblank custom categories used by the authenticated pharmacy case-insensitively without exposing categories used only by another pharmacy.
+13. WHEN a Pharmacy_Operator filters by category, THE MedFind_System SHALL match category values case-insensitively on SQLite and PostgreSQL while preserving all other inventory filters and query parameters.
 
 ### Requirement 6: Allocate Stock Decreases by FEFO
 
@@ -230,6 +235,7 @@ MedFind currently stores pharmacy-level medicine totals and batch attributes on 
 5. THE Add Medicine, Receiving_Workflow, inventory, and batch detail pages SHALL render required fields and actions at a 320-pixel viewport width without horizontal page overflow.
 6. THE MedFind_System SHALL display expired stock separately from Available_Stock on pharmacy-only batch views.
 7. WHEN an operation fails for insufficient Available_Stock, THE MedFind_System SHALL display the requested quantity and current Available_Stock.
+8. THE MedFind_System SHALL render one shared, accessible purple Back link with a deterministic named-route destination on every standalone pharmacy page except the Pharmacy dashboard navigation root.
 
 ### Requirement 12: Preserve Auditability and Transactional Consistency
 
@@ -259,3 +265,22 @@ MedFind currently stores pharmacy-level medicine totals and batch attributes on 
 6. WHERE the disposable PostgreSQL rehearsal environment is enabled, THE automated test suite SHALL verify schema migration and backfill behavior on PostgreSQL.
 7. THE automated test suite SHALL preserve the isolated SQLite in-memory default test configuration.
 8. THE implementation SHALL pass focused PHP unit and feature tests, the full PHP test suite, code formatting checks, and the frontend production build.
+
+### Requirement 14: Record Basic Sales Through FEFO
+
+**User Story:** As a Pharmacy_Operator, I want to record sold medicine quantities, so that available stock is deducted traceably without requiring a full point-of-sale workflow.
+
+#### Acceptance Criteria
+
+1. THE pharmacy dashboard SHALL display Record Sale first beside Manage Inventory, followed by Add New Medicine, Add Stock/Receive Delivery, View Stock Batches, Messages, Audit Log, and Controlled Substances, using one phone column, two medium columns, and four XL columns.
+2. THE MedFind_System SHALL provide pharmacy-authenticated `pharmacy.sales.create` and `pharmacy.sales.store` routes and a responsive repeatable-row form containing only a pharmacy-owned aggregate and positive integer quantity per line, optional notes, and read-only server-generated reference/time/staff context.
+3. WHEN a Basic_Record_Sale is submitted, THE MedFind_System SHALL reject duplicate aggregate rows, invalid quantities, and missing or foreign aggregates without disclosing another pharmacy's inventory and SHALL preserve all submitted rows with indexed errors.
+4. WHEN the pharmacy has no Available_Stock, THE Basic_Record_Sale form SHALL clearly state that no medicines are currently saleable and direct the operator to Add Stock.
+5. WHEN a valid Basic_Record_Sale is processed, THE MedFind_System SHALL deduct each line only through the FEFO_Allocator, exclude expired batches, span eligible batches in FEFO_Order, and synchronize each Pharmacy_Inventory_Aggregate.
+6. THE MedFind_System SHALL process every sale line in one transaction so any invalid, unauthorized, or insufficient later line rolls back all earlier line quantities, Stock_Movements, and Inventory_Audits.
+7. WHEN a sale line has insufficient Available_Stock, THE MedFind_System SHALL identify the line and display its requested and currently available quantities.
+8. WHEN a Basic_Record_Sale succeeds, every resulting Stock_Movement and Inventory_Audit SHALL share one operation identifier and Sale_Reference and preserve the authenticated actor, server timestamp, reason/notes, and per-batch allocation details.
+9. THE normal Basic_Record_Sale form SHALL NOT display or accept a batch-number selector; THE MedFind_System SHALL choose batches automatically by FEFO.
+10. THE Basic_Record_Sale workflow SHALL NOT collect payments, discounts, receipt details, customer data, or other full-POS information.
+11. THE Basic_Record_Sale medicine field SHALL provide an accessible, keyboard-operable searchable combobox that filters pharmacy-scoped aggregate labels by Generic Name, Brand Name, Dosage, and Available_Stock text, submits only an explicitly selected aggregate identifier, and works for initial, repeatable, and validation-restored rows.
+12. THE pharmacy dashboard SHALL render all eight action links with one full-width, consistently centered button contract and explicit build-discoverable matching value/icon color classes for all six statistics.
