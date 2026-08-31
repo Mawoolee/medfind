@@ -8,12 +8,12 @@
                 </a>
             </div>
 
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2 sm:gap-4">
                 @auth
                     {{-- Notification Bell --}}
                     @php $notifCount = auth()->user()->unreadNotifications()->count(); @endphp
                     <a href="{{ route('notifications.index') }}"
-                       class="relative text-gray-500 hover:text-[#9400D3] transition"
+                       class="relative flex items-center justify-center w-11 h-11 -mr-1 text-gray-500 hover:text-[#9400D3] transition"
                        title="Notifications">
                         <i class="fas fa-bell text-xl"></i>
                         @if($notifCount > 0)
@@ -27,7 +27,7 @@
                     @if(Auth::user()->role === 'consumer')
                         <div class="relative" x-data="{ open: false }">
                             <button type="button" @click="open = !open"
-                                class="text-sm text-[#191970] font-medium hover:text-[#9400D3] transition flex items-center gap-1">
+                                class="text-sm text-[#191970] font-medium hover:text-[#9400D3] transition flex items-center gap-1 min-h-[44px] px-1">
                                 <i class="fas fa-user-circle mr-1"></i> Menu
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -48,7 +48,7 @@
                     @if(in_array(Auth::user()->role, ['pharmacy', 'pharmacy_operator']))
                         <div class="relative" x-data="{ open: false }">
                             <button type="button" @click="open = !open"
-                                class="text-sm text-[#191970] font-medium hover:text-[#9400D3] transition flex items-center gap-1">
+                                class="text-sm text-[#191970] font-medium hover:text-[#9400D3] transition flex items-center gap-1 min-h-[44px] px-1">
                                 <i class="fas fa-capsules"></i> Pharmacy
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -72,7 +72,7 @@
                     @if(Auth::user()->role === 'admin')
                         <div class="relative" x-data="{ open: false }">
                             <button type="button" @click="open = !open"
-                                class="text-sm text-[#191970] font-medium hover:text-[#9400D3] transition flex items-center gap-1">
+                                class="text-sm text-[#191970] font-medium hover:text-[#9400D3] transition flex items-center gap-1 min-h-[44px] px-1">
                                 <i class="fas fa-shield-halved"></i> Admin
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -88,19 +88,19 @@
                         </div>
                     @endif
 
-                    <span class="text-sm text-[#191970] font-medium">{{ Auth::user()->name }}</span>
+                    <span class="hidden sm:inline text-sm text-[#191970] font-medium">{{ Auth::user()->name }}</span>
 
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="text-sm text-[#9400D3] hover:text-[#191970] font-medium transition">
+                        <button type="submit" class="text-sm text-[#9400D3] hover:text-[#191970] font-medium transition min-h-[44px] flex items-center px-1">
                             Log out
                         </button>
                     </form>
                 @else
-                    <a href="{{ route('login') }}" class="text-sm text-[#191970] font-medium hover:text-[#9400D3] transition">
+                    <a href="{{ route('login') }}" class="text-sm text-[#191970] font-medium hover:text-[#9400D3] transition min-h-[44px] flex items-center px-1">
                         Log in
                     </a>
-                    <a href="{{ route('register') }}" class="text-sm bg-[#191970] text-[#D9F855] px-4 py-2 rounded-full font-semibold hover:bg-[#2a2a8a] transition">
+                    <a href="{{ route('register') }}" class="text-sm bg-[#191970] text-[#D9F855] px-4 py-2 rounded-full font-semibold hover:bg-[#2a2a8a] transition min-h-[44px] flex items-center">
                         Sign up
                     </a>
                 @endauth

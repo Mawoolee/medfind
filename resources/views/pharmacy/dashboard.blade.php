@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-8">
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-6">
         <h1 class="text-2xl font-bold text-gray-800">Pharmacy Dashboard</h1>
         <span class="text-sm text-gray-500">{{ $pharmacy->pharmacy_name ?? 'No pharmacy assigned' }}</span>
     </div>
@@ -14,7 +14,7 @@
             <i class="fas fa-clock text-amber-500 mt-1"></i>
             <div>
                 <p class="font-bold text-amber-800 text-sm">Account Pending Approval</p>
-                <p class="text-amber-700 text-xs mt-1">Your pharmacy is under review. <a href="{{ route('pharmacy.requirements') }}" class="underline font-semibold">View or upload requirements</a>.</p>
+                <p class="text-amber-700 text-sm mt-1">Your pharmacy is under review. <a href="{{ route('pharmacy.requirements') }}" class="underline font-semibold">View or upload requirements</a>.</p>
             </div>
         </div>
     @endif
@@ -28,7 +28,7 @@
             ['label' => 'Searches Today', 'value' => $searchCountToday, 'value_class' => 'text-cyan-600', 'icon_class' => 'text-cyan-200', 'icon' => 'fa-magnifying-glass-chart'],
             ['label' => 'Total Searches', 'value' => $searchCountTotal, 'value_class' => 'text-indigo-600', 'icon_class' => 'text-indigo-200', 'icon' => 'fa-chart-line'],
         ] as $stat)
-            <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="bg-white rounded-lg shadow-lg p-5 sm:p-6">
                 <div class="flex items-center justify-between">
                     <div><p class="text-gray-500 text-sm">{{ $stat['label'] }}</p><p class="text-2xl font-bold {{ $stat['value_class'] }}">{{ $stat['value'] }}</p></div>
                     <i class="fas {{ $stat['icon'] }} text-4xl {{ $stat['icon_class'] }}"></i>
@@ -79,12 +79,12 @@
 
     <div class="mt-8 bg-white rounded-lg shadow-lg p-6">
         <h2 class="text-lg font-semibold text-gray-800 mb-4">Recent Inventory Overview</h2>
-        <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead><tr class="bg-gray-50 text-left text-gray-600"><th class="px-4 py-2">Medicine</th><th class="px-4 py-2">Dosage</th><th class="px-4 py-2">Available Stock</th><th class="px-4 py-2">Price</th><th class="px-4 py-2">Status</th></tr></thead>
+        <div class="overflow-x-auto -mx-6 px-6">
+            <table class="w-full text-sm">
+                <thead><tr class="bg-gray-50 text-left text-gray-600"><th class="px-4 py-2 whitespace-nowrap">Medicine</th><th class="px-4 py-2 whitespace-nowrap">Dosage</th><th class="px-4 py-2 whitespace-nowrap">Available Stock</th><th class="px-4 py-2 whitespace-nowrap">Price</th><th class="px-4 py-2 whitespace-nowrap">Status</th></tr></thead>
                 <tbody>
                     @forelse($recentInventory as $item)
-                        <tr class="border-t border-gray-200"><td class="px-4 py-2">{{ $item->medicine->medicine_name }}</td><td class="px-4 py-2">{{ $item->medicine->dosage }}</td><td class="px-4 py-2">{{ $item->available_stock }}</td><td class="px-4 py-2">₱{{ number_format((float) $item->representative_price, 2) }}</td><td class="px-4 py-2"><span class="px-2 py-1 rounded text-xs {{ $item->available_stock > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">{{ $item->available_stock > 0 ? 'In Stock' : 'Out of Stock' }}</span></td></tr>
+                        <tr class="border-t border-gray-200"><td class="px-4 py-2 whitespace-nowrap">{{ $item->medicine->medicine_name }}</td><td class="px-4 py-2 whitespace-nowrap">{{ $item->medicine->dosage }}</td><td class="px-4 py-2 whitespace-nowrap">{{ $item->available_stock }}</td><td class="px-4 py-2 whitespace-nowrap">₱{{ number_format((float) $item->representative_price, 2) }}</td><td class="px-4 py-2 whitespace-nowrap"><span class="px-2 py-1 rounded text-xs {{ $item->available_stock > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">{{ $item->available_stock > 0 ? 'In Stock' : 'Out of Stock' }}</span></td></tr>
                     @empty
                         <tr><td colspan="5" class="px-4 py-4 text-center text-gray-500">No inventory items found.</td></tr>
                     @endforelse

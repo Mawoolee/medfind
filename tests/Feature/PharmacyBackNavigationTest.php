@@ -22,6 +22,7 @@ final class PharmacyBackNavigationTest extends TestCase
             'inventory_batches.blade.php' => 'pharmacy.inventory',
             'inventory_create.blade.php' => 'pharmacy.inventory',
             'inventory_edit.blade.php' => 'pharmacy.inventory',
+            'location_edit.blade.php' => 'pharmacy.profile.edit',
             'messages.blade.php' => 'pharmacy.dashboard',
             'profile_edit.blade.php' => 'pharmacy.dashboard',
             'receiving_create.blade.php' => 'pharmacy.inventory',

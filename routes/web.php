@@ -171,6 +171,10 @@ Route::middleware(['auth', 'role:pharmacy,pharmacy_operator', 'pharmacy.pending'
     Route::get('/profile', [PharmacyProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [PharmacyProfileController::class, 'update'])->name('profile.update');
 
+    // Pharmacy profile location picker (separate map page)
+    Route::get('/profile/location', [PharmacyProfileController::class, 'locationEdit'])->name('profile.location');
+    Route::post('/profile/location', [PharmacyProfileController::class, 'storeLocation'])->name('profile.location.store');
+
     // Requirements upload
     Route::get('/requirements', [PharmacyRequirementsController::class, 'show'])->name('requirements');
     Route::post('/requirements', [PharmacyRequirementsController::class, 'store'])->name('requirements.store');

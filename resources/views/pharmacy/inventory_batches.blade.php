@@ -16,7 +16,7 @@
             </p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-            <a href="{{ route('pharmacy.receiving.create', $selectedInventory ? ['inventory_item_id' => $selectedInventory->id] : []) }}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm"><i class="fas fa-plus mr-1"></i>Add Stock</a>
+            <a href="{{ route('pharmacy.receiving.create', $selectedInventory ? ['inventory_item_id' => $selectedInventory->id] : []) }}" class="inline-flex items-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 min-h-11 rounded text-sm"><i class="fas fa-plus mr-1"></i>Add Stock</a>
             <x-back-button :href="route('pharmacy.inventory')" label="Back to Inventory" />
         </div>
     </div>
@@ -28,7 +28,7 @@
     <div class="bg-white rounded-lg shadow-lg overflow-hidden">
         <div class="p-5 border-b border-gray-200">
             <form method="GET" action="{{ route('pharmacy.inventory.batches') }}" class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <select name="inventory_item_id" class="border border-gray-300 rounded px-3 py-2 md:col-span-2">
+                <select name="inventory_item_id" class="border border-gray-300 rounded px-3 py-2.5 text-base md:col-span-2">
                     <option value="">All medicines</option>
                     @foreach($inventory as $aggregate)
                         <option value="{{ $aggregate->id }}" {{ (string) $selectedInventoryId === (string) $aggregate->id ? 'selected' : '' }}>
@@ -36,8 +36,8 @@
                         </option>
                     @endforeach
                 </select>
-                <input type="text" name="q" value="{{ $q }}" class="border border-gray-300 rounded px-3 py-2" placeholder="Batch, lot, supplier, medicine">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Filter</button>
+                <input type="text" name="q" value="{{ $q }}" class="border border-gray-300 rounded px-3 py-2.5 text-base" placeholder="Batch, lot, supplier, medicine">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded text-sm min-h-11">Filter</button>
             </form>
         </div>
 
@@ -66,9 +66,9 @@
                         <tr class="border-t border-gray-200 {{ $expired && !$depleted ? 'bg-red-50' : '' }}">
                             <td class="px-4 py-3">
                                 <p class="font-semibold text-gray-800">{{ $batch->inventoryItem->medicine->medicine_name }}</p>
-                                <p class="text-xs text-gray-500">{{ $batch->inventoryItem->medicine->brand_name }} {{ $batch->inventoryItem->medicine->dosage }}</p>
+                                <p class="text-sm text-gray-500">{{ $batch->inventoryItem->medicine->brand_name }} {{ $batch->inventoryItem->medicine->dosage }}</p>
                             </td>
-                            <td class="px-4 py-3"><p class="font-medium">{{ $batch->batch_number }}</p><p class="text-xs text-gray-500">Lot: {{ $batch->lot_number ?? '—' }}</p></td>
+                            <td class="px-4 py-3"><p class="font-medium">{{ $batch->batch_number }}</p><p class="text-sm text-gray-500">Lot: {{ $batch->lot_number ?? '—' }}</p></td>
                             <td class="px-4 py-3">{{ $batch->quantity_received }}</td>
                             <td class="px-4 py-3 font-semibold">{{ $batch->current_quantity }}</td>
                             <td class="px-4 py-3 {{ $expired ? 'text-red-700 font-semibold' : '' }}">{{ $batch->expiry_date?->format('M d, Y') ?? 'No expiry' }}</td>

@@ -3,9 +3,9 @@
         <!-- Logo -->
         <div class="mb-4 text-center">
             <div class="flex items-center justify-center mb-1">
-                <img src="{{ asset('images/Final Logo MedFind.png') }}" alt="MedFind" class="h-48 w-auto">
+                <img src="{{ asset('images/Final Logo MedFind.png') }}" alt="MedFind" class="h-32 sm:h-48 w-auto">
             </div>
-            <p class="text-sm text-[#9400D3] font-light">Sign in to your account</p>
+            <p class="text-base sm:text-sm text-[#9400D3] font-light">Sign in to your account</p>
         </div>
 
         <!-- Card -->
@@ -18,7 +18,7 @@
 
                     <!-- Email -->
                     <div class="mb-4">
-                        <label for="email" class="block text-xs font-medium text-[#9400D3] uppercase tracking-wider mb-1.5">
+                        <label for="email" class="block text-sm font-medium text-[#9400D3] uppercase tracking-wider mb-1.5">
                             Email
                         </label>
                         <input id="email" 
@@ -28,14 +28,14 @@
                                required 
                                autofocus 
                                autocomplete="username"
-                               class="w-full px-4 py-2.5 bg-[#f8f4ff] border border-[#9400D3]/20 rounded-lg text-sm text-[#191970] focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30 focus:border-[#9400D3] transition"
-                               placeholder="Email or mobile number">
+                               class="w-full px-4 py-3 bg-[#f8f4ff] border border-[#9400D3]/20 rounded-lg text-base text-[#191970] focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30 focus:border-[#9400D3] transition"
+                               placeholder="Email">
                         <x-input-error :messages="$errors->get('email')" class="mt-1" />
                     </div>
 
                     <!-- Password -->
                     <div class="mb-4">
-                        <label for="password" class="block text-xs font-medium text-[#9400D3] uppercase tracking-wider mb-1.5">
+                        <label for="password" class="block text-sm font-medium text-[#9400D3] uppercase tracking-wider mb-1.5">
                             Password
                         </label>
                         <input id="password" 
@@ -43,7 +43,7 @@
                                name="password" 
                                required 
                                autocomplete="current-password"
-                               class="w-full px-4 py-2.5 bg-[#f8f4ff] border border-[#9400D3]/20 rounded-lg text-sm text-[#191970] focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30 focus:border-[#9400D3] transition"
+                               class="w-full px-4 py-3 bg-[#f8f4ff] border border-[#9400D3]/20 rounded-lg text-base text-[#191970] focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30 focus:border-[#9400D3] transition"
                                placeholder="••••••••">
                         <x-input-error :messages="$errors->get('password')" class="mt-1" />
                     </div>
@@ -62,7 +62,7 @@
                     </div>
 
                     <!-- Submit -->
-                    <button type="submit" class="w-full bg-[#191970] text-[#D9F855] text-sm font-medium py-2.5 rounded-lg hover:bg-[#2a2a8a] transition">
+                    <button type="submit" class="w-full bg-[#191970] text-[#D9F855] text-base font-medium py-3 rounded-lg hover:bg-[#2a2a8a] transition">
                         Sign in
                     </button>
 

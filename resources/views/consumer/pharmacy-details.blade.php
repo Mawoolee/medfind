@@ -2,22 +2,22 @@
 
 @section('content')
 <div class="min-h-screen bg-[#f0f0ff] py-6 px-4 font-sans">
-    <div class="w-full max-w-7xl mx-auto px-6">
+    <div class="w-full max-w-7xl mx-auto px-0 sm:px-6">
 
         <!-- Back Button -->
-        <div class="flex items-center gap-2 mb-4">
-                <a href="{{ route('consumer.dashboard') }}" class="inline-flex items-center text-[#9400D3] hover:text-[#191970] text-xs font-semibold transition">
+        <div class="flex flex-wrap items-center gap-2 mb-4">
+                <a href="{{ route('consumer.dashboard') }}" class="inline-flex items-center text-[#9400D3] hover:text-[#191970] text-sm font-semibold transition">
                     <i class="fas fa-arrow-left mr-1.5"></i> Back to Map
                 </a>
                 <div class="ml-auto flex items-center gap-2">
                     @auth
                     <a href="{{ route('consumer.messages.chat', $pharmacy->id) }}"
-                       class="inline-flex items-center gap-1.5 bg-[#191970] hover:bg-[#2a2a8a] text-[#D9F855] font-bold px-4 py-2 rounded-full text-xs transition">
+                       class="inline-flex items-center justify-center gap-1.5 bg-[#191970] hover:bg-[#2a2a8a] text-[#D9F855] font-bold px-4 py-2 rounded-full text-sm transition">
                         <i class="fas fa-comments"></i> Message
                     </a>
                     @endauth
                     <a href="{{ route('consumer.dashboard') }}?dir=1&lat={{ $pharmacy->latitude }}&lng={{ $pharmacy->longitude }}"
-                       class="inline-flex items-center gap-1.5 bg-[#9400D3] hover:bg-[#7a00b0] text-white font-bold px-4 py-2 rounded-full text-xs transition">
+                       class="inline-flex items-center justify-center gap-1.5 bg-[#9400D3] hover:bg-[#7a00b0] text-white font-bold px-4 py-2 rounded-full text-sm transition">
                         <i class="fas fa-directions"></i> Directions
                     </a>
                 </div>
@@ -28,18 +28,18 @@
             <div class="mb-3">
                 <div class="flex items-center gap-2 mb-0.5">
                     <span class="text-xl"></span>
-                    <h1 class="text-lg font-extrabold text-[#191970] leading-tight">{{ $pharmacy->pharmacy_name }}</h1>
+                    <h1 class="text-xl sm:text-2xl font-extrabold text-[#191970] leading-tight">{{ $pharmacy->pharmacy_name }}</h1>
                 </div>
-                <p class="text-xs text-gray-500 flex items-center gap-1 ml-0.5 mb-1">
+                <p class="text-sm text-gray-500 flex items-center gap-1 ml-0.5 mb-1">
                     <span></span> {{ $pharmacy->pharmacyAddress }}
                 </p>
                 @if($pharmacy->contactNumber)
-                    <p class="text-xs text-[#9400D3] flex items-center gap-1 ml-0.5 mb-2">
+                    <p class="text-sm text-[#9400D3] flex items-center gap-1 ml-0.5 mb-2">
                         <i class="fas fa-phone text-base"></i> {{ $pharmacy->contactNumber }}
                     </p>
                 @endif
                 @if($pharmacy->operating_hours)
-                    <p class="text-xs text-gray-500 flex items-center gap-1 ml-0.5 mb-2">
+                    <p class="text-sm text-gray-500 flex items-center gap-1 ml-0.5 mb-2">
                         <i class="fas fa-clock text-base text-[#9400D3]"></i> {{ $pharmacy->operating_hours }}
                     </p>
                 @endif
@@ -49,7 +49,7 @@
             </div>
 
             <!-- Mini Map -->
-            <div id="mini-map" class="w-full h-32 rounded-2xl mb-4 overflow-hidden border border-[#9400D3]/10 shadow-inner"></div>
+            <div id="mini-map" class="w-full h-40 sm:h-32 rounded-2xl mb-4 overflow-hidden border border-[#9400D3]/10 shadow-inner"></div>
 
             <!-- Products / Medicine List -->
             <div class="bg-[#f8f4ff] rounded-2xl p-3.5 mb-4 border border-[#9400D3]/10">

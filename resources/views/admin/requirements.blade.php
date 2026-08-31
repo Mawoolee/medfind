@@ -191,7 +191,7 @@
  <button type="button"
  onclick="openFileModal('{{ $fileUrl }}')"
  class="text-xs font-semibold text-[#9400D3] hover:text-[#191970] transition flex items-center gap-1 mt-0.5">
- <i class="fas fa-eye text-[10px]"></i> View File
+ <i class="fas fa-eye text-xs"></i> View File
  </button>
  </div>
  @else
@@ -209,14 +209,15 @@
 
  {{-- Action Buttons --}}
  @if($pharmacy->status === 'pending')
- <div class="flex flex-wrap gap-3">
+ <div class="flex flex-col sm:flex-row flex-wrap gap-3">
  {{-- Approve --}}
  <form method="POST"
  action="{{ route('admin.requirements.approve', $pharmacy) }}"
- onsubmit="return confirm('Approve {{ addslashes($pharmacy->pharmacy_name) }}?')">
+ onsubmit="return confirm('Approve {{ addslashes($pharmacy->pharmacy_name) }}?')"
+ class="w-full sm:w-auto">
  @csrf
  <button type="submit"
- class="inline-flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold bg-green-600 hover:bg-green-700 text-white transition shadow-sm">
+ class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold bg-green-600 hover:bg-green-700 text-white transition shadow-sm">
  <i class="fas fa-check"></i> Approve
  </button>
  </form>
@@ -224,10 +225,11 @@
  {{-- Reject --}}
  <form method="POST"
  action="{{ route('admin.requirements.reject', $pharmacy) }}"
- onsubmit="return confirm('Reject {{ addslashes($pharmacy->pharmacy_name) }}?')">
+ onsubmit="return confirm('Reject {{ addslashes($pharmacy->pharmacy_name) }}?')"
+ class="w-full sm:w-auto">
  @csrf
  <button type="submit"
- class="inline-flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold bg-red-600 hover:bg-red-700 text-white transition shadow-sm">
+ class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold bg-red-600 hover:bg-red-700 text-white transition shadow-sm">
  <i class="fas fa-times"></i> Reject
  </button>
  </form>

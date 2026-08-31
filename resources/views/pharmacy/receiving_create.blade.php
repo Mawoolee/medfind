@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-8">
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
             <h1 class="text-2xl font-bold text-gray-800">Add Stock / Receive Delivery</h1>
             <p class="text-sm text-gray-500 mt-1">Each row creates a new, traceable stock batch for an existing medicine.</p>
@@ -33,7 +33,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
                         <label for="supplier_id" class="block text-sm font-medium text-gray-700">Supplier</label>
-                        <select id="supplier_id" name="supplier_id" class="mt-1 block w-full border border-gray-300 rounded px-3 py-2 @error('supplier_id') border-red-500 @enderror">
+                        <select id="supplier_id" name="supplier_id" class="mt-1 block w-full border border-gray-300 rounded px-3 py-2.5 text-base @error('supplier_id') border-red-500 @enderror">
                             <option value="">-- Select supplier --</option>
                             @foreach($suppliers as $supplier)
                                 <option value="{{ $supplier->id }}" {{ (string) old('supplier_id') === (string) $supplier->id ? 'selected' : '' }}>{{ $supplier->name }}</option>
@@ -42,16 +42,16 @@
                     </div>
                     <div>
                         <label for="purchase_order" class="block text-sm font-medium text-gray-700">Purchase Order / Delivery Reference</label>
-                        <input id="purchase_order" type="text" name="purchase_order" value="{{ old('purchase_order') }}" class="mt-1 block w-full border border-gray-300 rounded px-3 py-2" placeholder="PO-0001 / Delivery receipt">
+                        <input id="purchase_order" type="text" name="purchase_order" value="{{ old('purchase_order') }}" class="mt-1 block w-full border border-gray-300 rounded px-3 py-2.5 text-base" placeholder="PO-0001 / Delivery receipt">
                     </div>
                 </div>
 
-                <div class="mb-4 flex items-center justify-between">
+                <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
                         <h2 class="text-lg font-semibold text-gray-800">Received Batches</h2>
                         <p class="text-sm text-gray-500">A duplicate batch-and-lot combination for the same medicine will be rejected, never overwritten.</p>
                     </div>
-                    <button type="button" id="add-item" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded text-sm"><i class="fas fa-plus mr-1"></i>Add another batch</button>
+                    <button type="button" id="add-item" class="w-full sm:w-auto inline-flex items-center justify-center bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 min-h-11 rounded text-sm"><i class="fas fa-plus mr-1"></i>Add another batch</button>
                 </div>
 
                 @php
@@ -81,7 +81,7 @@
                             @foreach($rows as $index => $row)
                                 <tr class="item-row border-t border-gray-200">
                                     <td class="px-2 py-2">
-                                        <select name="items[{{ $index }}][inventory_item_id]" required class="medicine-select w-56 border border-gray-300 rounded px-2 py-1">
+                                        <select name="items[{{ $index }}][inventory_item_id]" required class="medicine-select w-56 border border-gray-300 rounded px-2 py-1.5 text-base">
                                             <option value="">-- Select medicine --</option>
                                             @foreach($inventory as $aggregate)
                                                 <option value="{{ $aggregate->id }}" data-cold-chain-required="{{ $aggregate->medicine->cold_chain_required ? '1' : '0' }}" {{ (string) ($row['inventory_item_id'] ?? '') === (string) $aggregate->id ? 'selected' : '' }}>
@@ -90,12 +90,12 @@
                                             @endforeach
                                         </select>
                                     </td>
-                                    <td class="px-2 py-2"><input type="text" name="items[{{ $index }}][batch_number]" value="{{ $row['batch_number'] ?? '' }}" required class="w-28 border border-gray-300 rounded px-2 py-1" placeholder="B001"></td>
-                                    <td class="px-2 py-2"><input type="text" name="items[{{ $index }}][lot_number]" value="{{ $row['lot_number'] ?? '' }}" class="w-28 border border-gray-300 rounded px-2 py-1" placeholder="LOT-01"></td>
-                                    <td class="px-2 py-2"><input type="number" name="items[{{ $index }}][quantity]" value="{{ $row['quantity'] ?? '' }}" required min="1" class="w-24 border border-gray-300 rounded px-2 py-1"></td>
-                                    <td class="px-2 py-2"><input type="number" step="0.01" name="items[{{ $index }}][price]" value="{{ $row['price'] ?? '' }}" required min="0" class="w-28 border border-gray-300 rounded px-2 py-1"></td>
-                                    <td class="px-2 py-2"><input type="date" name="items[{{ $index }}][expiry_date]" value="{{ $row['expiry_date'] ?? '' }}" class="w-36 border border-gray-300 rounded px-2 py-1"></td>
-                                    <td class="px-2 py-2"><input type="date" name="items[{{ $index }}][received_date]" value="{{ $row['received_date'] ?? now()->format('Y-m-d') }}" required data-default-date="{{ now()->format('Y-m-d') }}" class="w-36 border border-gray-300 rounded px-2 py-1"></td>
+                                    <td class="px-2 py-2"><input type="text" name="items[{{ $index }}][batch_number]" value="{{ $row['batch_number'] ?? '' }}" required class="w-28 border border-gray-300 rounded px-2 py-1.5 text-base" placeholder="B001"></td>
+                                    <td class="px-2 py-2"><input type="text" name="items[{{ $index }}][lot_number]" value="{{ $row['lot_number'] ?? '' }}" class="w-28 border border-gray-300 rounded px-2 py-1.5 text-base" placeholder="LOT-01"></td>
+                                    <td class="px-2 py-2"><input type="number" name="items[{{ $index }}][quantity]" value="{{ $row['quantity'] ?? '' }}" required min="1" class="w-24 border border-gray-300 rounded px-2 py-1.5 text-base"></td>
+                                    <td class="px-2 py-2"><input type="number" step="0.01" name="items[{{ $index }}][price]" value="{{ $row['price'] ?? '' }}" required min="0" class="w-28 border border-gray-300 rounded px-2 py-1.5 text-base"></td>
+                                    <td class="px-2 py-2"><input type="date" name="items[{{ $index }}][expiry_date]" value="{{ $row['expiry_date'] ?? '' }}" class="w-36 border border-gray-300 rounded px-2 py-1.5 text-base"></td>
+                                    <td class="px-2 py-2"><input type="date" name="items[{{ $index }}][received_date]" value="{{ $row['received_date'] ?? now()->format('Y-m-d') }}" required data-default-date="{{ now()->format('Y-m-d') }}" class="w-36 border border-gray-300 rounded px-2 py-1.5 text-base"></td>
                                     <td class="px-2 py-2 text-center">
                                         <input type="hidden" name="items[{{ $index }}][cold_chain]" value="0">
                                         <input type="checkbox" name="items[{{ $index }}][cold_chain]" value="1" {{ ! empty($row['cold_chain']) ? 'checked' : '' }} class="cold-chain-toggle">
@@ -107,9 +107,9 @@
                     </table>
                 </div>
 
-                <div class="mt-6 flex items-center gap-3">
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg"><i class="fas fa-check mr-2"></i>Process Delivery</button>
-                    <a href="{{ route('pharmacy.inventory') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-lg">Cancel</a>
+                <div class="mt-6 flex flex-col sm:flex-row sm:items-center gap-3">
+                    <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg min-h-11"><i class="fas fa-check mr-2"></i>Process Delivery</button>
+                    <a href="{{ route('pharmacy.inventory') }}" class="w-full sm:w-auto inline-flex items-center justify-center bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-lg min-h-11">Cancel</a>
                 </div>
             </form>
         </div>

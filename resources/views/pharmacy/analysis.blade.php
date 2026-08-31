@@ -38,7 +38,7 @@
     <!-- ABC-VED Matrix -->
     <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
         <h3 class="text-lg font-semibold text-gray-800 mb-4">ABC-VED Matrix</h3>
-        <div class="grid grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div class="bg-blue-50 border border-blue-200 rounded p-4 text-center">
                 <p class="text-sm text-blue-700 font-medium">Category I (High Priority)</p>
                 <p class="text-3xl font-bold text-blue-700">{{ $matrix['I'] }}</p>
@@ -58,33 +58,33 @@
     <div class="bg-white rounded-lg shadow-lg overflow-hidden">
         <div class="p-6">
             <h3 class="text-lg font-semibold text-gray-800 mb-4">Item Classification Details</h3>
-            <div class="overflow-x-auto">
-                <table class="w-full">
+            <div class="overflow-x-auto -mx-6 px-6">
+                <table class="w-full text-sm">
                     <thead>
                         <tr class="bg-gray-50 text-left text-gray-600">
-                            <th class="px-4 py-3">Medicine</th>
-                            <th class="px-4 py-3">Stock</th>
-                            <th class="px-4 py-3">Price</th>
-                            <th class="px-4 py-3">Value</th>
-                            <th class="px-4 py-3">ABC</th>
-                            <th class="px-4 py-3">VED</th>
-                            <th class="px-4 py-3">ABC-VED</th>
+                            <th class="px-4 py-3 whitespace-nowrap">Medicine</th>
+                            <th class="px-4 py-3 whitespace-nowrap">Stock</th>
+                            <th class="px-4 py-3 whitespace-nowrap">Price</th>
+                            <th class="px-4 py-3 whitespace-nowrap">Value</th>
+                            <th class="px-4 py-3 whitespace-nowrap">ABC</th>
+                            <th class="px-4 py-3 whitespace-nowrap">VED</th>
+                            <th class="px-4 py-3 whitespace-nowrap">ABC-VED</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($sorted as $item)
                             <tr class="border-t border-gray-200">
-                                <td class="px-4 py-3 font-medium">{{ $item->medicine->medicine_name }}</td>
-                                <td class="px-4 py-3">{{ $item->available_stock }}</td>
-                                <td class="px-4 py-3">₱{{ number_format((float) $item->representative_price, 2) }}</td>
-                                <td class="px-4 py-3">₱{{ number_format($item->value, 2) }}</td>
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3 font-medium whitespace-nowrap">{{ $item->medicine->medicine_name }}</td>
+                                <td class="px-4 py-3 whitespace-nowrap">{{ $item->available_stock }}</td>
+                                <td class="px-4 py-3 whitespace-nowrap">₱{{ number_format((float) $item->representative_price, 2) }}</td>
+                                <td class="px-4 py-3 whitespace-nowrap">₱{{ number_format($item->value, 2) }}</td>
+                                <td class="px-4 py-3 whitespace-nowrap">
                                     <span class="px-2 py-1 rounded text-xs font-semibold {{ $item->abc === 'A' ? 'bg-red-100 text-red-700' : ($item->abc === 'B' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700') }}">{{ $item->abc }}</span>
                                 </td>
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3 whitespace-nowrap">
                                     <span class="px-2 py-1 rounded text-xs font-semibold {{ $item->ved === 'V' ? 'bg-red-100 text-red-700' : ($item->ved === 'E' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700') }}">{{ $item->ved }}</span>
                                 </td>
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3 whitespace-nowrap">
                                     <span class="px-2 py-1 rounded text-xs font-semibold {{ $item->abc_ved === 'I' ? 'bg-blue-100 text-blue-700' : ($item->abc_ved === 'II' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700') }}">Cat {{ $item->abc_ved }}</span>
                                 </td>
                             </tr>

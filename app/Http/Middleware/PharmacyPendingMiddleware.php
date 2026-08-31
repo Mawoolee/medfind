@@ -21,6 +21,8 @@ class PharmacyPendingMiddleware
         $allowedRouteNames = [
             'pharmacy.profile.edit',
             'pharmacy.profile.update',
+            'pharmacy.profile.location',
+            'pharmacy.profile.location.store',
             'pharmacy.requirements',
             'pharmacy.requirements.store',
             'logout',

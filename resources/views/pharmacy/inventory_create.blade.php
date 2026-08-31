@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-8 max-w-4xl">
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
             <h1 class="text-2xl font-bold text-gray-800">Add New Medicine</h1>
             <p class="text-sm text-gray-500 mt-1">Create the product identity only. Receive batch stock separately after saving.</p>
@@ -33,7 +33,7 @@
 
             <div class="mb-5">
                 <label for="medicine_id" class="block text-sm font-medium text-gray-700">Use an existing medicine master (optional)</label>
-                <select id="medicine_id" name="medicine_id" class="mt-1 block w-full border border-gray-300 rounded px-3 py-2 @error('medicine_id') border-red-500 @enderror">
+                <select id="medicine_id" name="medicine_id" class="mt-1 block w-full border border-gray-300 rounded px-3 py-2.5 text-base @error('medicine_id') border-red-500 @enderror">
                     <option value="">-- Create a new medicine master --</option>
                     @foreach($medicines as $medicine)
                         <option value="{{ $medicine->id }}" {{ (string) old('medicine_id') === (string) $medicine->id ? 'selected' : '' }}>
@@ -47,25 +47,25 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label for="medicine_name" class="block text-sm font-medium text-gray-700">Generic Name <span class="text-red-500">*</span></label>
-                    <input id="medicine_name" type="text" name="medicine_name" value="{{ old('medicine_name') }}" required class="mt-1 block w-full border border-gray-300 rounded px-3 py-2 @error('medicine_name') border-red-500 @enderror" placeholder="e.g., Paracetamol">
+                    <input id="medicine_name" type="text" name="medicine_name" value="{{ old('medicine_name') }}" required class="mt-1 block w-full border border-gray-300 rounded px-3 py-2.5 text-base @error('medicine_name') border-red-500 @enderror" placeholder="e.g., Paracetamol">
                     @error('medicine_name')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
                     <label for="brand_name" class="block text-sm font-medium text-gray-700">Brand Name</label>
-                    <input id="brand_name" type="text" name="brand_name" value="{{ old('brand_name') }}" class="mt-1 block w-full border border-gray-300 rounded px-3 py-2 @error('brand_name') border-red-500 @enderror" placeholder="e.g., Biogesic">
+                    <input id="brand_name" type="text" name="brand_name" value="{{ old('brand_name') }}" class="mt-1 block w-full border border-gray-300 rounded px-3 py-2.5 text-base @error('brand_name') border-red-500 @enderror" placeholder="e.g., Biogesic">
                     @error('brand_name')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
                     <label for="dosage" class="block text-sm font-medium text-gray-700">Dosage</label>
-                    <input id="dosage" type="text" name="dosage" value="{{ old('dosage') }}" class="mt-1 block w-full border border-gray-300 rounded px-3 py-2 @error('dosage') border-red-500 @enderror" placeholder="e.g., 500mg">
+                    <input id="dosage" type="text" name="dosage" value="{{ old('dosage') }}" class="mt-1 block w-full border border-gray-300 rounded px-3 py-2.5 text-base @error('dosage') border-red-500 @enderror" placeholder="e.g., 500mg">
                     @error('dosage')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
                     <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
-                    <select id="category" name="category" class="mt-1 block w-full border border-gray-300 rounded px-3 py-2 @error('category') border-red-500 @enderror">
+                    <select id="category" name="category" class="mt-1 block w-full border border-gray-300 rounded px-3 py-2.5 text-base @error('category') border-red-500 @enderror">
                         <option value="">-- Select --</option>
                         @foreach($categoryOptions as $value => $label)
                             <option value="{{ $value }}" {{ $selectedCategory === $value ? 'selected' : '' }}>{{ $label }}</option>
@@ -76,13 +76,13 @@
 
                 <div>
                     <label for="manufacturer" class="block text-sm font-medium text-gray-700">Manufacturer</label>
-                    <input id="manufacturer" type="text" name="manufacturer" value="{{ old('manufacturer') }}" class="mt-1 block w-full border border-gray-300 rounded px-3 py-2 @error('manufacturer') border-red-500 @enderror">
+                    <input id="manufacturer" type="text" name="manufacturer" value="{{ old('manufacturer') }}" class="mt-1 block w-full border border-gray-300 rounded px-3 py-2.5 text-base @error('manufacturer') border-red-500 @enderror">
                     @error('manufacturer')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
                     <label for="par_level" class="block text-sm font-medium text-gray-700">Par Level</label>
-                    <input id="par_level" type="number" name="par_level" min="0" value="{{ old('par_level', 0) }}" class="mt-1 block w-full border border-gray-300 rounded px-3 py-2 @error('par_level') border-red-500 @enderror">
+                    <input id="par_level" type="number" name="par_level" min="0" value="{{ old('par_level', 0) }}" class="mt-1 block w-full border border-gray-300 rounded px-3 py-2.5 text-base @error('par_level') border-red-500 @enderror">
                     <p class="mt-1 text-xs text-gray-500">Compared with the combined available quantity of all batches.</p>
                     @error('par_level')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>
@@ -105,9 +105,9 @@
                 </div>
             </div>
 
-            <div class="mt-6 flex items-center gap-3">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded">Save Medicine</button>
-                <a href="{{ route('pharmacy.inventory') }}" class="text-sm text-gray-600">Cancel</a>
+            <div class="mt-6 flex flex-col sm:flex-row sm:items-center gap-3">
+                <button type="submit" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 sm:py-2 rounded min-h-11">Save Medicine</button>
+                <a href="{{ route('pharmacy.inventory') }}" class="text-center sm:text-left text-sm text-gray-600">Cancel</a>
             </div>
         </form>
     </div>

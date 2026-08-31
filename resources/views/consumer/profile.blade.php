@@ -6,11 +6,11 @@
 
         {{-- Header --}}
         <div class="flex items-center justify-between">
-            <h1 class="text-xl font-extrabold text-[#191970]">
+            <h1 class="text-xl sm:text-2xl font-extrabold text-[#191970]">
                 <i class="fas fa-user-circle mr-2 text-[#9400D3]"></i>Profile Settings
             </h1>
             <a href="{{ route('consumer.dashboard') }}"
-               class="text-xs text-[#9400D3] hover:text-[#191970] font-semibold transition flex items-center gap-1">
+               class="text-sm text-[#9400D3] hover:text-[#191970] font-semibold transition flex items-center gap-1">
                 <i class="fas fa-arrow-left"></i> Back
             </a>
         </div>
@@ -38,16 +38,16 @@
                 @method('PATCH')
 
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Full Name</label>
+                    <label class="block text-sm font-semibold text-gray-600 mb-1">Full Name</label>
                     <input type="text" name="name" value="{{ old('name', auth()->user()->name) }}" required
-                        class="w-full border border-[#9400D3]/20 rounded-xl px-4 py-2.5 text-sm text-[#191970] outline-none focus:border-[#9400D3] bg-[#f8f4ff] transition">
+                        class="w-full border border-[#9400D3]/20 rounded-xl px-4 py-2.5 text-base text-[#191970] outline-none focus:border-[#9400D3] bg-[#f8f4ff] transition">
                     @error('name') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Email Address</label>
+                    <label class="block text-sm font-semibold text-gray-600 mb-1">Email Address</label>
                     <input type="email" name="email" value="{{ old('email', auth()->user()->email) }}" required
-                        class="w-full border border-[#9400D3]/20 rounded-xl px-4 py-2.5 text-sm text-[#191970] outline-none focus:border-[#9400D3] bg-[#f8f4ff] transition">
+                        class="w-full border border-[#9400D3]/20 rounded-xl px-4 py-2.5 text-base text-[#191970] outline-none focus:border-[#9400D3] bg-[#f8f4ff] transition">
                     @error('email') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
@@ -70,23 +70,23 @@
                 @method('PUT')
 
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Current Password</label>
+                    <label class="block text-sm font-semibold text-gray-600 mb-1">Current Password</label>
                     <input type="password" name="current_password" required
-                        class="w-full border border-[#9400D3]/20 rounded-xl px-4 py-2.5 text-sm text-[#191970] outline-none focus:border-[#9400D3] bg-[#f8f4ff] transition">
+                        class="w-full border border-[#9400D3]/20 rounded-xl px-4 py-2.5 text-base text-[#191970] outline-none focus:border-[#9400D3] bg-[#f8f4ff] transition">
                     @error('current_password', 'updatePassword') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">New Password</label>
+                    <label class="block text-sm font-semibold text-gray-600 mb-1">New Password</label>
                     <input type="password" name="password" required
-                        class="w-full border border-[#9400D3]/20 rounded-xl px-4 py-2.5 text-sm text-[#191970] outline-none focus:border-[#9400D3] bg-[#f8f4ff] transition">
+                        class="w-full border border-[#9400D3]/20 rounded-xl px-4 py-2.5 text-base text-[#191970] outline-none focus:border-[#9400D3] bg-[#f8f4ff] transition">
                     @error('password', 'updatePassword') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Confirm New Password</label>
+                    <label class="block text-sm font-semibold text-gray-600 mb-1">Confirm New Password</label>
                     <input type="password" name="password_confirmation" required
-                        class="w-full border border-[#9400D3]/20 rounded-xl px-4 py-2.5 text-sm text-[#191970] outline-none focus:border-[#9400D3] bg-[#f8f4ff] transition">
+                        class="w-full border border-[#9400D3]/20 rounded-xl px-4 py-2.5 text-base text-[#191970] outline-none focus:border-[#9400D3] bg-[#f8f4ff] transition">
                 </div>
 
                 <button type="submit"
@@ -108,7 +108,7 @@
                 @csrf
                 @method('DELETE')
                 <input type="password" name="password" placeholder="Enter your password to confirm"
-                    class="w-full border border-red-200 rounded-xl px-4 py-2.5 text-sm text-[#191970] outline-none focus:border-red-400 bg-red-50 transition mb-3">
+                    class="w-full border border-red-200 rounded-xl px-4 py-2.5 text-base text-[#191970] outline-none focus:border-red-400 bg-red-50 transition mb-3">
                 @error('password', 'userDeletion') <p class="text-red-500 text-xs mb-2">{{ $message }}</p> @enderror
                 <button type="submit"
                     class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-full text-sm transition active:scale-95">

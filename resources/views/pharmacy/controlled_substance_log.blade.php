@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-8 max-w-2xl">
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div><h1 class="text-2xl font-bold text-gray-800">Log Controlled Substance</h1><p class="text-sm text-gray-500 mt-1">Stock decreases are allocated to available batches in FEFO order.</p></div>
         <x-back-button :href="route('pharmacy.controlled-substances.index')" label="Back to Controlled Substances" />
     </div>
@@ -18,7 +18,7 @@
             @csrf
             <div class="mb-5">
                 <label for="inventory_item_id" class="block text-sm font-medium text-gray-700 mb-1">Medicine <span class="text-red-500">*</span></label>
-                <select id="inventory_item_id" name="inventory_item_id" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                <select id="inventory_item_id" name="inventory_item_id" required class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-base">
                     <option value="">-- Select a controlled substance --</option>
                     @foreach($controlledItems as $item)
                         <option value="{{ $item->id }}" {{ (string) old('inventory_item_id') === (string) $item->id ? 'selected' : '' }}>{{ $item->medicine?->medicine_name }} — Available: {{ $item->available_stock }}</option>
@@ -27,7 +27,7 @@
             </div>
             <div class="mb-5">
                 <label for="action-select" class="block text-sm font-medium text-gray-700 mb-1">Action <span class="text-red-500">*</span></label>
-                <select name="action" required id="action-select" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                <select name="action" required id="action-select" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-base">
                     <option value="">-- Select action --</option>
                     <option value="dispensed" {{ old('action') === 'dispensed' ? 'selected' : '' }}>Dispensed to patient</option>
                     <option value="wastage" {{ old('action') === 'wastage' ? 'selected' : '' }}>Wastage / Destroyed</option>
@@ -38,19 +38,19 @@
             </div>
             <div class="mb-5">
                 <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">Quantity <span class="text-red-500">*</span></label>
-                <input id="quantity" type="number" name="quantity" value="{{ old('quantity') }}" min="0" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" placeholder="Enter quantity">
+                <input id="quantity" type="number" name="quantity" value="{{ old('quantity') }}" min="0" required class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-base" placeholder="Enter quantity">
             </div>
             <div class="mb-5" id="patient-ref-field" style="display:none;">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Patient / Prescription Reference</label>
-                <input type="text" name="patient_reference" value="{{ old('patient_reference') }}" maxlength="255" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" placeholder="Rx # or patient reference">
+                <input type="text" name="patient_reference" value="{{ old('patient_reference') }}" maxlength="255" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-base" placeholder="Rx # or patient reference">
             </div>
             <div class="mb-6">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                <textarea name="notes" rows="3" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" placeholder="Reason or reference">{{ old('notes') }}</textarea>
+                <textarea name="notes" rows="3" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-base" placeholder="Reason or reference">{{ old('notes') }}</textarea>
             </div>
-            <div class="flex gap-3">
-                <button type="submit" class="flex-1 bg-purple-700 text-white py-2 rounded-lg font-semibold text-sm hover:bg-purple-800"><i class="fas fa-save mr-2"></i>Submit Entry</button>
-                <a href="{{ route('pharmacy.controlled-substances.index') }}" class="flex-1 text-center border border-gray-300 text-gray-700 py-2 rounded-lg font-semibold text-sm hover:bg-gray-50">Cancel</a>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button type="submit" class="flex-1 bg-purple-700 text-white py-3 rounded-lg font-semibold text-sm hover:bg-purple-800 min-h-11"><i class="fas fa-save mr-2"></i>Submit Entry</button>
+                <a href="{{ route('pharmacy.controlled-substances.index') }}" class="flex-1 inline-flex items-center justify-center text-center border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold text-sm hover:bg-gray-50 min-h-11">Cancel</a>
             </div>
         </form>
     </div>

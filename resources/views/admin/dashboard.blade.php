@@ -6,10 +6,10 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-8">
- <h1 class="text-3xl font-bold text-gray-800 mb-6">Admin Dashboard</h1>
+ <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">Admin Dashboard</h1>
 
- <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
- <div class="bg-white rounded-lg shadow-lg p-6">
+ <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
+ <div class="bg-white rounded-lg shadow-lg p-5 sm:p-6">
  <div class="flex items-center justify-between">
  <div>
  <p class="text-gray-500 text-sm">Total Users</p>
@@ -18,7 +18,7 @@
  <i class="fas fa-users text-4xl text-blue-200"></i>
  </div>
  </div>
- <div class="bg-white rounded-lg shadow-lg p-6">
+ <div class="bg-white rounded-lg shadow-lg p-5 sm:p-6">
  <div class="flex items-center justify-between">
  <div>
  <p class="text-gray-500 text-sm">Pharmacies</p>
@@ -27,7 +27,7 @@
  <i class="fas fa-store text-4xl text-green-200"></i>
  </div>
  </div>
- <div class="bg-white rounded-lg shadow-lg p-6">
+ <div class="bg-white rounded-lg shadow-lg p-5 sm:p-6">
  <div class="flex items-center justify-between">
  <div>
  <p class="text-gray-500 text-sm">Medicines</p>
@@ -38,31 +38,31 @@
  </div>
  </div>
 
- <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
- <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col">
- <h2 class="text-xl font-semibold text-gray-800 mb-2">Manage Users</h2>
+ <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
+ <div class="bg-white rounded-lg shadow-lg p-5 sm:p-6 flex flex-col">
+ <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-2">Manage Users</h2>
  <p class="text-gray-600 mb-4 flex-1">View and manage all system users.</p>
- <a href="{{ route('admin.users') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition duration-200 w-fit">
+ <a href="{{ route('admin.users') }}" class="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition duration-200 w-full sm:w-fit">
  <i class="fas fa-user-cog mr-2"></i>Manage Users
  </a>
  </div>
- <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col">
- <h2 class="text-xl font-semibold text-gray-800 mb-2">Manage Pharmacies</h2>
+ <div class="bg-white rounded-lg shadow-lg p-5 sm:p-6 flex flex-col">
+ <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-2">Manage Pharmacies</h2>
  <p class="text-gray-600 mb-4 flex-1">Add, edit, or remove pharmacies.</p>
- <a href="{{ route('admin.pharmacies') }}" class="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition duration-200 w-fit">
+ <a href="{{ route('admin.pharmacies') }}" class="inline-flex items-center justify-center bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition duration-200 w-full sm:w-fit">
  <i class="fas fa-store-alt mr-2"></i>Manage Pharmacies
  </a>
  </div>
- <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col">
- <h2 class="text-xl font-semibold text-gray-800 mb-2">Review Requirements</h2>
+ <div class="bg-white rounded-lg shadow-lg p-5 sm:p-6 flex flex-col">
+ <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-2">Review Requirements</h2>
  <p class="text-gray-600 mb-4 flex-1">Review pharmacy documents and approve or reject registrations.</p>
- <a href="{{ route('admin.requirements') }}" class="inline-block text-white px-6 py-3 rounded-lg transition duration-200 w-fit" style="background:#9400D3;">
+ <a href="{{ route('admin.requirements') }}" class="inline-flex items-center justify-center text-white px-6 py-3 rounded-lg transition duration-200 w-full sm:w-fit" style="background:#9400D3;">
  <i class="fas fa-file-circle-check mr-2"></i>Review Requirements
  </a>
  </div>
  </div>
 
- <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+ <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
  <div class="bg-white rounded-lg shadow-lg overflow-hidden">
  <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
  <h2 class="text-lg font-semibold text-gray-800">Recent Users</h2>

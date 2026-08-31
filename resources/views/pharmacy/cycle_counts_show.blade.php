@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-8">
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <h1 class="text-2xl font-bold text-gray-800">📋 {{ $count->name }}</h1>
         <x-back-button :href="route('pharmacy.cycle-counts.index')" label="Back to Cycle Counts" />
     </div>
@@ -58,30 +58,31 @@
         </div>
 
         @if($count->completed_at)
-            <table class="w-full">
+            <div class="overflow-x-auto">
+            <table class="w-full text-sm min-w-[640px]">
                 <thead>
                     <tr class="bg-gray-50 text-left text-gray-600">
-                        <th class="px-4 py-3">Medicine</th>
-                        <th class="px-4 py-3">Expected</th>
-                        <th class="px-4 py-3">Counted</th>
-                        <th class="px-4 py-3">Discrepancy</th>
-                        <th class="px-4 py-3">Status</th>
+                        <th class="px-4 py-3 whitespace-nowrap">Medicine</th>
+                        <th class="px-4 py-3 whitespace-nowrap">Expected</th>
+                        <th class="px-4 py-3 whitespace-nowrap">Counted</th>
+                        <th class="px-4 py-3 whitespace-nowrap">Discrepancy</th>
+                        <th class="px-4 py-3 whitespace-nowrap">Status</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($count->items as $item)
                         <tr class="border-t border-gray-200">
-                            <td class="px-4 py-3 font-medium">{{ $item->inventoryItem->medicine->medicine_name }}</td>
-                            <td class="px-4 py-3">{{ $item->expected_quantity }}</td>
-                            <td class="px-4 py-3">{{ $item->counted_quantity }}</td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 font-medium whitespace-nowrap">{{ $item->inventoryItem->medicine->medicine_name }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap">{{ $item->expected_quantity }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap">{{ $item->counted_quantity }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap">
                                 @if($item->discrepancy != 0)
                                     <span class="font-semibold {{ $item->discrepancy > 0 ? 'text-green-600' : 'text-red-600' }}">{{ $item->discrepancy > 0 ? '+' : '' }}{{ $item->discrepancy }}</span>
                                 @else
                                     <span class="text-gray-400">0</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 whitespace-nowrap">
                                 @if($item->discrepancy == 0)
                                     <span class="px-2 py-1 rounded text-xs bg-green-100 text-green-700">Match</span>
                                 @else
@@ -94,37 +95,40 @@
                     @endforelse
                 </tbody>
             </table>
+            </div>
         @else
             <form method="POST" action="{{ route('pharmacy.cycle-counts.complete', $count->id) }}">
                 @csrf
-                <table class="w-full">
+                <div class="overflow-x-auto">
+                <table class="w-full text-sm min-w-[600px]">
                     <thead>
                         <tr class="bg-gray-50 text-left text-gray-600">
-                            <th class="px-4 py-3">Medicine</th>
-                            <th class="px-4 py-3">Expected</th>
-                            <th class="px-4 py-3">Counted</th>
-                            <th class="px-4 py-3">Variance</th>
+                            <th class="px-4 py-3 whitespace-nowrap">Medicine</th>
+                            <th class="px-4 py-3 whitespace-nowrap">Expected</th>
+                            <th class="px-4 py-3 whitespace-nowrap">Counted</th>
+                            <th class="px-4 py-3 whitespace-nowrap">Variance</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($count->items as $item)
                             <tr class="border-t border-gray-200">
-                                <td class="px-4 py-3 font-medium">{{ $item->inventoryItem->medicine->medicine_name }}</td>
-                                <td class="px-4 py-3">{{ $item->expected_quantity }}</td>
-                                <td class="px-4 py-3">
-                                    <input type="number" name="counted[{{ $item->id }}]" value="{{ $item->counted_quantity ?? $item->expected_quantity }}" min="0" class="w-24 px-2 py-1 border border-gray-300 rounded">
+                                <td class="px-4 py-3 font-medium whitespace-nowrap">{{ $item->inventoryItem->medicine->medicine_name }}</td>
+                                <td class="px-4 py-3 whitespace-nowrap">{{ $item->expected_quantity }}</td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <input type="number" name="counted[{{ $item->id }}]" value="{{ $item->counted_quantity ?? $item->expected_quantity }}" min="0" class="w-24 px-2 py-1.5 text-base border border-gray-300 rounded">
                                 </td>
-                                <td class="px-4 py-3" id="var-{{ $item->id }}">—</td>
+                                <td class="px-4 py-3 whitespace-nowrap" id="var-{{ $item->id }}">—</td>
                             </tr>
                         @empty
                             <tr><td colspan="4" class="px-4 py-8 text-center text-gray-500">No items in this count.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
+                </div>
                 <div class="p-6">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Completion Notes</label>
-                    <textarea name="notes" rows="2" class="w-full border border-gray-300 rounded px-3 py-2"></textarea>
-                    <button type="submit" class="mt-3 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded">
+                    <textarea name="notes" rows="2" class="w-full border border-gray-300 rounded px-3 py-2.5 text-base"></textarea>
+                    <button type="submit" class="mt-3 w-full sm:w-auto inline-flex items-center justify-center bg-green-600 hover:bg-green-700 text-white px-6 py-3 sm:py-2 rounded min-h-11">
                         <i class="fas fa-check mr-2"></i>Complete Cycle Count
                     </button>
                 </div>

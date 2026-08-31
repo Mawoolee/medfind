@@ -10,10 +10,10 @@
             <p class="text-sm text-gray-500 mt-1">One row per medicine. Available stock is combined from all non-expired batches.</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-            <a href="{{ route('pharmacy.inventory.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm"><i class="fas fa-plus mr-1"></i>Add New Medicine</a>
-            <a href="{{ route('pharmacy.receiving.create') }}" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded text-sm"><i class="fas fa-truck-ramp-box mr-1"></i>Add Stock</a>
-            <a href="{{ route('pharmacy.inventory.batches') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded text-sm"><i class="fas fa-layer-group mr-1"></i>View Stock Batches</a>
-            <a href="{{ route('pharmacy.inventory.export') }}" class="bg-gray-700 hover:bg-gray-800 text-white px-3 py-2 rounded text-sm"><i class="fas fa-file-csv mr-1"></i>Export CSV</a>
+            <a href="{{ route('pharmacy.inventory.create') }}" class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 min-h-11 rounded text-sm"><i class="fas fa-plus mr-1"></i>Add New Medicine</a>
+            <a href="{{ route('pharmacy.receiving.create') }}" class="inline-flex items-center bg-green-600 hover:bg-green-700 text-white px-3 py-2 min-h-11 rounded text-sm"><i class="fas fa-truck-ramp-box mr-1"></i>Add Stock</a>
+            <a href="{{ route('pharmacy.inventory.batches') }}" class="inline-flex items-center bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 min-h-11 rounded text-sm"><i class="fas fa-layer-group mr-1"></i>View Stock Batches</a>
+            <a href="{{ route('pharmacy.inventory.export') }}" class="inline-flex items-center bg-gray-700 hover:bg-gray-800 text-white px-3 py-2 min-h-11 rounded text-sm"><i class="fas fa-file-csv mr-1"></i>Export CSV</a>
             <x-back-button :href="route('pharmacy.dashboard')" label="Back to Pharmacy Dashboard" />
         </div>
     </div>
@@ -29,15 +29,15 @@
         <div class="p-6 border-b border-gray-200">
             <form method="GET" action="{{ route('pharmacy.inventory') }}" class="grid grid-cols-1 md:grid-cols-6 gap-3">
                 <div class="md:col-span-2">
-                    <input id="pharmacyInventorySearch" name="q" value="{{ $q }}" type="text" placeholder="Medicine, brand, or manufacturer" autocomplete="off" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none">
+                    <input id="pharmacyInventorySearch" name="q" value="{{ $q }}" type="text" placeholder="Medicine, brand, or manufacturer" autocomplete="off" class="w-full px-3 py-2.5 border border-gray-300 rounded text-base focus:outline-none">
                 </div>
-                <select name="category" class="px-3 py-2 border border-gray-300 rounded">
+                <select name="category" class="px-3 py-2.5 border border-gray-300 rounded text-base">
                     <option value="">All Categories</option>
                     @foreach($categoryOptions as $value => $label)
                         <option value="{{ $value }}" {{ $category === $value ? 'selected' : '' }}>{{ $label }}</option>
                     @endforeach
                 </select>
-                <select name="stock" class="px-3 py-2 border border-gray-300 rounded">
+                <select name="stock" class="px-3 py-2.5 border border-gray-300 rounded text-base">
                     <option value="">All Stock</option>
                     <option value="in" {{ $stock === 'in' ? 'selected' : '' }}>In Stock</option>
                     <option value="low" {{ $stock === 'low' ? 'selected' : '' }}>At / Below Par</option>
@@ -45,14 +45,14 @@
                     <option value="expiring" {{ $stock === 'expiring' ? 'selected' : '' }}>Expiring in 90 Days</option>
                     <option value="expired" {{ $stock === 'expired' ? 'selected' : '' }}>Has Expired Stock</option>
                 </select>
-                <select name="sort" class="px-3 py-2 border border-gray-300 rounded">
+                <select name="sort" class="px-3 py-2.5 border border-gray-300 rounded text-base">
                     <option value="recent" {{ $sort === 'recent' ? 'selected' : '' }}>Recently Updated</option>
                     <option value="fefo" {{ $sort === 'fefo' ? 'selected' : '' }}>FEFO</option>
                     <option value="name" {{ $sort === 'name' ? 'selected' : '' }}>Medicine Name</option>
                     <option value="low" {{ $sort === 'low' ? 'selected' : '' }}>Stock: Low to High</option>
                     <option value="high" {{ $sort === 'high' ? 'selected' : '' }}>Stock: High to Low</option>
                 </select>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm">Filter</button>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded text-sm min-h-11">Filter</button>
             </form>
             <p id="inventorySearchResultCount" class="mt-3 text-sm text-gray-500">Showing {{ $inventory->total() }} medicine(s).</p>
             <script>window.inventoryMedicineNames = @json($inventoryMedicineNames);</script>
@@ -85,7 +85,7 @@
                         <tr class="border-t border-gray-200 {{ $isOut ? 'bg-red-50' : ($isLow ? 'bg-yellow-50' : '') }}">
                             <td class="px-4 py-3" data-medicine-name>
                                 <p class="font-semibold text-gray-800">{{ $item->medicine->medicine_name }}</p>
-                                @if($item->medicine->brand_name)<p class="text-xs text-gray-500">{{ $item->medicine->brand_name }}</p>@endif
+                                @if($item->medicine->brand_name)<p class="text-sm text-gray-500">{{ $item->medicine->brand_name }}</p>@endif
                                 <div class="mt-1 flex gap-2">
                                     @if($item->medicine->cold_chain_required)<span class="text-xs text-blue-600" title="Cold-chain required"><i class="fas fa-snowflake mr-1"></i>Cold chain</span>@endif
                                     @if($item->is_controlled)<span class="text-xs text-red-600"><i class="fas fa-shield-halved mr-1"></i>Controlled</span>@endif

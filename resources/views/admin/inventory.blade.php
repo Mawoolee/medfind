@@ -4,18 +4,18 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-8">
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
             <h1 class="text-2xl font-bold text-gray-800">📦 System Inventory Overview</h1>
             <p class="text-sm text-gray-500 mt-1">Real-time stock levels across all partner pharmacies.</p>
         </div>
-        <a href="{{ route('admin.dashboard') }}" class="text-[#9400D3] hover:text-[#7a00b0] text-sm font-medium">
+        <a href="{{ route('admin.dashboard') }}" class="text-[#9400D3] hover:text-[#7a00b0] text-sm font-medium whitespace-nowrap">
             <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
         </a>
     </div>
 
     {{-- Summary Cards --}}
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6">
         <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
             <p class="text-xs text-gray-500">Total SKUs</p>
             <p class="text-2xl font-bold text-[#9400D3]">{{ number_format($totalSkus) }}</p>
@@ -36,15 +36,15 @@
 
     {{-- Filters --}}
     <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-6">
-        <form method="GET" action="{{ route('admin.inventory') }}" class="flex flex-wrap gap-3 items-end">
-            <div>
-                <label class="block text-xs text-gray-500 mb-1">Medicine</label>
+        <form method="GET" action="{{ route('admin.inventory') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap gap-3 lg:items-end">
+            <div class="lg:w-48">
+                <label class="block text-sm text-gray-500 mb-1">Medicine</label>
                 <input type="text" name="q" value="{{ $q }}" placeholder="Search medicine..."
-                    class="border border-gray-300 rounded px-3 py-1.5 text-sm w-48 focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
+                    class="w-full border border-gray-300 rounded px-3 py-2.5 lg:py-1.5 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
             </div>
             <div>
-                <label class="block text-xs text-gray-500 mb-1">Pharmacy</label>
-                <select name="pharmacy_id" class="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
+                <label class="block text-sm text-gray-500 mb-1">Pharmacy</label>
+                <select name="pharmacy_id" class="w-full border border-gray-300 rounded px-3 py-2.5 lg:py-1.5 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
                     <option value="">All pharmacies</option>
                     @foreach($pharmacies as $p)
                         <option value="{{ $p->id }}" {{ $pharmacyId == $p->id ? 'selected' : '' }}>{{ $p->pharmacy_name }}</option>
@@ -52,8 +52,8 @@
                 </select>
             </div>
             <div>
-                <label class="block text-xs text-gray-500 mb-1">Stock Status</label>
-                <select name="stock" class="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
+                <label class="block text-sm text-gray-500 mb-1">Stock Status</label>
+                <select name="stock" class="w-full border border-gray-300 rounded px-3 py-2.5 lg:py-1.5 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
                     <option value="">All</option>
                     <option value="in" {{ $stock === 'in' ? 'selected' : '' }}>In Stock</option>
                     <option value="out" {{ $stock === 'out' ? 'selected' : '' }}>Out of Stock</option>
@@ -62,19 +62,19 @@
                 </select>
             </div>
             <div>
-                <label class="block text-xs text-gray-500 mb-1">Category</label>
-                <select name="category" class="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
+                <label class="block text-sm text-gray-500 mb-1">Category</label>
+                <select name="category" class="w-full border border-gray-300 rounded px-3 py-2.5 lg:py-1.5 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
                     <option value="">All categories</option>
                     @foreach($categories as $cat)
                         <option value="{{ $cat }}" {{ $category === $cat ? 'selected' : '' }}>{{ $cat }}</option>
                     @endforeach
                 </select>
             </div>
-            <button type="submit" class="bg-[#9400D3] text-white px-4 py-1.5 rounded text-sm hover:bg-[#7a00b0] transition">
+            <button type="submit" class="bg-[#9400D3] text-white px-4 py-2.5 lg:py-1.5 rounded text-sm hover:bg-[#7a00b0] transition">
                 <i class="fas fa-filter mr-1"></i>Filter
             </button>
             @if($q || $pharmacyId || $stock || $category)
-                <a href="{{ route('admin.inventory') }}" class="text-sm text-gray-500 hover:text-gray-700 py-1.5">
+                <a href="{{ route('admin.inventory') }}" class="text-sm text-gray-500 hover:text-gray-700 py-2.5 lg:py-1.5 text-center">
                     <i class="fas fa-times mr-1"></i>Clear
                 </a>
             @endif
@@ -115,7 +115,7 @@
             <p class="text-sm text-gray-600">Showing <span class="font-semibold">{{ $items->total() }}</span> inventory records</p>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full">
+            <table class="w-full min-w-[820px]">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200 text-left text-xs uppercase tracking-wide text-gray-500">
                         <th class="px-4 py-3">Pharmacy</th>

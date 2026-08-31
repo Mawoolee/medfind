@@ -47,9 +47,9 @@
 
  {{-- Checklist --}}
  <div class="bg-white rounded-[20px] shadow-sm p-5 mb-6 border border-gray-100">
- <h2 class="font-semibold mb-1 text-sm" style="color:#191970;"><i class="fas fa-list-check mr-2" style="color:#9400D3;"></i>Required Documents</h2>
+ <h2 class="font-semibold mb-1 text-base" style="color:#191970;"><i class="fas fa-list-check mr-2" style="color:#9400D3;"></i>Required Documents</h2>
  <p class="text-xs text-gray-400 mb-4">Checked items mean a file has already been uploaded.</p>
- <div class="grid grid-cols-2 gap-2">
+ <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
  @foreach($docs as $key => $doc)
  @php $isUploaded = !empty($uploaded[$key]); @endphp
  <input type="hidden" id="sv_{{ $key }}" value="{{ $isUploaded ? 1 : 0 }}">
@@ -58,7 +58,7 @@
  style="{{ $isUploaded ? 'background:#191970;border-color:#191970;' : ($doc['required'] ? 'border-color:#9400D3;' : 'border-color:#d1d5db;') }}">
  @if($isUploaded)<i class="fas fa-check text-[8px] text-white"></i>@endif
  </span>
- <span id="checklabel_{{ $key }}" class="text-xs flex-1 truncate" style="color:{{ $isUploaded ? '#191970' : '#374151' }};font-weight:{{ $isUploaded ? '600' : '400' }};">
+ <span id="checklabel_{{ $key }}" class="text-sm flex-1 truncate" style="color:{{ $isUploaded ? '#191970' : '#374151' }};font-weight:{{ $isUploaded ? '600' : '400' }};">
  {{ $doc['label'] }}@if(!$doc['required'])<span class="text-gray-400 font-normal ml-1">(optional)</span>@endif
  </span>
  </div>
@@ -75,7 +75,7 @@
  </div>
  @endif
 
- <div class="grid grid-cols-2 gap-4">
+ <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
  @foreach($docs as $key => $doc)
  @php $isUploaded = !empty($uploaded[$key]); @endphp
  <div class="bg-white rounded-[16px] shadow-sm border overflow-hidden"
@@ -87,11 +87,11 @@
  <i class="fas {{ $isUploaded ? 'fa-check' : 'fa-file' }} text-[8px]"
  style="color:{{ $isUploaded ? '#D9F855' : '#9400D3' }};"></i>
  </span>
- <span class="text-xs font-semibold flex-1 truncate" style="color:#191970;" title="{{ $doc['label'] }}">{{ $doc['label'] }}</span>
+ <span class="text-sm font-semibold flex-1 truncate" style="color:#191970;" title="{{ $doc['label'] }}">{{ $doc['label'] }}</span>
  @if($isUploaded)
- <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full text-white flex-shrink-0" style="background:#191970;">&#x2713;</span>
+ <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white flex-shrink-0" style="background:#191970;">&#x2713;</span>
  @else
- <span class="text-[9px] font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0 border"
+ <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0 border"
  style="{{ $doc['required'] ? 'color:#b45309;background:#fffbeb;border-color:#fcd34d;' : 'color:#9ca3af;background:#f9fafb;border-color:#e5e7eb;' }}">
  {{ $doc['required'] ? 'Required' : 'Optional' }}
  </span>
@@ -100,11 +100,11 @@
  <div class="px-4 py-3 flex items-center gap-3">
  <input type="file" name="doc_{{ $key }}" id="file_{{ $key }}" accept=".jpg,.jpeg,.png,.pdf" class="hidden" onchange="showFileName('{{ $key }}', this)">
  <button type="button" onclick="document.getElementById('file_{{ $key }}').click()"
- class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-white hover:opacity-90 transition"
+ class="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 min-h-11 rounded-full text-sm font-semibold text-white hover:opacity-90 transition"
  style="background:#9400D3;">
- <i class="fas fa-upload text-[9px]"></i> Select File
+ <i class="fas fa-upload text-[10px]"></i> Select File
  </button>
- <p id="fname_{{ $key }}" class="text-xs truncate flex-1 min-w-0">
+ <p id="fname_{{ $key }}" class="text-sm truncate flex-1 min-w-0">
  @if($isUploaded)
  <span style="color:#191970;font-weight:600;"><i class="fas fa-file mr-1"></i>Uploaded</span>
  @else

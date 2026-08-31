@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\PharmacyRegistrationController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\ProfileController;
@@ -17,6 +18,26 @@ Route::middleware('guest')->group(function () {
         ->name('register');
 
     Route::post('register', [RegisteredUserController::class, 'store']);
+
+    // Pharmacy owner registration (two-step flow)
+    Route::get('register/pharmacy', [PharmacyRegistrationController::class, 'create'])
+        ->name('register.pharmacy');
+
+    Route::post('register/pharmacy', [PharmacyRegistrationController::class, 'storeAccount'])
+        ->name('register.pharmacy.account');
+
+    Route::get('register/pharmacy/details', [PharmacyRegistrationController::class, 'details'])
+        ->name('register.pharmacy.details');
+
+    Route::post('register/pharmacy/details', [PharmacyRegistrationController::class, 'store'])
+        ->name('register.pharmacy.store');
+
+    // Separate location picker map page for the pharmacy registration flow.
+    Route::get('register/pharmacy/location', [PharmacyRegistrationController::class, 'locationPicker'])
+        ->name('register.pharmacy.location');
+
+    Route::post('register/pharmacy/location', [PharmacyRegistrationController::class, 'storeLocation'])
+        ->name('register.pharmacy.location.store');
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');

@@ -703,26 +703,28 @@
     @media (max-width: 640px) {
         .stats-bar-fixed {
             top: 68px !important;
-            padding: 4px 12px !important;
-            gap: 8px !important;
-            font-size: 10px !important;
+            padding: 5px 14px !important;
+            gap: 10px !important;
+            font-size: 11px !important;
         }
         .stats-bar-fixed .stat-divider {
             height: 12px !important;
         }
         .search-panel {
             top: 108px !important;
+            width: calc(100% - 24px) !important;
         }
         .search-card-minimal {
-            padding: 4px 4px 4px 12px !important;
+            padding: 5px 5px 5px 14px !important;
         }
+        /* 16px input keeps iOS from auto-zooming the map view on focus */
         .search-card-minimal input {
-            font-size: 12px !important;
-            padding: 8px 0 !important;
+            font-size: 16px !important;
+            padding: 9px 0 !important;
         }
         .search-card-minimal button {
-            padding: 6px 12px !important;
-            font-size: 11px !important;
+            padding: 8px 14px !important;
+            font-size: 12px !important;
         }
         .chat-modal-fixed {
             width: calc(100% - 32px) !important;
@@ -731,6 +733,27 @@
         }
         .autocomplete-items {
             width: 100% !important;
+        }
+        /* Active messenger-style chat window fits small screens */
+        #activeChatWindow {
+            width: calc(100vw - 24px) !important;
+            right: 12px !important;
+            left: 12px !important;
+            bottom: 12px !important;
+        }
+        /* Routing panel fits within the viewport on mobile */
+        .leaflet-routing-container {
+            width: calc(100vw - 24px) !important;
+            max-width: 340px !important;
+        }
+        /* Nearest suggestion buttons stay tappable */
+        .nearest-suggestion-panel .btn-directions,
+        .nearest-suggestion-panel .btn-view {
+            padding: 8px 12px !important;
+            font-size: 11px !important;
+        }
+        .nearest-suggestion-panel .suggestion-name {
+            font-size: 14px !important;
         }
     }
 </style>
@@ -839,7 +862,7 @@ function renderChatHeads() {
                 circle.style.transform = 'scale(1)';
             };
         } else {
-            // No unread — show close only on hover, hidden otherwise
+            // No unread ï¿½ show close only on hover, hidden otherwise
             cornerBtn.style.cssText = baseStyle + 'background:#6b7280;color:#fff;opacity:0;';
             cornerBtn.textContent = '?';
             head.onmouseenter = function() {

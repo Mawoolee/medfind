@@ -3,10 +3,10 @@
 @section('title', 'Pharmacy Messages')
 
 @section('content')
-<div class="flex" style="height:calc(100vh - 120px);margin-top:10px;margin-bottom:20px;max-width:1280px;margin-left:auto;margin-right:auto;border-radius:16px;overflow:hidden;">
+<div id="messagesRoot" class="flex" style="height:calc(100vh - 120px);margin-top:10px;margin-bottom:20px;max-width:1280px;margin-left:auto;margin-right:auto;border-radius:16px;overflow:hidden;">
 
     {{-- LEFT PANEL --}}
-    <div class="w-96 flex-shrink-0 border-r flex flex-col" style="background:#191970;border-color:rgba(148,0,211,0.3);">
+    <div id="conversationListPanel" class="w-full sm:w-96 flex-shrink-0 border-r flex flex-col" style="background:#191970;border-color:rgba(148,0,211,0.3);">
         <div class="px-5 py-4 border-b flex items-center justify-between" style="border-color:rgba(148,0,211,0.3);">
             <h2 class="text-white font-bold text-lg">Messages</h2>
             <x-back-button :href="route('pharmacy.dashboard')" label="Back to Pharmacy Dashboard" class="shrink-0 bg-[#191970] hover:!bg-white" />
@@ -61,7 +61,7 @@
     </div>
 
     {{-- RIGHT PANEL --}}
-    <div class="flex-1 flex flex-col" style="background:#1a1a2e;">
+    <div id="chatPanel" class="flex-1 flex-col hidden sm:flex" style="background:#1a1a2e;">
         <div id="chatEmpty" class="flex-1 flex items-center justify-center">
             <div class="text-center">
                 <i class="fas fa-comments text-gray-600 text-4xl mb-3 block"></i>
@@ -76,7 +76,10 @@
                 $threadLastMsg = $thread->sortByDesc('created_at')->first();
             @endphp
             <div class="chat-view hidden flex-col h-full" id="chat-{{ $consumerId }}">
-                <div class="flex items-center gap-3 px-6 py-3 border-b flex-shrink-0" style="background:#191970;border-color:rgba(148,0,211,0.3);">
+                <div class="flex items-center gap-3 px-4 sm:px-6 py-3 border-b flex-shrink-0" style="background:#191970;border-color:rgba(148,0,211,0.3);">
+                    <button type="button" onclick="closeConversation()" class="sm:hidden text-gray-300 hover:text-[#D9F855] transition -ml-1 pr-1 flex items-center" title="Back to messages">
+                        <i class="fas fa-arrow-left text-lg"></i>
+                    </button>
                     <div class="w-9 h-9 rounded-full flex items-center justify-center border-2 border-[#D9F855]" style="background:#2a2a5a;">
                         <span class="text-[#D9F855] font-bold text-xs">{{ strtoupper(substr($consumer->name ?? 'C', 0, 1)) }}</span>
                     </div>
@@ -85,7 +88,7 @@
                         <p class="text-gray-400 text-xs">{{ $consumer->email ?? '' }}</p>
                     </div>
                 </div>
-                <div class="flex-1 overflow-y-auto px-6 py-4 space-y-3 chat-messages">
+                <div class="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-3 chat-messages">
                     @php
                         // Build flat timeline using sender field
                         $timeline = $thread->sortBy('created_at')->map(function($msg) {
@@ -154,14 +157,14 @@
                         @endif
                     @endforeach
                 </div>
-                <div class="px-6 py-3 border-t flex-shrink-0" style="background:#191970;border-color:rgba(148,0,211,0.3);">
+                <div class="px-4 sm:px-6 py-3 border-t flex-shrink-0" style="background:#191970;border-color:rgba(148,0,211,0.3);">
                     <form method="POST" action="{{ route('pharmacy.message.reply', $threadLastMsg->id) }}" class="flex items-center gap-3" enctype="multipart/form-data" onsubmit="return sendReply(this, {{ $consumerId }})">
                             @csrf
                             <label for="phRx_{{ $consumerId }}" class="cursor-pointer text-gray-400 hover:text-[#D9F855] transition flex-shrink-0">
                                 <i class="fas fa-paperclip text-lg"></i>
                             </label>
                             <input type="file" name="attachments[]" id="phRx_{{ $consumerId }}" accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.csv" class="hidden" multiple>
-                            <input type="text" name="reply" placeholder="Reply..." required autocomplete="off" class="flex-1 px-5 py-3 rounded-full text-sm text-white outline-none placeholder-gray-400" style="background:#2a2a5a;border:1px solid rgba(148,0,211,0.3);">
+                            <input type="text" name="reply" placeholder="Reply..." required autocomplete="off" class="flex-1 px-5 py-3 rounded-full text-base text-white outline-none placeholder-gray-400" style="background:#2a2a5a;border:1px solid rgba(148,0,211,0.3);">
                             <button type="submit" class="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 transition hover:opacity-80" style="background:#9400D3;">
                                 <i class="fas fa-paper-plane text-white text-sm"></i>
                             </button>
@@ -177,10 +180,32 @@
 var activeConsumerId = null;
 var skipPollUntil = 0;
 
+// Mobile (<640px): the list and chat share the screen; opening a conversation
+// swaps to the chat panel, and the back button returns to the list.
+function isMobileView() {
+    return window.matchMedia('(max-width: 639px)').matches;
+}
+
+function closeConversation() {
+    var listPanel = document.getElementById('conversationListPanel');
+    var chatPanel = document.getElementById('chatPanel');
+    if (listPanel) { listPanel.classList.remove('hidden'); listPanel.classList.add('flex'); }
+    if (chatPanel) { chatPanel.classList.add('hidden'); chatPanel.classList.remove('flex'); }
+}
+
 function openConversation(consumerId) {
     activeConsumerId = consumerId;
     window.location.hash = 'chat-' + consumerId;
     document.getElementById('chatEmpty').style.display = 'none';
+
+    // On mobile, swap panels so the chat view fills the screen.
+    if (isMobileView()) {
+        var listPanel = document.getElementById('conversationListPanel');
+        var chatPanel = document.getElementById('chatPanel');
+        if (listPanel) { listPanel.classList.add('hidden'); listPanel.classList.remove('flex'); }
+        if (chatPanel) { chatPanel.classList.remove('hidden'); chatPanel.classList.add('flex'); }
+    }
+
     document.querySelectorAll('.chat-view').forEach(function(el) {
         el.classList.add('hidden');
         el.classList.remove('flex');
@@ -262,6 +287,21 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
+
+// Keep panel visibility sane when crossing the mobile/desktop breakpoint.
+window.addEventListener('resize', function() {
+    var listPanel = document.getElementById('conversationListPanel');
+    var chatPanel = document.getElementById('chatPanel');
+    if (!isMobileView()) {
+        // Desktop: both panels visible; let Tailwind's sm: classes govern layout.
+        if (listPanel) { listPanel.classList.remove('hidden'); listPanel.classList.remove('flex'); }
+        if (chatPanel) { chatPanel.classList.remove('hidden'); }
+    } else if (!activeConsumerId) {
+        // Mobile with no open conversation: show the list.
+        if (listPanel) { listPanel.classList.remove('hidden'); }
+        if (chatPanel) { chatPanel.classList.add('hidden'); }
+    }
+});
 
 // Restore active conversation from URL hash on page load
 (function() {

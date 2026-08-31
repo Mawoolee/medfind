@@ -23,51 +23,51 @@
         </div>
     @endif
 
-    <div class="bg-white rounded-lg shadow-lg p-6 max-w-2xl">
+    <div class="bg-white rounded-lg shadow-lg p-5 sm:p-6 max-w-2xl">
         <form action="{{ route('admin.pharmacy.store') }}" method="POST">
             @csrf
 
             <div class="mb-4">
-                <label for="pharmacy_name" class="block text-gray-700 font-medium mb-2">Pharmacy Name</label>
+                <label for="pharmacy_name" class="block text-gray-700 text-sm font-medium mb-2">Pharmacy Name</label>
                 <input type="text" id="pharmacy_name" name="pharmacy_name" value="{{ old('pharmacy_name') }}" required
-                       class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                       class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             </div>
 
             <div class="mb-4">
-                <label for="pharmacyAddress" class="block text-gray-700 font-medium mb-2">Address</label>
+                <label for="pharmacyAddress" class="block text-gray-700 text-sm font-medium mb-2">Address</label>
                 <input type="text" id="pharmacyAddress" name="pharmacyAddress" value="{{ old('pharmacyAddress') }}" required
-                       class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                       class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             </div>
 
             <div class="mb-4">
-                <label for="contactNumber" class="block text-gray-700 font-medium mb-2">Contact Number</label>
+                <label for="contactNumber" class="block text-gray-700 text-sm font-medium mb-2">Contact Number</label>
                 <input type="text" id="contactNumber" name="contactNumber" value="{{ old('contactNumber') }}"
-                       class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                       class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             </div>
 
             <div class="mb-4">
-                <label for="operating_hours" class="block text-gray-700 font-medium mb-2">Operating Hours</label>
+                <label for="operating_hours" class="block text-gray-700 text-sm font-medium mb-2">Operating Hours</label>
                 <input type="text" id="operating_hours" name="operating_hours" value="{{ old('operating_hours') }}"
                        placeholder="e.g. Mon-Sat 8:00 AM - 9:00 PM"
-                       class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                       class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div>
-                    <label for="latitude" class="block text-gray-700 font-medium mb-2">Latitude</label>
+                    <label for="latitude" class="block text-gray-700 text-sm font-medium mb-2">Latitude</label>
                     <input type="number" step="any" id="latitude" name="latitude" value="{{ old('latitude') }}"
-                           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 <div>
-                    <label for="longitude" class="block text-gray-700 font-medium mb-2">Longitude</label>
+                    <label for="longitude" class="block text-gray-700 text-sm font-medium mb-2">Longitude</label>
                     <input type="number" step="any" id="longitude" name="longitude" value="{{ old('longitude') }}"
-                           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
             </div>
 
             <div class="mb-4">
-                <label for="user_id" class="block text-gray-700 font-medium mb-2">Owner (optional)</label>
-                <select id="user_id" name="user_id" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <label for="user_id" class="block text-gray-700 text-sm font-medium mb-2">Owner (optional)</label>
+                <select id="user_id" name="user_id" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     <option value="">-- No owner --</option>
                     @foreach ($users as $user)
                         <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>
@@ -77,11 +77,11 @@
                 </select>
             </div>
 
-            <div class="flex gap-3">
-                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition duration-200">
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button type="submit" class="inline-flex items-center justify-center bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg transition duration-200 w-full sm:w-auto">
                     <i class="fas fa-plus mr-2"></i>Add Pharmacy
                 </button>
-                <a href="{{ route('admin.pharmacies') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-lg transition duration-200">
+                <a href="{{ route('admin.pharmacies') }}" class="inline-flex items-center justify-center bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2.5 rounded-lg transition duration-200 w-full sm:w-auto">
                     Cancel
                 </a>
             </div>

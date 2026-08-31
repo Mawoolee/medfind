@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-8">
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
             <h1 class="text-2xl font-bold text-gray-800">📋 Inventory Audit Log</h1>
             <p class="text-sm text-gray-500 mt-1">Every available-stock change recorded — who changed what, when, and by how much.</p>
@@ -26,30 +26,30 @@
     {{-- Filters --}}
     <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-6">
         <form method="GET" action="{{ route('pharmacy.audit-log') }}" class="flex flex-wrap gap-3 items-end">
-            <div>
-                <label class="block text-xs text-gray-500 mb-1">Medicine</label>
+            <div class="w-full sm:w-auto">
+                <label class="block text-sm text-gray-500 mb-1">Medicine</label>
                 <input type="text" name="q" value="{{ $q }}" placeholder="Search medicine..."
-                    class="border border-gray-300 rounded px-3 py-1.5 text-sm w-48 focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
+                    class="border border-gray-300 rounded px-3 py-2.5 text-base w-full sm:w-48 focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
             </div>
-            <div>
-                <label class="block text-xs text-gray-500 mb-1">From</label>
+            <div class="flex-1 sm:flex-none min-w-[45%] sm:min-w-0">
+                <label class="block text-sm text-gray-500 mb-1">From</label>
                 <input type="date" name="from" value="{{ $from }}"
-                    class="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
+                    class="border border-gray-300 rounded px-3 py-2.5 text-base w-full focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
             </div>
-            <div>
-                <label class="block text-xs text-gray-500 mb-1">To</label>
+            <div class="flex-1 sm:flex-none min-w-[45%] sm:min-w-0">
+                <label class="block text-sm text-gray-500 mb-1">To</label>
                 <input type="date" name="to" value="{{ $to }}"
-                    class="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
+                    class="border border-gray-300 rounded px-3 py-2.5 text-base w-full focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
             </div>
-            <div>
-                <label class="block text-xs text-gray-500 mb-1">Change Type</label>
-                <select name="change" class="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
+            <div class="w-full sm:w-auto">
+                <label class="block text-sm text-gray-500 mb-1">Change Type</label>
+                <select name="change" class="border border-gray-300 rounded px-3 py-2.5 text-base w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
                     <option value="">All changes</option>
                     <option value="increase" {{ $change === 'increase' ? 'selected' : '' }}>Increases only</option>
                     <option value="decrease" {{ $change === 'decrease' ? 'selected' : '' }}>Decreases only</option>
                 </select>
             </div>
-            <button type="submit" class="bg-[#9400D3] text-white px-4 py-1.5 rounded text-sm hover:bg-[#7a00b0] transition">
+            <button type="submit" class="w-full sm:w-auto bg-[#9400D3] text-white px-4 py-2.5 min-h-11 rounded text-sm hover:bg-[#7a00b0] transition">
                 <i class="fas fa-filter mr-1"></i>Filter
             </button>
             @if($q || $from || $to || $change)
@@ -78,7 +78,7 @@
             <div>
                 <p class="text-xs text-gray-500">Total Entries</p>
                 <p class="text-xl font-bold text-gray-800">{{ number_format($totalCount) }}</p>
-                <p class="text-[11px] text-gray-400">All dates, unfiltered</p>
+                <p class="text-xs text-gray-400">All dates, unfiltered</p>
             </div>
         </div>
         <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 flex items-center gap-4">
@@ -88,7 +88,7 @@
             <div>
                 <p class="text-xs text-gray-500">Available Stock Increases</p>
                 <p class="text-xl font-bold text-green-700">{{ number_format($increaseCount) }}</p>
-                <p class="text-[11px] text-gray-400">All dates, unfiltered</p>
+                <p class="text-xs text-gray-400">All dates, unfiltered</p>
             </div>
         </div>
         <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 flex items-center gap-4">
@@ -98,7 +98,7 @@
             <div>
                 <p class="text-xs text-gray-500">Available Stock Decreases</p>
                 <p class="text-xl font-bold text-red-700">{{ number_format($decreaseCount) }}</p>
-                <p class="text-[11px] text-gray-400">All dates, unfiltered</p>
+                <p class="text-xs text-gray-400">All dates, unfiltered</p>
             </div>
         </div>
     </div>
@@ -106,22 +106,22 @@
     {{-- Audit Table --}}
     <div class="bg-white rounded-lg shadow-lg overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full">
+            <table class="w-full min-w-[900px]">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200 text-left text-xs uppercase tracking-wide text-gray-500">
                         <th class="px-4 py-3">Date &amp; Time</th>
                         <th class="px-4 py-3">Medicine</th>
                         <th class="px-4 py-3">
                             Available Before
-                            <span class="block font-normal normal-case tracking-normal text-[10px] text-gray-400">Expired batches excluded</span>
+                            <span class="block font-normal normal-case tracking-normal text-xs text-gray-400">Expired batches excluded</span>
                         </th>
                         <th class="px-4 py-3">
                             Available After
-                            <span class="block font-normal normal-case tracking-normal text-[10px] text-gray-400">Expired batches excluded</span>
+                            <span class="block font-normal normal-case tracking-normal text-xs text-gray-400">Expired batches excluded</span>
                         </th>
                         <th class="px-4 py-3">
                             Change in Available
-                            <span class="block font-normal normal-case tracking-normal text-[10px] text-gray-400">May be expiry, not a dispense</span>
+                            <span class="block font-normal normal-case tracking-normal text-xs text-gray-400">May be expiry, not a dispense</span>
                         </th>
                         <th class="px-4 py-3">Changed By</th>
                         <th class="px-4 py-3">Notes</th>
