@@ -1,55 +1,46 @@
 ﻿@extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen bg-[#f0f0ff] py-6 px-4 font-sans">
+<div class="min-h-screen bg-[#f0f0ff] pt-3 pb-6 px-4 font-sans">
     <div class="w-full max-w-7xl mx-auto px-0 sm:px-6">
 
-        <!-- Back Button -->
-        <div class="flex flex-wrap items-center gap-2 mb-4">
-                <a href="{{ route('consumer.dashboard') }}" class="inline-flex items-center text-[#9400D3] hover:text-[#191970] text-sm font-semibold transition">
-                    <i class="fas fa-arrow-left mr-1.5"></i> Back to Map
+        @if(isset($pharmacy))
+            <!-- Back to Map (top-right navigation) -->
+            <div class="flex justify-end mb-3">
+                <a href="{{ route('consumer.dashboard') }}"
+                   class="inline-flex items-center gap-1.5 text-[#9400D3] hover:text-[#191970] font-semibold text-sm transition
+                          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9400D3] focus-visible:ring-offset-2 rounded">
+                    <i class="fas fa-arrow-left"></i> Back
                 </a>
-                <div class="ml-auto flex items-center gap-2">
-                    @auth
-                    <a href="{{ route('consumer.messages.chat', $pharmacy->id) }}"
-                       class="inline-flex items-center justify-center gap-1.5 bg-[#191970] hover:bg-[#2a2a8a] text-[#D9F855] font-bold px-4 py-2 rounded-full text-sm transition">
-                        <i class="fas fa-comments"></i> Message
-                    </a>
-                    @endauth
-                    <a href="{{ route('consumer.dashboard') }}?dir=1&lat={{ $pharmacy->latitude }}&lng={{ $pharmacy->longitude }}"
-                       class="inline-flex items-center justify-center gap-1.5 bg-[#9400D3] hover:bg-[#7a00b0] text-white font-bold px-4 py-2 rounded-full text-sm transition">
-                        <i class="fas fa-directions"></i> Directions
-                    </a>
-                </div>
             </div>
 
-        @if(isset($pharmacy))
             <!-- Pharmacy Header -->
             <div class="mb-3">
-                <div class="flex items-center gap-2 mb-0.5">
-                    <span class="text-xl"></span>
-                    <h1 class="text-xl sm:text-2xl font-extrabold text-[#191970] leading-tight">{{ $pharmacy->pharmacy_name }}</h1>
+                <div class="flex flex-row flex-wrap sm:items-center gap-3 mb-0.5">
+                    <h1 class="flex-1 min-w-0 truncate text-xl sm:text-2xl font-extrabold text-[#191970] leading-tight">{{ $pharmacy->pharmacy_name }}</h1>
+                    <div class="w-auto sm:ml-auto flex items-center gap-2 shrink-0">
+                        @auth
+                        <a href="{{ route('consumer.messages.chat', $pharmacy->id) }}"
+                           aria-label="Message"
+                           class="inline-flex items-center justify-center gap-1.5 h-10 w-10 sm:h-auto sm:w-auto rounded-full sm:px-4 sm:py-2 bg-[#191970] hover:bg-[#2a2a8a] text-[#D9F855] font-bold text-sm transition
+                                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9400D3] focus-visible:ring-offset-2">
+                            <i class="fas fa-comments"></i> <span class="hidden sm:inline">Message</span>
+                        </a>
+                        @endauth
+                        <a href="{{ route('consumer.dashboard') }}?dir=1&lat={{ $pharmacy->latitude }}&lng={{ $pharmacy->longitude }}"
+                           aria-label="Get directions"
+                           class="inline-flex items-center justify-center gap-1.5 h-10 w-10 sm:h-auto sm:w-auto rounded-full sm:px-4 sm:py-2 bg-[#9400D3] hover:bg-[#7a00b0] text-white font-bold text-sm transition
+                                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9400D3] focus-visible:ring-offset-2">
+                            <i class="fas fa-directions"></i> <span class="hidden sm:inline">Directions</span>
+                        </a>
+                    </div>
                 </div>
-                <p class="text-sm text-gray-500 flex items-center gap-1 ml-0.5 mb-1">
-                    <span></span> {{ $pharmacy->pharmacyAddress }}
-                </p>
-                @if($pharmacy->contactNumber)
-                    <p class="text-sm text-[#9400D3] flex items-center gap-1 ml-0.5 mb-2">
-                        <i class="fas fa-phone text-base"></i> {{ $pharmacy->contactNumber }}
-                    </p>
-                @endif
                 @if($pharmacy->operating_hours)
                     <p class="text-sm text-gray-500 flex items-center gap-1 ml-0.5 mb-2">
                         <i class="fas fa-clock text-base text-[#9400D3]"></i> {{ $pharmacy->operating_hours }}
                     </p>
                 @endif
-                <div class="inline-flex items-center gap-1.5 bg-[#f8f4ff] text-[#191970] text-sm font-semibold px-3 py-1 rounded-full border border-[#9400D3]/10">
-                    <span></span> Distance calculated from your location
-                </div>
             </div>
-
-            <!-- Mini Map -->
-            <div id="mini-map" class="w-full h-40 sm:h-32 rounded-2xl mb-4 overflow-hidden border border-[#9400D3]/10 shadow-inner"></div>
 
             <!-- Products / Medicine List -->
             <div class="bg-[#f8f4ff] rounded-2xl p-3.5 mb-4 border border-[#9400D3]/10">
@@ -74,7 +65,7 @@
                                      {{ (float) $item->representative_price }},
                                      {{ (int) $item->available_stock }}
                                  )">
-                                <div>
+                                <div class="min-w-0 flex-1">
                                     <p class="font-bold text-[#191970] text-base leading-snug">
                                         {{ $item->medicine->medicine_name }}
                                         @if($item->medicine->dosage)
@@ -90,11 +81,11 @@
                                         </p>
                                     @endif
                                 </div>
-                                <div class="shrink-0 flex flex-col items-end gap-1">
-                                    <span class="bg-[#191970] text-[#D9F855] text-sm font-bold px-3 py-1 rounded-full inline-block shadow-sm">
+                                <div class="shrink-0 w-24 flex flex-col items-end gap-1">
+                                    <span class="bg-[#191970] text-[#D9F855] text-sm font-bold px-3 py-1 rounded-full inline-flex items-center justify-center min-w-[72px] text-center shadow-sm">
                                         ₱{{ number_format($item->representative_price, 0) }}
                                     </span>
-                                    <span class="text-xs text-gray-400">{{ $item->available_stock }} pcs</span>
+                                    <span class="text-xs text-gray-400 text-right">{{ $item->available_stock }} pcs</span>
                                 </div>
                             </div>
                         @endforeach
@@ -157,31 +148,7 @@
     </div>
 </div>
 
-<!-- Leaflet CSS & JS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <script>
-    @if(isset($pharmacy))
-        const miniMap = L.map('mini-map', {
-            center: [{{ $pharmacy->latitude }}, {{ $pharmacy->longitude }}],
-            zoom: 15,
-            zoomControl: false,
-            attributionControl: false
-        });
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors',
-            maxZoom: 19
-        }).addTo(miniMap);
-
-        const miniIcon = L.divIcon({
-            html: `<div style="width:14px;height:14px;border-radius:50%;background:#191970;border:2.5px solid #D9F855;box-shadow:0 2px 6px rgba(25,25,112,0.3);"></div>`,
-            iconSize: [14,14], iconAnchor: [7,7]
-        });
-        L.marker([{{ $pharmacy->latitude }}, {{ $pharmacy->longitude }}], { icon: miniIcon }).addTo(miniMap);
-    @endif
-
     // Scroll to contact section if #contact in URL
     document.addEventListener('DOMContentLoaded', function() {
         if (window.location.hash === '#contact') {

@@ -73,12 +73,17 @@
         </div>
     </div>
 
-<!-- Route Info Bar - below the routing panel: summary + clear button -->
-    <div id="routeInfoBar" style="display:none; position:fixed; bottom:24px; left:50%; transform:translateX(-50%); z-index:9999; background:#ffffff; border-radius:9999px; padding:8px 12px 8px 16px; box-shadow:0 4px 20px rgba(25,25,112,0.15); border:1px solid rgba(148,0,211,0.12); font-family:system-ui,-apple-system,sans-serif; align-items:center; gap:12px;">
-        <div id="routeSummary" style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:#191970;"></div>
-        <button id="clearRouteBtn" onclick="window.clearRoute()" style="background:#9400D3; color:#ffffff; border:none; padding:8px 14px; border-radius:9999px; font-weight:700; font-size:11px; cursor:pointer; display:flex; align-items:center; gap:4px; box-shadow:0 2px 8px rgba(148,0,211,0.3); white-space:nowrap;">
-            <i class="fas fa-times"></i> Clear Route
-        </button>
+<!-- Route Info Bar - clean summary card: summary line on top, buttons row below -->
+    <div id="routeInfoBar">
+        <div id="routeSummary"></div>
+        <div id="routeActions">
+            <button id="toggleStepsBtn" onclick="window.toggleDirections()">
+                <i class="fas fa-list-ul"></i> <span id="toggleStepsLabel">View steps</span> <i class="fas fa-chevron-up chevron"></i>
+            </button>
+            <button id="clearRouteBtn" onclick="window.clearRoute()">
+                <i class="fas fa-times"></i> Clear Route
+            </button>
+        </div>
     </div>
 
 
@@ -295,7 +300,11 @@
     }
 
     /* Leaflet Routing Machine Container - Custom Styling */
+    /* Hidden by default: only the clean summary pill (#routeInfoBar) shows.
+       The detailed step list is revealed only when body.directions-open is set
+       (toggled by the "View steps" button). */
     .leaflet-routing-container {
+        display: none !important;
         background: rgba(255, 255, 255, 0.97) !important;
         backdrop-filter: blur(12px) !important;
         border-radius: 16px !important;
@@ -303,10 +312,17 @@
         box-shadow: 0 8px 32px rgba(25, 25, 112, 0.12) !important;
         padding: 0 !important;
         overflow-y: auto !important;
-        max-height: 65vh !important;
+        max-height: 60vh !important;
         font-family: system-ui, -apple-system, sans-serif !important;
         width: 320px !important;
-        margin-top: 80px !important;
+        /* Sit clear of the top search bar: anchored to the right, well below it */
+        margin-top: 200px !important;
+    }
+    /* Reveal the steps panel when the toggle turns on directions-open.
+       Positioned as a right-side panel on desktop, clear of the search bar
+       and above the bottom summary pill. */
+    body.directions-open .leaflet-routing-container {
+        display: block !important;
     }
     .leaflet-routing-container .leaflet-routing-alternatives-container {
         padding: 0 !important;
@@ -400,6 +416,104 @@
         border-radius: 4px;
     }
 
+    /* Route summary card: a compact rounded card, centered at the bottom.
+       Column layout so the summary sits on top and the two action buttons form
+       a neat row below. The JS toggles display between "none" and "flex"; the
+       flex-direction:column here means "flex" always lays it out as a column. */
+    #routeInfoBar {
+        display: none;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 9999;
+        width: calc(100% - 24px);
+        max-width: 440px;
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 10px 14px;
+        box-shadow: 0 4px 20px rgba(25, 25, 112, 0.15);
+        border: 1px solid rgba(148, 0, 211, 0.12);
+        font-family: system-ui, -apple-system, sans-serif;
+        box-sizing: border-box;
+    }
+    /* "X km · approx Y min" summary line */
+    #routeSummary {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #191970;
+        text-align: center;
+    }
+    /* Row holding the two balanced action buttons */
+    #routeActions {
+        display: flex;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    /* "View steps" / "Hide steps" toggle button */
+    #toggleStepsBtn {
+        flex: 1 !important;
+        background: #191970 !important;
+        color: #D9F855 !important;
+        border: none !important;
+        padding: 0 14px !important;
+        min-height: 40px !important;
+        border-radius: 9999px !important;
+        font-weight: 700 !important;
+        font-size: 12px !important;
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        box-shadow: 0 2px 8px rgba(25, 25, 112, 0.25) !important;
+        white-space: nowrap !important;
+        transition: background 0.2s ease !important;
+        font-family: system-ui, -apple-system, sans-serif !important;
+    }
+    #toggleStepsBtn:hover {
+        background: #2a2a8a !important;
+    }
+    /* Clear Route button - purple, balanced beside the toggle */
+    #clearRouteBtn {
+        flex: 1 !important;
+        background: #9400D3 !important;
+        color: #ffffff !important;
+        border: none !important;
+        padding: 0 14px !important;
+        min-height: 40px !important;
+        border-radius: 9999px !important;
+        font-weight: 700 !important;
+        font-size: 12px !important;
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        box-shadow: 0 2px 8px rgba(148, 0, 211, 0.3) !important;
+        white-space: nowrap !important;
+        transition: background 0.2s ease !important;
+        font-family: system-ui, -apple-system, sans-serif !important;
+    }
+    #clearRouteBtn:hover {
+        background: #a916e0 !important;
+    }
+    #toggleStepsBtn .chevron {
+        transition: transform 0.2s ease !important;
+    }
+    /* Rotate the chevron when steps are open */
+    body.directions-open #toggleStepsBtn .chevron {
+        transform: rotate(180deg) !important;
+    }
+
     /* Force all UI elements to be on top */
     .stats-bar-fixed {
         position: fixed !important;
@@ -418,6 +532,8 @@
         gap: 16px !important;
         font-size: 12px !important;
         pointer-events: none !important;
+        white-space: nowrap !important;
+        max-width: calc(100% - 24px) !important;
     }
     
     .stats-bar-fixed .stat-item {
@@ -702,16 +818,10 @@
     
     @media (max-width: 640px) {
         .stats-bar-fixed {
-            top: 68px !important;
-            padding: 5px 14px !important;
-            gap: 10px !important;
-            font-size: 11px !important;
-        }
-        .stats-bar-fixed .stat-divider {
-            height: 12px !important;
+            display: none !important;
         }
         .search-panel {
-            top: 108px !important;
+            top: 84px !important;
             width: calc(100% - 24px) !important;
         }
         .search-card-minimal {
@@ -741,11 +851,24 @@
             left: 12px !important;
             bottom: 12px !important;
         }
-        /* Routing panel fits within the viewport on mobile */
-        .leaflet-routing-container {
+        /* Routing panel becomes a bottom sheet on mobile: full-width, clear of
+           the search bar, and sitting above the #routeInfoBar summary pill. */
+        body.directions-open .leaflet-routing-container {
+            position: fixed !important;
+            left: 12px !important;
+            right: 12px !important;
+            bottom: 86px !important;
+            top: auto !important;
             width: calc(100vw - 24px) !important;
-            max-width: 340px !important;
+            max-width: none !important;
+            margin-top: 0 !important;
+            max-height: 45vh !important;
+            z-index: 9998 !important;
         }
+        /* The route summary card already uses width:calc(100% - 24px) and a
+           clean column layout in the base rule, so it fits mobile without any
+           wrap hack. It sits at bottom:24px, below the directions bottom-sheet
+           (which uses bottom:86px), so the two never overlap. */
         /* Nearest suggestion buttons stay tappable */
         .nearest-suggestion-panel .btn-directions,
         .nearest-suggestion-panel .btn-view {

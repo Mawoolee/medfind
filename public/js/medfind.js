@@ -239,7 +239,7 @@ function createPopupContent(pharmacy) {
  <button onclick="window.closePopup()" style="float:right;margin:-4px -4px 0 0;background:transparent;border:none;font-size:22px;color:#94a3b8;cursor:pointer;outline:none;z-index:9999;font-weight:bold;line-height:1;">&times;</button>
  <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
                 ${pharmacy.logo ? `<img src="${pharmacy.logo}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid #9400D3;flex-shrink:0;">` : `<div style="width:48px;height:48px;border-radius:50%;background:#191970;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:2px solid #D9F855;"><span style="color:#D9F855;font-size:20px;font-weight:bold;">${pharmacy.name.charAt(0)}</span></div>`}
- <div style="flex:1;min-width:0;"><a href="${detailsUrl}" style="font-size:15px;font-weight:800;color:#191970;line-height:1.2;text-decoration:none;" onmouseover="this.style.color='#9400D3'" onmouseout="this.style.color='#191970'">${pharmacy.name}</a><div style="font-size:11px;color:#64748b;margin-top:3px;">${pharmacy.address || 'No address available'}</div><div style="margin-top:4px;"><span style="background:rgba(148,0,211,0.08);color:#191970;font-size:10px;font-weight:600;padding:3px 8px;border-radius:9999px;display:inline-block;">${distance.toFixed(1)} km away</span></div><div style="font-size:10px;color:#64748b;margin-top:4px;">${pharmacy.hours ? pharmacy.hours : ''}</div></div>
+ <div style="flex:1;min-width:0;"><a href="${detailsUrl}" style="font-size:15px;font-weight:800;color:#191970;line-height:1.2;text-decoration:none;" onmouseover="this.style.color='#9400D3'" onmouseout="this.style.color='#191970'">${pharmacy.name}</a><div style="font-size:11px;color:#64748b;margin-top:3px;">${pharmacy.address || 'No address available'}</div><div style="margin-top:4px;display:flex;flex-wrap:wrap;align-items:center;gap:6px;"><span style="background:rgba(148,0,211,0.08);color:#191970;font-size:10px;font-weight:600;padding:3px 8px;border-radius:9999px;display:inline-block;">${distance.toFixed(1)} km away</span>${pharmacy.contactNumber ? `<span style="color:#9400D3;font-size:10px;font-weight:600;display:inline-flex;align-items:center;gap:3px;"><i class="fas fa-phone"></i> ${pharmacy.contactNumber}</span>` : ''}</div><div style="font-size:10px;color:#64748b;margin-top:4px;">${pharmacy.hours ? pharmacy.hours : ''}</div></div>
  </div>
  
  
@@ -405,6 +405,9 @@ function getDirections(pharmacyLat, pharmacyLng) {
  // If a route is already showing, remove it first
  clearRoute();
 
+ // Start with the detailed steps COLLAPSED: only the summary pill shows.
+ resetDirectionsToggle();
+
  // Ensure the routing plugin is loaded
  if (typeof L.Routing === 'undefined') {
  alert('Directions are not available right now. Please try again.');
@@ -542,6 +545,27 @@ function clearRoute() {
  // Hide the route summary
  const summaryEl = document.getElementById("routeSummary");
  if (summaryEl) summaryEl.style.display = "none";
+
+ // Collapse the steps panel and reset the toggle button
+ resetDirectionsToggle();
+}
+
+// ============================================
+// DIRECTIONS STEPS TOGGLE ("View steps" / "Hide steps")
+// ============================================
+// The detailed LRM instructions panel is hidden by CSS unless
+// <body> carries the "directions-open" class. This toggle flips that
+// class and syncs the button label/icon.
+function resetDirectionsToggle() {
+ document.body.classList.remove('directions-open');
+ const label = document.getElementById('toggleStepsLabel');
+ if (label) label.textContent = 'View steps';
+}
+
+function toggleDirections() {
+ const open = document.body.classList.toggle('directions-open');
+ const label = document.getElementById('toggleStepsLabel');
+ if (label) label.textContent = open ? 'Hide steps' : 'View steps';
 }
 
 function openChatFromPopup(name) {
@@ -1085,6 +1109,7 @@ window.selectInventoryMedicineFromAutocomplete = selectInventoryMedicineFromAuto
 window.selectInventoryMedicineFromAutocomplete = selectInventoryMedicineFromAutocomplete;
 window.getDirections = getDirections;
 window.clearRoute = clearRoute;
+window.toggleDirections = toggleDirections;
 window.openContactPharmacy = openContactPharmacy;
 
 window.startUnreadSync = startUnreadSync;
