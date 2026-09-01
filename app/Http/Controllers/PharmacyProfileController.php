@@ -105,11 +105,13 @@ class PharmacyProfileController extends Controller
 
         // Handle logo upload
         if ($request->hasFile('logo')) {
+            $logoDisk = config('filesystems.logo_disk', 'public');
+
             // Delete old logo if exists
             if ($pharmacy->logo_path) {
-                Storage::disk('public')->delete($pharmacy->logo_path);
+                Storage::disk($logoDisk)->delete($pharmacy->logo_path);
             }
-            $path = $request->file('logo')->store('pharmacy-logos', 'public');
+            $path = $request->file('logo')->store('pharmacy-logos', $logoDisk);
             $pharmacy->logo_path = $path;
         }
 

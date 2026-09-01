@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Pharmacy extends Model
 {
@@ -25,6 +26,23 @@ class Pharmacy extends Model
     protected $casts = [
         'requirements' => 'array',
     ];
+
+    /**
+     * Get the full public URL for the pharmacy logo.
+     *
+     * Uses the disk configured by FILESYSTEM_LOGO_DISK (defaults to 'public').
+     * Returns null when no logo has been uploaded.
+     */
+    public function getLogoUrlAttribute(): ?string
+    {
+        if (! $this->logo_path) {
+            return null;
+        }
+
+        return Storage::disk(
+            config('filesystems.logo_disk', 'public')
+        )->url($this->logo_path);
+    }
 
     /**
      * Get the user that owns the pharmacy.

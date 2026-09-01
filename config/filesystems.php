@@ -17,6 +17,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Logo Disk
+    |--------------------------------------------------------------------------
+    |
+    | Configures which disk is used for pharmacy logo storage. In local
+    | development this defaults to the 'public' disk (storage symlink).
+    | On production set FILESYSTEM_LOGO_DISK=r2 to use Cloudflare R2.
+    |
+    */
+
+    'logo_disk' => env('FILESYSTEM_LOGO_DISK', 'public'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Filesystem Disks
     |--------------------------------------------------------------------------
     |
@@ -65,6 +78,28 @@ return [
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
             'report' => false,
+        ],
+
+        /*
+        |----------------------------------------------------------------------
+        | Cloudflare R2 — pharmacy logos (public bucket)
+        |----------------------------------------------------------------------
+        | S3-compatible object storage. Enable on production by setting
+        | FILESYSTEM_LOGO_DISK=r2.  The R2.dev public URL is used for reads
+        | so no signed URLs are required. use_path_style_endpoint must be true
+        | for the Cloudflare R2 endpoint format.
+        */
+        'r2' => [
+            'driver' => 's3',
+            'key' => env('CLOUDFLARE_R2_ACCESS_KEY_ID'),
+            'secret' => env('CLOUDFLARE_R2_SECRET_ACCESS_KEY'),
+            'region' => 'auto',
+            'bucket' => env('CLOUDFLARE_R2_BUCKET'),
+            'endpoint' => env('CLOUDFLARE_R2_ENDPOINT'),   // https://<account_id>.r2.cloudflarestorage.com
+            'url' => env('CLOUDFLARE_R2_PUBLIC_URL'),       // https://pub-xxxx.r2.dev
+            'use_path_style_endpoint' => true,
+            'visibility' => 'public',
+            'throw' => false,
         ],
 
     ],

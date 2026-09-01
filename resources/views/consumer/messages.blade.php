@@ -36,7 +36,7 @@
                          onclick="openConversation({{ $pharmacyId }})">
                         {{-- Avatar --}}
                         @if($pharmacy->logo_path)
-                            <img src="{{ asset('storage/' . $pharmacy->logo_path) }}" class="w-11 h-11 rounded-full object-cover border-2 border-[#D9F855] flex-shrink-0">
+                            <img src="{{ $pharmacy->logo_url }}" class="w-11 h-11 rounded-full object-cover border-2 border-[#D9F855] flex-shrink-0">
                         @else
                             <div class="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-[#D9F855]" style="background:#2a2a5a;">
                                 <span class="text-[#D9F855] font-bold text-sm">{{ strtoupper(substr($pharmacy->pharmacy_name ?? 'P', 0, 1)) }}</span>
@@ -107,7 +107,7 @@
                         <i class="fas fa-arrow-left text-lg"></i>
                     </button>
                     @if($pharmacy->logo_path)
-                        <img src="{{ asset('storage/' . $pharmacy->logo_path) }}" class="w-9 h-9 rounded-full object-cover border-2 border-[#D9F855]">
+                        <img src="{{ $pharmacy->logo_url }}" class="w-9 h-9 rounded-full object-cover border-2 border-[#D9F855]">
                     @else
                         <div class="w-9 h-9 rounded-full flex items-center justify-center border-2 border-[#D9F855]" style="background:#2a2a5a;">
                             <span class="text-[#D9F855] font-bold text-xs">{{ strtoupper(substr($pharmacy->pharmacy_name ?? 'P', 0, 1)) }}</span>

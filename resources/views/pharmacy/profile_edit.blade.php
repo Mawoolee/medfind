@@ -47,7 +47,7 @@
             <div class="flex items-center gap-5">
                 {{-- Preview --}}
                 @if($pharmacy->logo_path)
-                    <img src="{{ asset('storage/' . $pharmacy->logo_path) }}"
+                    <img src="{{ $pharmacy->logo_url }}"
                         alt="Pharmacy Logo"
                         class="w-24 h-24 rounded-full object-cover border-4"
                         style="border-color:rgba(148,0,211,0.2);"

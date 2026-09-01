@@ -17,19 +17,21 @@ Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
         ->name('register');
 
-    Route::post('register', [RegisteredUserController::class, 'store']);
+    Route::post('register', [RegisteredUserController::class, 'store'])->middleware('throttle:10,1');
 
     // Pharmacy owner registration (two-step flow)
     Route::get('register/pharmacy', [PharmacyRegistrationController::class, 'create'])
         ->name('register.pharmacy');
 
     Route::post('register/pharmacy', [PharmacyRegistrationController::class, 'storeAccount'])
+        ->middleware('throttle:10,1')
         ->name('register.pharmacy.account');
 
     Route::get('register/pharmacy/details', [PharmacyRegistrationController::class, 'details'])
         ->name('register.pharmacy.details');
 
     Route::post('register/pharmacy/details', [PharmacyRegistrationController::class, 'store'])
+        ->middleware('throttle:10,1')
         ->name('register.pharmacy.store');
 
     // Separate location picker map page for the pharmacy registration flow.
@@ -42,12 +44,13 @@ Route::middleware('guest')->group(function () {
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
 
-    Route::post('login', [AuthenticatedSessionController::class, 'store']);
+    Route::post('login', [AuthenticatedSessionController::class, 'store'])->middleware('throttle:5,1');
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');
 
     Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
+        ->middleware('throttle:5,1')
         ->name('password.email');
 
     Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
