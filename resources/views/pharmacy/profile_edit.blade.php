@@ -9,9 +9,15 @@
     {{-- Page header --}}
     <div class="flex items-center justify-between mb-8">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background:#191970;">
-                <i class="fas fa-hospital text-white text-lg"></i>
-            </div>
+            @if($pharmacy->logo_url)
+                <img src="{{ $pharmacy->logo_url }}" alt="{{ $pharmacy->pharmacy_name }}"
+                     class="w-10 h-10 rounded-full object-cover border-2 flex-shrink-0"
+                     style="border-color:rgba(148,0,211,0.3);">
+            @else
+                <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style="background:#191970;">
+                    <i class="fas fa-hospital text-white text-lg"></i>
+                </div>
+            @endif
             <div>
                 <h1 class="text-2xl font-bold" style="color:#191970;">Pharmacy Profile</h1>
                 <p class="text-sm text-gray-500">Manage your pharmacy information</p>
@@ -188,6 +194,10 @@
             $lng = old('longitude', $location['longitude'] ?? $pharmacy->longitude);
             $addr = old('location_address', $location['address'] ?? null);
             $hasLocation = $lat !== null && $lat !== '' && $lng !== null && $lng !== '';
+            // Fallback: if confirmed location but no address label, use the saved pharmacy address
+            if ($hasLocation && !$addr && $pharmacy->pharmacyAddress) {
+                $addr = $pharmacy->pharmacyAddress;
+            }
         @endphp
         <div class="bg-white rounded-[20px] shadow-sm p-6 mb-6 border border-gray-100">
             <h2 class="font-semibold mb-4" style="color:#191970;">
