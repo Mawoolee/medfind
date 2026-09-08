@@ -17,7 +17,7 @@
                 <p class="text-sm text-gray-500">Search an address or drag the pin to set your location</p>
             </div>
         </div>
-        <x-back-button :href="route('pharmacy.profile.edit')" label="Back to Profile" />
+        <x-back-button :href="route('pharmacy.dashboard')" label="Back to Dashboard" />
     </div>
 
     <form method="POST" action="{{ route('pharmacy.profile.location.store') }}">

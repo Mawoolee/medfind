@@ -10,7 +10,7 @@
             <a href="{{ route('pharmacy.suppliers.create') }}" class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 min-h-11 rounded">
                 <i class="fas fa-plus mr-2"></i>Add Supplier
             </a>
-            <x-back-button :href="route('pharmacy.dashboard')" label="Back to Pharmacy Dashboard" />
+            <x-back-button :href="route('pharmacy.dashboard')" label="Back to Dashboard" />
         </div>
     </div>
 

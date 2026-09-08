@@ -9,7 +9,7 @@
             <h1 class="text-2xl font-bold text-gray-800">Edit Medicine</h1>
             <p class="text-sm text-gray-500 mt-1">This page changes product identity and par level only. Existing batches are preserved.</p>
         </div>
-        <x-back-button :href="route('pharmacy.inventory')" label="Back to Inventory" />
+        <x-back-button :href="route('pharmacy.dashboard')" label="Back to Dashboard" />
     </div>
 
     @if(session('error'))
@@ -53,12 +53,20 @@
                 </div>
                 <div>
                     <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
-                    <select id="category" name="category" class="mt-1 block w-full border border-gray-300 rounded px-3 py-2.5 text-base">
-                        <option value="">-- Select --</option>
+                    <input
+                        type="text"
+                        id="category"
+                        name="category"
+                        list="category-options"
+                        value="{{ old('category', $item->medicine->category ?? '') }}"
+                        placeholder="Select or type a category..."
+                        class="mt-1 block w-full border border-gray-300 rounded px-3 py-2.5 text-base"
+                    >
+                    <datalist id="category-options">
                         @foreach($categoryOptions as $value => $label)
-                            <option value="{{ $value }}" {{ $selectedCategory === $value ? 'selected' : '' }}>{{ $label }}</option>
+                            <option value="{{ $value }}">{{ $label }}</option>
                         @endforeach
-                    </select>
+                    </datalist>
                 </div>
                 <div>
                     <label for="manufacturer" class="block text-sm font-medium text-gray-700">Manufacturer</label>

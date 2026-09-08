@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-8 max-w-4xl">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6"><div><h1 class="text-2xl font-bold text-gray-800">New Return / Recall</h1><p class="text-sm text-gray-500 mt-1">The requested quantity is removed from available batches in FEFO order.</p></div><x-back-button :href="route('pharmacy.returns.index')" label="Back to Returns and Recalls" /></div>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6"><div><h1 class="text-2xl font-bold text-gray-800">New Return / Recall</h1><p class="text-sm text-gray-500 mt-1">The requested quantity is removed from available batches in FEFO order.</p></div><x-back-button :href="route('pharmacy.dashboard')" label="Back to Dashboard" /></div>
 
     @if($errors->any())<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"><ul class="list-disc list-inside">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
 

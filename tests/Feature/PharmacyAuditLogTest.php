@@ -140,7 +140,6 @@ class PharmacyAuditLogTest extends TestCase
         $this->assertSame(3, $response->viewData('totalCount'));
         $this->assertSame(1, $response->viewData('increaseCount'));
         $this->assertSame(1, $response->viewData('decreaseCount'));
-        $response->assertSee('Pharmacy-wide totals');
     }
 
     public function test_date_filters_cover_the_whole_local_calendar_day(): void

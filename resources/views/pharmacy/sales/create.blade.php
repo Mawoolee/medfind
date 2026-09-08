@@ -9,7 +9,7 @@
             <h1 class="text-2xl font-bold text-gray-800">Record Sale</h1>
             <p class="mt-1 text-sm text-gray-600">Record sold quantities only. Eligible stock is deducted automatically in FEFO order.</p>
         </div>
-        <x-back-button :href="route('pharmacy.dashboard')" label="Back to Pharmacy Dashboard" />
+        <x-back-button :href="route('pharmacy.dashboard')" label="Back to Dashboard" />
     </div>
 
     @if(session('success'))

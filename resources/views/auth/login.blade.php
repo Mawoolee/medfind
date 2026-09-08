@@ -38,13 +38,16 @@
                         <label for="password" class="block text-sm font-medium text-[#9400D3] uppercase tracking-wider mb-1.5">
                             Password
                         </label>
-                        <input id="password" 
-                               type="password" 
-                               name="password" 
-                               required 
-                               autocomplete="current-password"
-                               class="w-full px-4 py-3 bg-[#f8f4ff] border border-[#9400D3]/20 rounded-lg text-base text-[#191970] focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30 focus:border-[#9400D3] transition"
-                               placeholder="••••••••">
+                        <div class="relative">
+                            <input id="password" 
+                                   type="password" 
+                                   name="password" 
+                                   required 
+                                   autocomplete="current-password"
+                                   class="w-full px-4 py-3 pr-10 bg-[#f8f4ff] border border-[#9400D3]/20 rounded-lg text-base text-[#191970] focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30 focus:border-[#9400D3] transition"
+                                   placeholder="••••••••">
+                            <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 focus:outline-none" onclick="togglePassword(this)" tabindex="-1" aria-label="Toggle password visibility"><i class="fas fa-eye"></i></button>
+                        </div>
                         <x-input-error :messages="$errors->get('password')" class="mt-1" />
                     </div>
 
@@ -82,4 +85,18 @@
             &copy; 2026 MedFind. All rights reserved.
         </p>
     </div>
+
+    <script>
+        function togglePassword(btn) {
+            const input = btn.closest('.relative').querySelector('input');
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+    </script>
 </x-guest-layout>

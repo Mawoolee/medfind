@@ -9,7 +9,7 @@
             <h1 class="text-2xl font-bold text-gray-800">Add New Medicine</h1>
             <p class="text-sm text-gray-500 mt-1">Create the product identity only. Receive batch stock separately after saving.</p>
         </div>
-        <x-back-button :href="route('pharmacy.inventory')" label="Back to Inventory" />
+        <x-back-button :href="route('pharmacy.dashboard')" label="Back to Dashboard" />
     </div>
 
     @if($errors->any())
@@ -65,12 +65,20 @@
 
                 <div>
                     <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
-                    <select id="category" name="category" class="mt-1 block w-full border border-gray-300 rounded px-3 py-2.5 text-base @error('category') border-red-500 @enderror">
-                        <option value="">-- Select --</option>
+                    <input
+                        type="text"
+                        id="category"
+                        name="category"
+                        list="category-options"
+                        value="{{ old('category', $selectedCategory) }}"
+                        placeholder="Select or type a category..."
+                        class="mt-1 block w-full border border-gray-300 rounded px-3 py-2.5 text-base @error('category') border-red-500 @enderror"
+                    >
+                    <datalist id="category-options">
                         @foreach($categoryOptions as $value => $label)
-                            <option value="{{ $value }}" {{ $selectedCategory === $value ? 'selected' : '' }}>{{ $label }}</option>
+                            <option value="{{ $value }}">{{ $label }}</option>
                         @endforeach
-                    </select>
+                    </datalist>
                     @error('category')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>
 

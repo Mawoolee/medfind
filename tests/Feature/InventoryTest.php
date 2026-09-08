@@ -62,7 +62,7 @@ class InventoryTest extends TestCase
             ->assertSee(route('pharmacy.inventory.batches'), false)
             ->assertSee(route('pharmacy.inventory.batches', ['inventory_item_id' => $item->id]), false)
             ->assertSee('href="'.route('pharmacy.dashboard').'"', false)
-            ->assertSee('aria-label="Back to Pharmacy Dashboard"', false)
+            ->assertSee('aria-label="Back to Dashboard"', false)
             ->assertDontSee('<th class="px-4 py-3">Batches</th>', false)
             ->assertDontSee('<span class="font-semibold">3</span>', false)
             ->assertViewHas('inventory', fn ($inventory): bool => ! array_key_exists(
@@ -665,11 +665,11 @@ class InventoryTest extends TestCase
         }
 
         $createResponse->assertSee(
-            '<option value="Old Custom Category" selected>Old Custom Category</option>',
+            'value="Old Custom Category"',
             false,
         );
         $editResponse->assertSee(
-            '<option value="Legacy Compound" selected>Legacy Compound</option>',
+            'value="Legacy Compound"',
             false,
         );
     }

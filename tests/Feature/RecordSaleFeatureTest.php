@@ -119,7 +119,7 @@ final class RecordSaleFeatureTest extends TestCase
             ->assertSee('SALE-20250610-090000-')
             ->assertSee('Jun 10, 2025 9:00 AM')
             ->assertSee('href="'.route('pharmacy.dashboard').'"', false)
-            ->assertSee('aria-label="Back to Pharmacy Dashboard"', false)
+            ->assertSee('aria-label="Back to Dashboard"', false)
             ->assertSee('name="items[0][inventory_item_id]"', false)
             ->assertSee('name="items[0][quantity]"', false)
             ->assertSee('name="notes"', false)

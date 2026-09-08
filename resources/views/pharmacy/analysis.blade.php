@@ -6,7 +6,7 @@
 <div class="container mx-auto px-4 py-8">
     <div class="flex items-center justify-between mb-6">
         <h1 class="text-2xl font-bold text-gray-800">📊 ABC/VED Analysis</h1>
-        <x-back-button :href="route('pharmacy.dashboard')" label="Back to Pharmacy Dashboard" />
+        <x-back-button :href="route('pharmacy.dashboard')" label="Back to Dashboard" />
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">

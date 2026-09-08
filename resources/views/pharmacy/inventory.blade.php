@@ -14,7 +14,7 @@
             <a href="{{ route('pharmacy.receiving.create') }}" class="inline-flex items-center bg-green-600 hover:bg-green-700 text-white px-3 py-2 min-h-11 rounded text-sm"><i class="fas fa-truck-ramp-box mr-1"></i>Add Stock</a>
             <a href="{{ route('pharmacy.inventory.batches') }}" class="inline-flex items-center bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 min-h-11 rounded text-sm"><i class="fas fa-layer-group mr-1"></i>View Stock Batches</a>
             <a href="{{ route('pharmacy.inventory.export') }}" class="inline-flex items-center bg-gray-700 hover:bg-gray-800 text-white px-3 py-2 min-h-11 rounded text-sm"><i class="fas fa-file-csv mr-1"></i>Export CSV</a>
-            <x-back-button :href="route('pharmacy.dashboard')" label="Back to Pharmacy Dashboard" />
+            <x-back-button :href="route('pharmacy.dashboard')" label="Back to Dashboard" />
         </div>
     </div>
 
