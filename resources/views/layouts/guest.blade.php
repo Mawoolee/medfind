@@ -40,7 +40,7 @@
             body {
                 font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
                 min-height: 100vh;
-                background-image: url('{{ asset(''images/MedFind Background light.png'') }}');
+                background-image: url('/images/MedFind Background light.png');
                 background-size: cover;
                 background-position: center;
                 background-attachment: fixed;
@@ -62,7 +62,7 @@
             
             /* Dark mode background & overlay */
             html.dark body {
-                background-image: url('{{ asset(''images/MedFind Background login.png'') }}');
+                background-image: url('/images/MedFind Background login.png');
                 background-color: #0a0f3d;
             }
             html.dark body::before {
