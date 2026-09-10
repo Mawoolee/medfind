@@ -16,19 +16,19 @@
             </p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-            <a href="{{ route('pharmacy.receiving.create', $selectedInventory ? ['inventory_item_id' => $selectedInventory->id] : []) }}" class="inline-flex items-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 min-h-11 rounded text-sm"><i class="fas fa-plus mr-1"></i>Add Stock</a>
+            <a href="{{ route('pharmacy.receiving.create', $selectedInventory ? ['inventory_item_id' => $selectedInventory->id] : []) }}" class="inline-flex items-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 min-h-11 rounded-xl text-sm"><i class="fas fa-plus mr-1"></i>Add Stock</a>
             <x-back-button :href="route('pharmacy.dashboard')" label="Back to Dashboard" />
         </div>
     </div>
 
     @if(session('success'))
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">{{ session('success') }}</div>
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl mb-4">{{ session('success') }}</div>
     @endif
 
-    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
         <div class="p-5 border-b border-gray-200">
             <form method="GET" action="{{ route('pharmacy.inventory.batches') }}" class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <select name="inventory_item_id" class="border border-gray-300 rounded px-3 py-2.5 text-base md:col-span-2">
+                <select name="inventory_item_id" class="border border-gray-300 rounded-xl px-3 py-2.5 text-base md:col-span-2">
                     <option value="">All medicines</option>
                     @foreach($inventory as $aggregate)
                         <option value="{{ $aggregate->id }}" {{ (string) $selectedInventoryId === (string) $aggregate->id ? 'selected' : '' }}>
@@ -36,8 +36,8 @@
                         </option>
                     @endforeach
                 </select>
-                <input type="text" name="q" value="{{ $q }}" class="border border-gray-300 rounded px-3 py-2.5 text-base" placeholder="Batch, supplier, medicine">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded text-sm min-h-11">Filter</button>
+                <input type="text" name="q" value="{{ $q }}" class="border border-gray-300 rounded-xl px-3 py-2.5 text-base" placeholder="Batch, supplier, medicine">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm min-h-11">Filter</button>
             </form>
         </div>
 
@@ -78,11 +78,11 @@
                             <td class="px-4 py-3 text-sm">{{ $batch->received_reference ?? '—' }}</td>
                             <td class="px-4 py-3">
                                 @if($depleted)
-                                    <span class="px-2 py-1 rounded text-xs bg-gray-200 text-gray-700">Depleted</span>
+                                    <span class="px-2 py-1 rounded-xl text-xs bg-gray-200 text-gray-700">Depleted</span>
                                 @elseif($expired)
-                                    <span class="px-2 py-1 rounded text-xs bg-red-100 text-red-700">Expired</span>
+                                    <span class="px-2 py-1 rounded-xl text-xs bg-red-100 text-red-700">Expired</span>
                                 @else
-                                    <span class="px-2 py-1 rounded text-xs bg-green-100 text-green-700">Available</span>
+                                    <span class="px-2 py-1 rounded-xl text-xs bg-green-100 text-green-700">Available</span>
                                 @endif
                                 @if($batch->cold_chain)<span class="block text-xs text-blue-600 mt-1"><i class="fas fa-snowflake mr-1"></i>Cold chain</span>@endif
                             </td>

@@ -14,7 +14,7 @@
     </div>
 
     @if ($errors->any())
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4">
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-4">
             <ul class="list-disc list-inside">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -23,32 +23,32 @@
         </div>
     @endif
 
-    <div class="bg-white rounded-lg shadow-lg p-5 sm:p-6 max-w-2xl">
+    <div class="bg-white rounded-xl shadow-lg p-5 sm:p-6 max-w-2xl">
         <form action="{{ route('admin.medicine.store') }}" method="POST">
             @csrf
 
             <div class="mb-4">
                 <label for="medicine_name" class="block text-gray-700 text-sm font-medium mb-2">Medicine Name</label>
                 <input type="text" id="medicine_name" name="medicine_name" value="{{ old('medicine_name') }}" required
-                       class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                       class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
             </div>
 
             <div class="mb-4">
                 <label for="dosage" class="block text-gray-700 text-sm font-medium mb-2">Dosage</label>
                 <input type="text" id="dosage" name="dosage" value="{{ old('dosage') }}" placeholder="e.g. 500mg"
-                       class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                       class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
             </div>
 
             <div class="mb-4">
                 <label for="manufacturer" class="block text-gray-700 text-sm font-medium mb-2">Manufacturer</label>
                 <input type="text" id="manufacturer" name="manufacturer" value="{{ old('manufacturer') }}"
-                       class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                       class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
             </div>
 
             <div class="mb-4">
                 <label for="category" class="block text-gray-700 text-sm font-medium mb-2">Category</label>
                 <input type="text" id="category" name="category" value="{{ old('category') }}" placeholder="e.g. Antibiotic"
-                       class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                       class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
             </div>
 
             <div class="mb-4">
@@ -59,10 +59,10 @@
             </div>
 
             <div class="flex flex-col sm:flex-row gap-3">
-                <button type="submit" class="inline-flex items-center justify-center bg-purple-600 hover:bg-purple-700 text-white px-6 py-2.5 rounded-lg transition duration-200 w-full sm:w-auto">
+                <button type="submit" class="inline-flex items-center justify-center bg-purple-600 hover:bg-purple-700 text-white px-6 py-2.5 rounded-xl transition duration-200 w-full sm:w-auto">
                     <i class="fas fa-plus mr-2"></i>Add Medicine
                 </button>
-                <a href="{{ route('admin.medicines') }}" class="inline-flex items-center justify-center bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2.5 rounded-lg transition duration-200 w-full sm:w-auto">
+                <a href="{{ route('admin.medicines') }}" class="inline-flex items-center justify-center bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2.5 rounded-xl transition duration-200 w-full sm:w-auto">
                     Cancel
                 </a>
             </div>

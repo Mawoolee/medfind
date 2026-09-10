@@ -19,7 +19,7 @@
         transition: color 0.15s;
     }
     .location-edit-pen:hover {
-        color: #1d4ed8;
+        color: #7a00b0;
     }
 </style>
 
@@ -32,7 +32,7 @@
     </div>
 
     @if ($errors->any())
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4 max-w-2xl mx-auto">
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-4 max-w-2xl mx-auto">
             <ul class="list-disc list-inside">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -41,33 +41,33 @@
         </div>
     @endif
 
-    <div class="bg-white rounded-lg shadow-lg p-5 sm:p-6 max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-lg p-5 sm:p-6 max-w-2xl mx-auto">
         <form action="{{ route('admin.pharmacy.store') }}" method="POST">
             @csrf
 
             <div class="mb-4">
                 <label for="pharmacy_name" class="block text-gray-700 text-sm font-medium mb-2">Pharmacy Name</label>
                 <input type="text" id="pharmacy_name" name="pharmacy_name" value="{{ old('pharmacy_name') }}" required
-                       class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                       class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
             </div>
 
             <div class="mb-4">
                 <label for="pharmacyAddress" class="block text-gray-700 text-sm font-medium mb-2">Address</label>
                 <input type="text" id="pharmacyAddress" name="pharmacyAddress" value="{{ old('pharmacyAddress') }}" required
-                       class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                       class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
             </div>
 
             <div class="mb-4">
                 <label for="contactNumber" class="block text-gray-700 text-sm font-medium mb-2">Contact Number</label>
                 <input type="text" id="contactNumber" name="contactNumber" value="{{ old('contactNumber') }}"
-                       class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                       class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
             </div>
 
             <div class="mb-4">
                 <label for="operating_hours" class="block text-gray-700 text-sm font-medium mb-2">Operating Hours</label>
                 <input type="text" id="operating_hours" name="operating_hours" value="{{ old('operating_hours') }}"
                        placeholder="e.g. Mon-Sat 8:00 AM - 9:00 PM"
-                       class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                       class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
             </div>
 
             @php
@@ -81,7 +81,7 @@
 
                 {{-- Confirmed state --}}
                 @if ($hasLocation)
-                <div class="location-confirmed-map relative mb-2 overflow-hidden rounded-lg border border-green-300 px-3 py-2.5">
+                <div class="location-confirmed-map relative mb-2 overflow-hidden rounded-xl border border-green-300 px-3 py-2.5">
                     <a href="{{ route('admin.pharmacy.location') }}"
                        aria-label="Change location"
                        title="Change location"
@@ -100,10 +100,10 @@
                 </div>
                 @else
                 <a href="{{ route('admin.pharmacy.location') }}"
-                   class="group flex w-full flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-blue-400/40 bg-blue-50/30 px-4 py-6 text-center cursor-pointer transition hover:border-blue-500 hover:bg-blue-50">
-                    <i class="fas fa-map-location-dot text-2xl text-blue-500"></i>
+                   class="group flex w-full flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-purple-400/40 bg-purple-50/30 px-4 py-6 text-center cursor-pointer transition hover:border-purple-500 hover:bg-purple-50">
+                    <i class="fas fa-map-location-dot text-2xl text-purple-500"></i>
                     <span class="text-sm font-semibold text-gray-700">Set Pharmacy Location</span>
-                    <span class="text-xs font-light text-blue-500/70">Search address or drop a pin on the map</span>
+                    <span class="text-xs font-light text-purple-500/70">Search address or drop a pin on the map</span>
                 </a>
                 @endif
 
@@ -122,7 +122,7 @@
 
             <div class="mb-4">
                 <label for="user_id" class="block text-gray-700 text-sm font-medium mb-2">Owner (optional)</label>
-                <select id="user_id" name="user_id" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <select id="user_id" name="user_id" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
                     <option value="">-- No owner --</option>
                     @foreach ($users as $user)
                         <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>
@@ -133,10 +133,10 @@
             </div>
 
             <div class="flex flex-col sm:flex-row gap-3">
-                <button type="submit" class="inline-flex items-center justify-center bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg transition duration-200 w-full sm:w-auto">
+                <button type="submit" class="inline-flex items-center justify-center bg-blue-700 hover:bg-blue-800 text-white px-6 py-2.5 rounded-xl transition duration-200 w-full sm:w-auto">
                     <i class="fas fa-plus mr-2"></i>Add Pharmacy
                 </button>
-                <a href="{{ route('admin.pharmacies') }}" class="inline-flex items-center justify-center bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2.5 rounded-lg transition duration-200 w-full sm:w-auto">
+                <a href="{{ route('admin.pharmacies') }}" class="inline-flex items-center justify-center border border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-2.5 rounded-xl transition duration-200 w-full sm:w-auto">
                     Cancel
                 </a>
             </div>

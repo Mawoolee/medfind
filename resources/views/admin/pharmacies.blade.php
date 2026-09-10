@@ -9,7 +9,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <h1 class="text-2xl font-bold text-gray-800">Manage Pharmacies</h1>
         <div class="flex items-center gap-4">
-            <a href="{{ route('admin.pharmacy.add') }}" class="inline-flex items-center justify-center bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg transition duration-200">
+            <a href="{{ route('admin.pharmacy.add') }}" class="inline-flex items-center justify-center bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-xl transition duration-200">
                 <i class="fas fa-plus mr-2"></i>Add Pharmacy
             </a>
             <a href="{{ route('admin.dashboard') }}" class="text-[#9400D3] hover:text-[#7a00b0] whitespace-nowrap">
@@ -19,34 +19,34 @@
     </div>
 
 @if(session('success'))
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4">
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl mb-4">
             {{ session('success') }}
         </div>
     @endif
 
     <!-- Search & Filter -->
-    <form method="GET" action="{{ route('admin.pharmacies') }}" class="bg-white rounded-lg shadow-lg p-4 mb-6 flex flex-col sm:flex-row flex-wrap gap-3 sm:items-end">
+    <form method="GET" action="{{ route('admin.pharmacies') }}" class="bg-white rounded-xl shadow-lg p-4 mb-6 flex flex-col sm:flex-row flex-wrap gap-3 sm:items-end">
         <div class="flex-1 min-w-[200px]">
             <label class="block text-sm font-semibold text-gray-600 mb-1">Search</label>
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by name or address..."
-                   class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-base sm:text-sm focus:ring-2 focus:ring-purple-300 focus:border-purple-400">
+                   class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-base sm:text-sm focus:ring-2 focus:ring-purple-300 focus:border-purple-400">
         </div>
         <div>
             <label class="block text-sm font-semibold text-gray-600 mb-1">Status</label>
-            <select name="status" class="w-full sm:w-auto sm:min-w-[130px] border border-gray-300 rounded-lg px-3 py-2.5 text-base sm:text-sm focus:ring-2 focus:ring-purple-300 focus:border-purple-400">
+            <select name="status" class="w-full sm:w-auto sm:min-w-[130px] border border-gray-300 rounded-xl px-3 py-2.5 text-base sm:text-sm focus:ring-2 focus:ring-purple-300 focus:border-purple-400">
                 <option value="all">All Statuses</option>
                 @foreach(['approved', 'pending', 'rejected'] as $status)
                     <option value="{{ $status }}" {{ request('status') === $status ? 'selected' : '' }}>{{ ucfirst($status) }}</option>
                 @endforeach
             </select>
         </div>
-        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg text-sm font-semibold">
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold">
             <i class="fas fa-search mr-1"></i>Search
         </button>
         <a href="{{ route('admin.pharmacies') }}" class="text-gray-500 hover:text-gray-700 text-sm px-2 py-2 text-center">Reset</a>
     </form>
 
-    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
         <div class="p-4 sm:p-6">
             <div class="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
                 <table class="w-full min-w-[780px]">
@@ -78,7 +78,7 @@
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                                         </button>
                                         <div x-show="open" @click.away="open = false" x-cloak
-                                             class="absolute left-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 w-32">
+                                             class="absolute left-0 mt-1 bg-white rounded-xl shadow-lg border border-gray-200 py-1 z-50 w-32">
                                             @foreach(['pending', 'approved', 'rejected'] as $statusOption)
                                                 @if($statusOption !== $pharmacy->status)
                                                     <form action="{{ route('admin.pharmacy.update', $pharmacy->id) }}" method="POST">

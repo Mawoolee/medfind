@@ -13,7 +13,7 @@
         </a>
     </div>
 
-    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
         <div class="p-4 sm:p-6">
             @if (empty($logs))
                 <p class="text-gray-500 text-center py-8">No logs found.</p>

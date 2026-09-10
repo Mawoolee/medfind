@@ -19,7 +19,7 @@
         </a>
     </div>
 
-    <div class="bg-white rounded-lg shadow-lg p-5 sm:p-6 max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-lg p-5 sm:p-6 max-w-2xl mx-auto">
         <form method="POST" action="{{ route('admin.pharmacy.location.edit.store', $pharmacy->id) }}">
             @csrf
 
@@ -32,22 +32,22 @@
                     <input id="addressSearch"
                            type="text"
                            autocomplete="off"
-                           class="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                           class="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                            placeholder="Enter street address, city, or area...">
                     <button type="button"
                             id="addressSearchBtn"
-                            class="px-4 py-2.5 rounded-lg text-base font-semibold text-white bg-blue-600 hover:bg-blue-700 transition">
+                            class="px-4 py-2.5 rounded-xl text-base font-semibold text-white bg-[#9400D3] hover:bg-[#7a00b0] transition">
                         <i class="fas fa-magnifying-glass"></i>
                     </button>
                 </div>
                 {{-- Search results list --}}
-                <ul id="searchResults" class="hidden mt-2 border border-gray-200 rounded-lg divide-y divide-gray-100 overflow-hidden"></ul>
+                <ul id="searchResults" class="hidden mt-2 border border-gray-200 rounded-xl divide-y divide-gray-100 overflow-hidden"></ul>
             </div>
 
             {{-- Use my current location --}}
             <button type="button"
                     id="useMyLocationBtn"
-                    class="inline-flex items-center gap-1.5 mb-2 px-4 py-2 rounded-full text-sm font-semibold text-white bg-gray-700 hover:bg-gray-800 transition">
+                    class="inline-flex items-center gap-1.5 mb-2 px-4 py-2 rounded-full text-sm font-semibold text-white bg-[#191970] hover:opacity-90 transition">
                 <i class="fas fa-location-crosshairs"></i>
                 Use my current location
             </button>
@@ -57,7 +57,7 @@
 
             {{-- Map --}}
             <div id="adminLocationMap"
-                 class="w-full max-w-full h-[240px] sm:h-[320px] rounded-lg border border-gray-300 overflow-hidden"></div>
+                 class="w-full max-w-full h-[240px] sm:h-[320px] rounded-xl border border-gray-300 overflow-hidden"></div>
             <p class="text-xs text-gray-400 mt-1">
                 <i class="fas fa-hand-pointer"></i> Click or drag the marker to refine.
                 Coordinates are auto-generated from address and map placement.
@@ -78,7 +78,7 @@
             {{-- Save --}}
             <button type="submit"
                     id="saveLocationBtn"
-                    class="w-full mt-5 bg-green-600 hover:bg-green-700 text-white text-base font-medium py-2.5 rounded-lg transition">
+                    class="w-full mt-5 bg-[#191970] hover:bg-[#2a2a8a] text-[#D9F855] text-base font-medium py-2.5 rounded-xl transition">
                 <i class="fas fa-floppy-disk mr-2"></i>Save Location
             </button>
         </form>
@@ -192,7 +192,7 @@
                 showNotice(items.length + ' result(s). Pick one or drag the pin.', false);
                 items.forEach(function (item) {
                     var li = document.createElement('li');
-                    li.className = 'px-3 py-2 text-xs text-gray-700 hover:bg-blue-50 cursor-pointer';
+                    li.className = 'px-3 py-2 text-xs text-gray-700 hover:bg-purple-50 cursor-pointer';
                     li.textContent = item.display_name;
                     li.addEventListener('click', function () {
                         updateCoords(parseFloat(item.lat), parseFloat(item.lon), true, item.display_name);

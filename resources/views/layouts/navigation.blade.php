@@ -1,4 +1,4 @@
-﻿<nav class="bg-white/95 backdrop-blur-sm border-b border-[#9400D3]/10 fixed top-0 left-0 right-0 z-[10000]">
+<nav class="bg-white/95 backdrop-blur-sm border-b border-[#9400D3]/10 fixed top-0 left-0 right-0 z-[10000]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             {{-- Logo --}}
@@ -8,8 +8,14 @@
                 </a>
             </div>
 
-            <div class="flex items-center gap-2 sm:gap-4">
-                @auth
+            <div class="flex items-center gap-0">
+                                {{-- Dark Mode Toggle --}}
+                <button type="button" id="darkModeToggle" class="relative flex items-center justify-center w-11 h-11 text-gray-500 hover:text-[#9400D3] transition -mr-1"
+                    title="Toggle dark/light mode"
+                    aria-label="Toggle dark/light mode">
+                    <i id="darkModeIcon" class="fas fa-moon text-xl"></i>
+                </button>
+@auth
                     {{-- Notification Bell --}}
                     @php $notifCount = auth()->user()->unreadNotifications()->count(); @endphp
                     <a href="{{ route('notifications.index') }}"

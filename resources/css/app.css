@@ -16,3 +16,534 @@
         border-radius: 12px;
     }
 }
+
+/* --- Dark Mode ----------------------------------------------- */
+:root {
+    --bg-page:        #f0f0ff;
+    --bg-card:        #ffffff;
+    --bg-card-hover:  #f9f9ff;
+    --text-primary:   #191970;
+    --text-secondary: #6b7280;
+    --border-color:   #e5e7eb;
+    --nav-bg:         rgba(255,255,255,0.95);
+}
+
+html.dark {
+    --bg-page:        #0f0f1a;
+    --bg-card:        #1a1a2e;
+    --bg-card-hover:  #1f1f35;
+    --text-primary:   #e2e8f0;
+    --text-secondary: #94a3b8;
+    --border-color:   rgba(255,255,255,0.08);
+    --nav-bg:         rgba(15,15,26,0.95);
+}
+
+/* Force white background for auth cards in light mode */
+html:not(.dark) .auth-logo-container,
+html:not(.dark) .auth-card {
+    background-color: white !important;
+}
+/* Force white footer in light mode */
+html:not(.dark) p[class*="rounded-lg"] {
+    background-color: white !important;
+}
+
+html.dark .auth-logo-container + .auth-card + p,
+html.dark p[class*="text-xs"][class*="rounded-lg"] {
+    background-color: rgba(15,25,70,0.90) !important;
+}
+
+/* Ensure text is visible in light mode on auth pages */
+html:not(.dark) .auth-logo-container p,
+html:not(.dark) .auth-logo-container h1,
+html:not(.dark) .auth-card label,
+html:not(.dark) .auth-card p,
+html:not(.dark) .auth-card span {
+    color: #374151 !important; /* gray-700 */
+}
+
+html:not(.dark) .auth-card input {
+    color: #111827 !important; /* gray-900 */
+}
+
+html:not(.dark) .auth-card input::placeholder {
+    color: #9ca3af !important; /* gray-400 */
+}
+
+html:not(.dark) .auth-card a {
+    color: #9333ea !important; /* purple-600 */
+}
+
+html:not(.dark) .auth-card a:hover {
+    color: #7e22ce !important; /* purple-700 */
+}
+/* Prevent white background on autofill/autocomplete */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.05) inset !important;
+    -webkit-text-fill-color: #000000 !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+html.dark input:-webkit-autofill,
+html.dark input:-webkit-autofill:hover,
+html.dark input:-webkit-autofill:focus,
+html.dark input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.1) inset !important;
+    -webkit-text-fill-color: #ffffff !important;
+}
+
+html.dark body {
+    background-color: #0f0f1a;
+    color: #e2e8f0;
+}
+
+/* Exclude auth pages from bg-white override - they need their own colors */
+html.dark body:not(.auth-page) .bg-white:not(.auth-logo-container):not(.auth-card):not(.auth-logo-container + .auth-card + p) {
+    background-color: #1a1a2e !important;
+}
+
+html.dark .bg-gray-50 {
+    background-color: #15152a !important;
+}
+
+html.dark .bg-gray-100 {
+    background-color: #1e1e32 !important;
+}
+
+html.dark .text-gray-800,
+html.dark .text-gray-900 {
+    color: #e2e8f0 !important;
+}
+
+html.dark .text-gray-700 {
+    color: #cbd5e1 !important;
+}
+
+html.dark .text-gray-600 {
+    color: #94a3b8 !important;
+}
+
+html.dark .text-gray-500 {
+    color: #64748b !important;
+}
+
+html.dark .border-gray-200,
+html.dark .border-gray-100 {
+    border-color: rgba(255,255,255,0.08) !important;
+}
+
+html.dark .border-gray-300 {
+    border-color: rgba(255,255,255,0.12) !important;
+}
+
+html.dark .shadow-lg,
+html.dark .shadow-xl,
+html.dark .shadow-2xl {
+    box-shadow: 0 4px 24px rgba(0,0,0,0.5) !important;
+}
+
+/* Nav dark */
+html.dark nav {
+    background: rgba(15,15,26,0.95) !important;
+    border-color: rgba(148,0,211,0.2) !important;
+}
+
+html.dark nav a,
+html.dark nav button {
+    color: #e2e8f0 !important;
+}
+
+html.dark nav a:hover,
+html.dark nav button:hover {
+    color: #c084fc !important;
+}
+
+/* Dropdown menus dark */
+html.dark [x-show] .bg-white,
+html.dark .absolute.bg-white {
+    background-color: #1a1a2e !important;
+    border-color: rgba(255,255,255,0.08) !important;
+}
+
+html.dark .hover\:bg-\[\#9400D3\]\/5:hover {
+    background-color: rgba(148,0,211,0.15) !important;
+}
+
+/* Tables dark */
+html.dark table thead tr {
+    background-color: #15152a !important;
+}
+
+html.dark table tbody tr {
+    border-color: rgba(255,255,255,0.06) !important;
+}
+
+html.dark table tbody tr:hover {
+    background-color: #1f1f35 !important;
+}
+
+/* Inputs dark */
+html.dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="hidden"]),
+html.dark select,
+html.dark textarea {
+    background-color: #15152a !important;
+    border-color: rgba(255,255,255,0.12) !important;
+    color: #e2e8f0 !important;
+}
+
+/* Alert/status boxes */
+html.dark .bg-green-50  { background-color: rgba(16,185,129,0.1) !important; }
+html.dark .bg-red-50    { background-color: rgba(239,68,68,0.1)  !important; }
+html.dark .bg-yellow-50 { background-color: rgba(234,179,8,0.1)  !important; }
+html.dark .bg-blue-50   { background-color: rgba(59,130,246,0.1) !important; }
+html.dark .bg-amber-50  { background-color: rgba(245,158,11,0.1) !important; }
+html.dark .bg-orange-50 { background-color: rgba(249,115,22,0.1) !important; }
+html.dark .bg-purple-50 { background-color: rgba(168,85,247,0.1) !important; }
+html.dark .bg-indigo-50 { background-color: rgba(99,102,241,0.1) !important; }
+/* Consumer dashboard map panels — stats bar & search panel */
+html.dark .stats-bar-fixed {
+    background: rgba(26, 26, 46, 0.95) !important;
+    border-color: rgba(148, 0, 211, 0.2) !important;
+}
+
+html.dark .stats-bar-fixed .stat-number {
+    color: #e2e8f0 !important;
+}
+
+html.dark .stats-bar-fixed .stat-label {
+    color: #94a3b8 !important;
+}
+
+html.dark .stats-bar-fixed .stat-divider {
+    background: rgba(255,255,255,0.1) !important;
+}
+
+html.dark .search-card-minimal {
+    background: rgba(26, 26, 46, 0.95) !important;
+    border-color: rgba(148, 0, 211, 0.25) !important;
+}
+
+html.dark .search-card-minimal input {
+    color: #e2e8f0 !important;
+}
+
+html.dark .search-card-minimal input::placeholder {
+    color: #64748b !important;
+}
+
+html.dark .autocomplete-items {
+    background: #1a1a2e !important;
+    border-color: rgba(148, 0, 211, 0.25) !important;
+}
+
+html.dark .autocomplete-item {
+    color: #e2e8f0 !important;
+    border-color: rgba(255,255,255,0.06) !important;
+}
+
+html.dark .autocomplete-item:hover {
+    background: rgba(148, 0, 211, 0.15) !important;
+}
+
+html.dark .autocomplete-item strong {
+    color: #c084fc !important;
+}
+
+html.dark .nearest-suggestion-panel {
+    background: rgba(26, 26, 46, 0.97) !important;
+    border-color: rgba(148, 0, 211, 0.25) !important;
+}
+
+html.dark .nearest-suggestion-panel .suggestion-name {
+    color: #e2e8f0 !important;
+}
+
+html.dark .nearest-suggestion-panel .suggestion-item {
+    background: rgba(148, 0, 211, 0.08) !important;
+    border-color: rgba(148, 0, 211, 0.15) !important;
+}
+
+html.dark #routeInfoBar {
+    background: #1a1a2e !important;
+    border-color: rgba(148, 0, 211, 0.25) !important;
+}
+
+html.dark #routeSummary {
+    color: #e2e8f0 !important;
+}
+
+html.dark .leaflet-routing-container {
+    background: rgba(26, 26, 46, 0.97) !important;
+    border-color: rgba(148, 0, 211, 0.25) !important;
+}
+
+html.dark .leaflet-routing-alt h2,
+html.dark .leaflet-routing-alt h3 {
+    color: #e2e8f0 !important;
+}
+
+html.dark .leaflet-routing-alt table tr td {
+    color: #cbd5e1 !important;
+}
+
+html.dark .leaflet-routing-alt table tr td:last-child {
+    color: #c084fc !important;
+}
+
+html.dark .chat-modal-fixed {
+    background: #1a1a2e !important;
+    border-color: rgba(148, 0, 211, 0.25) !important;
+}
+
+html.dark .chat-header {
+    background: rgba(148, 0, 211, 0.08) !important;
+    border-color: rgba(255,255,255,0.08) !important;
+    color: #e2e8f0 !important;
+}
+
+html.dark .chat-messages {
+    background: rgba(148, 0, 211, 0.04) !important;
+}
+
+html.dark .message.received .bubble {
+    background: #15152a !important;
+    border-color: rgba(148, 0, 211, 0.25) !important;
+    color: #e2e8f0 !important;
+}
+
+html.dark .chat-input-area {
+    background: #1a1a2e !important;
+    border-color: rgba(255,255,255,0.08) !important;
+}
+
+html.dark .chat-input-area input {
+    background: rgba(148, 0, 211, 0.08) !important;
+    border-color: rgba(148, 0, 211, 0.2) !important;
+    color: #e2e8f0 !important;
+}
+
+html.dark #activeChatWindow {
+    background: #1a1a2e !important;
+    border-color: rgba(148, 0, 211, 0.25) !important;
+}
+
+html.dark #activeChatMessages {
+    background: rgba(148, 0, 211, 0.04) !important;
+}
+
+html.dark #activeChatInput {
+    background: rgba(148, 0, 211, 0.08) !important;
+    border-color: rgba(148, 0, 211, 0.2) !important;
+    color: #e2e8f0 !important;
+}
+/* --- Interactive Auth UI Enhancements --------------------------- */
+
+/* Card hover lift effect */
+.auth-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.auth-card:hover {
+    transform: translateY(-4px);
+}
+
+/* Input focus glow & scale */
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="text"]:focus {
+    transform: scale(1.01);
+    transition: all 0.2s ease;
+}
+
+/* Light mode input focus glow */
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="text"]:focus {
+    box-shadow: 0 0 0 3px rgba(0, 220, 255, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode input focus glow */
+html.dark input[type="email"]:focus,
+html.dark input[type="password"]:focus,
+html.dark input[type="text"]:focus {
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2), 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Button hover & active states */
+button[type="submit"] {
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+button[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(25, 25, 112, 0.3);
+}
+
+button[type="submit"]:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(25, 25, 112, 0.2);
+}
+
+/* Button ripple effect */
+button[type="submit"]::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+button[type="submit"]:active::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Link hover bounce */
+a {
+    transition: all 0.15s ease;
+}
+
+a:hover {
+    transform: translateX(2px);
+}
+
+/* Checkbox/remember me interaction */
+input[type="checkbox"] {
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+input[type="checkbox"]:hover {
+    transform: scale(1.1);
+}
+
+input[type="checkbox"]:active {
+    transform: scale(0.95);
+}
+
+/* Password toggle icon hover */
+.password-toggle-icon {
+    transition: all 0.2s ease;
+}
+
+.password-toggle-icon:hover {
+    transform: scale(1.15);
+}
+
+.password-toggle-icon:active {
+    transform: scale(0.9);
+}
+
+/* Floating dark mode toggle pulse on hover */
+#darkModeToggle {
+    transition: all 0.3s ease;
+}
+
+#darkModeToggle:hover {
+    transform: scale(1.1) rotate(10deg);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+#darkModeToggle:active {
+    transform: scale(0.95) rotate(-5deg);
+}
+
+/* Logo pill subtle animation */
+.auth-logo-pill {
+    transition: all 0.3s ease;
+}
+
+.auth-logo-pill:hover {
+    transform: scale(1.02);
+}
+
+/* Smooth entrance animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Apply entrance animations */
+.auth-logo-container {
+    animation: fadeInDown 0.6s ease-out;
+}
+
+.auth-card-container {
+    animation: scaleIn 0.5s ease-out 0.1s backwards;
+}
+
+.auth-footer {
+    animation: fadeInUp 0.6s ease-out 0.2s backwards;
+}
+
+/* Input label float effect (if we add labels inside inputs later) */
+.input-wrapper {
+    position: relative;
+}
+
+.floating-label {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: all 0.2s ease;
+    pointer-events: none;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 14px;
+}
+
+.input-wrapper input:focus + .floating-label,
+.input-wrapper input:not(:placeholder-shown) + .floating-label {
+    top: -8px;
+    font-size: 11px;
+    background: rgba(15, 15, 50, 0.9);
+    padding: 0 6px;
+    border-radius: 4px;
+}
+
+html.dark .input-wrapper input:focus + .floating-label,
+html.dark .input-wrapper input:not(:placeholder-shown) + .floating-label {
+    background: rgba(255, 255, 255, 0.95);
+    color: #6b7280;
+}
+/* Force black text for footer in light mode */
+html:not(.dark) .auth-logo-container + .auth-card + p {
+    color: #374151 !important;
+}

@@ -16,35 +16,35 @@
 
     {{-- Summary Cards --}}
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6">
-        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
             <p class="text-xs text-gray-500">Total SKUs</p>
             <p class="text-2xl font-bold text-[#9400D3]">{{ number_format($totalSkus) }}</p>
         </div>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
             <p class="text-xs text-gray-500">In Stock</p>
             <p class="text-2xl font-bold text-green-600">{{ number_format($inStockCount) }}</p>
         </div>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
             <p class="text-xs text-gray-500">Out of Stock</p>
             <p class="text-2xl font-bold text-red-600">{{ number_format($outOfStockCount) }}</p>
         </div>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
             <p class="text-xs text-gray-500">Low Stock Alerts</p>
             <p class="text-2xl font-bold text-yellow-600">{{ number_format($lowStockCount) }}</p>
         </div>
     </div>
 
     {{-- Filters --}}
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-6">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
         <form method="GET" action="{{ route('admin.inventory') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap gap-3 lg:items-end">
             <div class="lg:w-48">
                 <label class="block text-sm text-gray-500 mb-1">Medicine</label>
                 <input type="text" name="q" value="{{ $q }}" placeholder="Search medicine..."
-                    class="w-full border border-gray-300 rounded px-3 py-2.5 lg:py-1.5 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
+                    class="w-full border border-gray-300 rounded-xl px-3 py-2.5 lg:py-1.5 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
             </div>
             <div>
                 <label class="block text-sm text-gray-500 mb-1">Pharmacy</label>
-                <select name="pharmacy_id" class="w-full border border-gray-300 rounded px-3 py-2.5 lg:py-1.5 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
+                <select name="pharmacy_id" class="w-full border border-gray-300 rounded-xl px-3 py-2.5 lg:py-1.5 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
                     <option value="">All pharmacies</option>
                     @foreach($pharmacies as $p)
                         <option value="{{ $p->id }}" {{ $pharmacyId == $p->id ? 'selected' : '' }}>{{ $p->pharmacy_name }}</option>
@@ -53,7 +53,7 @@
             </div>
             <div>
                 <label class="block text-sm text-gray-500 mb-1">Stock Status</label>
-                <select name="stock" class="w-full border border-gray-300 rounded px-3 py-2.5 lg:py-1.5 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
+                <select name="stock" class="w-full border border-gray-300 rounded-xl px-3 py-2.5 lg:py-1.5 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
                     <option value="">All</option>
                     <option value="in" {{ $stock === 'in' ? 'selected' : '' }}>In Stock</option>
                     <option value="out" {{ $stock === 'out' ? 'selected' : '' }}>Out of Stock</option>
@@ -63,14 +63,14 @@
             </div>
             <div>
                 <label class="block text-sm text-gray-500 mb-1">Category</label>
-                <select name="category" class="w-full border border-gray-300 rounded px-3 py-2.5 lg:py-1.5 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
+                <select name="category" class="w-full border border-gray-300 rounded-xl px-3 py-2.5 lg:py-1.5 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
                     <option value="">All categories</option>
                     @foreach($categories as $cat)
                         <option value="{{ $cat }}" {{ $category === $cat ? 'selected' : '' }}>{{ $cat }}</option>
                     @endforeach
                 </select>
             </div>
-            <button type="submit" class="bg-[#9400D3] text-white px-4 py-2.5 lg:py-1.5 rounded text-sm hover:bg-[#7a00b0] transition">
+            <button type="submit" class="bg-[#9400D3] text-white px-4 py-2.5 lg:py-1.5 rounded-xl text-sm hover:bg-[#7a00b0] transition">
                 <i class="fas fa-filter mr-1"></i>Filter
             </button>
             @if($q || $pharmacyId || $stock || $category)
@@ -85,7 +85,7 @@
     @if(!$pharmacyId && !$q && !$stock && !$category)
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         @foreach($pharmacySummaries as $summary)
-        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
             <div class="flex items-center justify-between mb-2">
                 <h3 class="font-semibold text-gray-800 text-sm">{{ $summary['name'] }}</h3>
                 <span class="text-xs {{ $summary['out'] > 0 ? 'text-red-600' : 'text-green-600' }} font-medium">
@@ -110,7 +110,7 @@
     @endif
 
     {{-- Inventory Table --}}
-    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
         <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
             <p class="text-sm text-gray-600">Showing <span class="font-semibold">{{ $items->total() }}</span> inventory records</p>
         </div>

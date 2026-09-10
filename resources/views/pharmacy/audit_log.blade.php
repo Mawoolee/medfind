@@ -13,7 +13,7 @@
     </div>
 
     {{-- What the recorded quantities actually measure --}}
-    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6 flex items-start gap-3">
+    <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 flex items-start gap-3">
         <i class="fas fa-circle-info text-amber-500 mt-0.5"></i>
         <p class="text-sm text-amber-800 leading-relaxed">
             These figures are <span class="font-semibold">available stock</span> — the quantity across batches that have
@@ -24,32 +24,32 @@
     </div>
 
     {{-- Filters --}}
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-6">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
         <form method="GET" action="{{ route('pharmacy.audit-log') }}" class="flex flex-wrap gap-3 items-end">
             <div class="w-full sm:w-auto">
                 <label class="block text-sm text-gray-500 mb-1">Medicine</label>
                 <input type="text" name="q" value="{{ $q }}" placeholder="Search medicine..."
-                    class="border border-gray-300 rounded px-3 py-2.5 text-base w-full sm:w-48 focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
+                    class="border border-gray-300 rounded-xl px-3 py-2.5 text-base w-full sm:w-48 focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
             </div>
             <div class="flex-1 sm:flex-none min-w-[45%] sm:min-w-0">
                 <label class="block text-sm text-gray-500 mb-1">From</label>
                 <input type="date" name="from" value="{{ $from }}"
-                    class="border border-gray-300 rounded px-3 py-2.5 text-base w-full focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
+                    class="border border-gray-300 rounded-xl px-3 py-2.5 text-base w-full focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
             </div>
             <div class="flex-1 sm:flex-none min-w-[45%] sm:min-w-0">
                 <label class="block text-sm text-gray-500 mb-1">To</label>
                 <input type="date" name="to" value="{{ $to }}"
-                    class="border border-gray-300 rounded px-3 py-2.5 text-base w-full focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
+                    class="border border-gray-300 rounded-xl px-3 py-2.5 text-base w-full focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
             </div>
             <div class="w-full sm:w-auto">
                 <label class="block text-sm text-gray-500 mb-1">Change Type</label>
-                <select name="change" class="border border-gray-300 rounded px-3 py-2.5 text-base w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
+                <select name="change" class="border border-gray-300 rounded-xl px-3 py-2.5 text-base w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30">
                     <option value="">All changes</option>
                     <option value="increase" {{ $change === 'increase' ? 'selected' : '' }}>Increases only</option>
                     <option value="decrease" {{ $change === 'decrease' ? 'selected' : '' }}>Decreases only</option>
                 </select>
             </div>
-            <button type="submit" class="w-full sm:w-auto bg-[#9400D3] text-white px-4 py-2.5 min-h-11 rounded text-sm hover:bg-[#7a00b0] transition">
+            <button type="submit" class="w-full sm:w-auto bg-[#9400D3] text-white px-4 py-2.5 min-h-11 rounded-xl text-sm hover:bg-[#7a00b0] transition">
                 <i class="fas fa-filter mr-1"></i>Filter
             </button>
             @if($q || $from || $to || $change)
@@ -64,7 +64,7 @@
     </div>
 
     {{-- Audit Table --}}
-    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full min-w-[900px]">
                 <thead>

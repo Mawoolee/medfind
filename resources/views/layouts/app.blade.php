@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
@@ -17,6 +17,15 @@
     <!-- MedFind Custom CSS -->
     <link rel="stylesheet" href="{{ asset('css/medfind.css') }}">
 
+    
+    <!-- Dark Mode Init (runs before render to prevent flash) -->
+    <script>
+        (function() {
+            if (localStorage.getItem('medfind-theme') === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
     <!-- Vite for Tailwind CSS (para sa production-ready) -->
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -107,5 +116,29 @@
     <script src="{{ asset('js/medfind.js') }}"></script>
 
     @stack('scripts')
+
+    <!-- Dark Mode Toggle Script -->
+    <script>
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const icon = document.getElementById('darkModeIcon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('medfind-theme', 'light');
+                if (icon) { icon.classList.replace('fa-sun', 'fa-moon'); }
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('medfind-theme', 'dark');
+                if (icon) { icon.classList.replace('fa-moon', 'fa-sun'); }
+            }
+        }
+        // Set correct icon on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const icon = document.getElementById('darkModeIcon');
+            if (icon && document.documentElement.classList.contains('dark')) {
+                icon.classList.replace('fa-moon', 'fa-sun');
+            }
+        });
+    </script>
 </body>
 </html>

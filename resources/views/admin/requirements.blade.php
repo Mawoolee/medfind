@@ -21,13 +21,13 @@
 
  {{-- Flash Messages --}}
  @if(session('success'))
- <div class="mb-4 flex items-center gap-3 bg-green-50 border border-green-200 text-green-800 rounded-lg px-4 py-3">
+ <div class="mb-4 flex items-center gap-3 bg-green-50 border border-green-200 text-green-800 rounded-xl px-4 py-3">
  <i class="fas fa-check-circle text-green-500"></i>
  <span>{{ session('success') }}</span>
  </div>
  @endif
  @if(session('error'))
- <div class="mb-4 flex items-center gap-3 bg-red-50 border border-red-200 text-red-800 rounded-lg px-4 py-3">
+ <div class="mb-4 flex items-center gap-3 bg-red-50 border border-red-200 text-red-800 rounded-xl px-4 py-3">
  <i class="fas fa-exclamation-circle text-red-500"></i>
  <span>{{ session('error') }}</span>
  </div>
@@ -39,7 +39,7 @@
  <div class="flex-1 min-w-[160px]">
  <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Status</label>
  <select name="status"
- class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30 focus:border-[#9400D3]">
+ class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#9400D3]/30 focus:border-[#9400D3]">
  <option value="pending" {{ request('status', 'pending') === 'pending' ? 'selected' : '' }}>Pending</option>
  <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Approved</option>
  <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Rejected</option>
@@ -48,7 +48,7 @@
  </div>
  <div>
  <button type="submit"
- class="bg-[#9400D3] hover:bg-[#7a00b0] text-white text-sm font-semibold px-5 py-2 rounded-lg transition">
+ class="bg-[#9400D3] hover:bg-[#7a00b0] text-white text-sm font-semibold px-5 py-2 rounded-xl transition">
  <i class="fas fa-filter mr-1"></i> Filter
  </button>
  </div>
@@ -142,7 +142,7 @@
  {{-- Review toggle button --}}
  <button type="button"
  @click="open = !open"
- class="text-sm font-semibold px-4 py-1.5 rounded-lg border transition"
+ class="text-sm font-semibold px-4 py-1.5 rounded-xl border transition"
  :class="open
  ? 'bg-[#191970] text-white border-[#191970]'
  : 'bg-white text-[#191970] border-[#191970] hover:bg-[#191970] hover:text-white'">
@@ -173,7 +173,7 @@
  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
  @foreach($docMap as $key => $label)
  @php $isUploaded = array_key_exists($key, $docs); @endphp
- <div class="flex items-center gap-3 px-4 py-3 rounded-lg border
+ <div class="flex items-center gap-3 px-4 py-3 rounded-xl border
  {{ $isUploaded ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200' }}">
  @if($isUploaded)
  <span class="w-6 h-6 flex items-center justify-center rounded-full bg-green-100 text-green-600 flex-shrink-0">
@@ -211,7 +211,7 @@
  class="w-full sm:w-auto">
  @csrf
  <button type="submit"
- class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold bg-green-600 hover:bg-green-700 text-white transition shadow-sm">
+ class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold bg-green-600 hover:bg-green-700 text-white transition shadow-sm">
  <i class="fas fa-check"></i> Approve
  </button>
  </form>
@@ -223,7 +223,7 @@
  class="w-full sm:w-auto">
  @csrf
  <button type="submit"
- class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold bg-red-600 hover:bg-red-700 text-white transition shadow-sm">
+ class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold bg-red-600 hover:bg-red-700 text-white transition shadow-sm">
  <i class="fas fa-times"></i> Reject
  </button>
  </form>

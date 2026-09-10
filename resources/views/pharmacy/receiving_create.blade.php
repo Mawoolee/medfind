@@ -13,7 +13,7 @@
     </div>
 
     @if($errors->any())
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4">
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-4">
             <ul class="list-disc list-inside">
                 @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
             </ul>
@@ -21,12 +21,12 @@
     @endif
 
     @if($inventory->isEmpty())
-        <div class="bg-amber-50 border border-amber-300 text-amber-800 rounded-lg p-5">
+        <div class="bg-amber-50 border border-amber-300 text-amber-800 rounded-xl p-5">
             Add a medicine master before receiving stock.
             <a href="{{ route('pharmacy.inventory.create') }}" class="font-semibold underline">Add New Medicine</a>
         </div>
     @else
-        <div class="bg-white rounded-lg shadow-lg p-6">
+        <div class="bg-white rounded-xl shadow-lg p-6">
             <p class="text-sm text-gray-500 mb-5">A duplicate batch number for the same medicine will be rejected, never overwritten.</p>
 
             <form id="receiving-form" action="{{ route('pharmacy.receiving.store') }}" method="POST">
@@ -47,7 +47,7 @@
                             id="medicine_search"
                             autocomplete="off"
                             placeholder="Type to search medicine..."
-                            class="w-full border border-gray-300 rounded px-3 py-2.5 text-base"
+                            class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-base"
                         >
                         <input
                             type="hidden"
@@ -67,7 +67,7 @@
                         <input
                             type="text"
                             id="display_generic_name"
-                            class="w-full border border-gray-300 rounded px-3 py-2.5 text-base"
+                            class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-base"
                         >
                     </div>
                     <div>
@@ -75,7 +75,7 @@
                         <input
                             type="text"
                             id="display_brand_name"
-                            class="w-full border border-gray-300 rounded px-3 py-2.5 text-base"
+                            class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-base"
                         >
                     </div>
                 </div>
@@ -87,7 +87,7 @@
                         <input
                             type="text"
                             id="display_dosage"
-                            class="w-full border border-gray-300 rounded px-3 py-2.5 text-base"
+                            class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-base"
                         >
                     </div>
                     <div>
@@ -100,7 +100,7 @@
                             name="items[0][batch_number]"
                             value="{{ old('items.0.batch_number', '') }}"
                             required
-                            class="w-full border border-gray-300 rounded px-3 py-2.5 text-base"
+                            class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-base"
                             placeholder="B001"
                         >
                     </div>
@@ -120,7 +120,7 @@
                             required
                             min="0"
                             step="0.01"
-                            class="w-full border border-gray-300 rounded px-3 py-2.5 text-base"
+                            class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-base"
                             placeholder="0.00"
                         >
                     </div>
@@ -135,7 +135,7 @@
                             value="{{ old('items.0.quantity', '') }}"
                             required
                             min="1"
-                            class="w-full border border-gray-300 rounded px-3 py-2.5 text-base"
+                            class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-base"
                             placeholder="1"
                         >
                     </div>
@@ -150,7 +150,7 @@
                             id="expiry_date"
                             name="items[0][expiry_date]"
                             value="{{ old('items.0.expiry_date', '') }}"
-                            class="w-full border border-gray-300 rounded px-3 py-2.5 text-base"
+                            class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-base"
                         >
                     </div>
                     <div>
@@ -163,7 +163,7 @@
                             name="items[0][received_date]"
                             value="{{ old('items.0.received_date', now()->format('Y-m-d')) }}"
                             required
-                            class="w-full border border-gray-300 rounded px-3 py-2.5 text-base"
+                            class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-base"
                         >
                     </div>
                 </div>
@@ -178,7 +178,7 @@
                             name="items[0][cold_chain]"
                             value="1"
                             {{ old('items.0.cold_chain') ? 'checked' : '' }}
-                            class="h-4 w-4 rounded border-gray-300 text-blue-600"
+                            class="h-4 w-4 rounded-xl border-gray-300 text-blue-600"
                         >
                         <label for="cold_chain" class="text-sm font-medium text-gray-700">Cold Chain Required</label>
                     </div>
@@ -188,7 +188,7 @@
                             id="display_requires_prescription"
                             disabled
                             tabindex="-1"
-                            class="h-4 w-4 rounded border-gray-300 text-blue-600 cursor-default"
+                            class="h-4 w-4 rounded-xl border-gray-300 text-blue-600 cursor-default"
                         >
                         <label for="display_requires_prescription" class="text-sm font-medium text-gray-700 cursor-default">
                             Requires Prescription <span class="text-gray-400 font-normal text-xs">(from medicine)</span>
@@ -203,13 +203,13 @@
                 <div class="flex flex-col sm:flex-row gap-3">
                     <button
                         type="submit"
-                        class="w-full sm:w-auto inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg min-h-11"
+                        class="w-full sm:w-auto inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl min-h-11"
                     >
                         <i class="fas fa-check mr-2"></i>Process Delivery
                     </button>
                     <a
                         href="{{ route('pharmacy.inventory') }}"
-                        class="w-full sm:w-auto inline-flex items-center justify-center bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-lg min-h-11"
+                        class="w-full sm:w-auto inline-flex items-center justify-center bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-xl min-h-11"
                     >
                         Cancel
                     </a>

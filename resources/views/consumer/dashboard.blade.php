@@ -583,7 +583,7 @@
     .search-card-minimal input {
         flex: 1 !important;
         border: none !important;
-        padding: 10px 0 !important;
+        padding: 10px 12px !important;
         font-size: 13px !important;
         font-family: system-ui, -apple-system, sans-serif !important;
         outline: none !important;
@@ -878,6 +878,76 @@
         .nearest-suggestion-panel .suggestion-name {
             font-size: 14px !important;
         }
+    }
+
+    /* -- Dark mode overrides for map UI panels ------------------- */
+    html.dark .stats-bar-fixed {
+        background: rgba(15, 15, 35, 0.97) !important;
+        border-color: rgba(148, 0, 211, 0.3) !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.4) !important;
+    }
+    html.dark .stats-bar-fixed .stat-number {
+        color: #e2e8f0 !important;
+    }
+    html.dark .stats-bar-fixed .stat-label {
+        color: #94a3b8 !important;
+    }
+    html.dark .stats-bar-fixed .stat-divider {
+        background: rgba(255,255,255,0.12) !important;
+    }
+    html.dark .search-card-minimal {
+        background: rgba(15, 15, 35, 0.97) !important;
+        border-color: rgba(148, 0, 211, 0.35) !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.4) !important;
+    }
+    html.dark .search-card-minimal input {
+        color: #e2e8f0 !important;
+        background: transparent !important;
+    }
+    html.dark .search-card-minimal input::placeholder {
+        color: #475569 !important;
+    }
+    html.dark .autocomplete-items {
+        background: rgba(15, 15, 35, 0.98) !important;
+        border-color: rgba(148, 0, 211, 0.3) !important;
+    }
+    html.dark .autocomplete-item {
+        color: #e2e8f0 !important;
+        border-color: rgba(255,255,255,0.06) !important;
+    }
+    html.dark .autocomplete-item:hover {
+        background: rgba(148, 0, 211, 0.15) !important;
+    }
+    html.dark .nearest-suggestion-panel {
+        background: rgba(15, 15, 35, 0.97) !important;
+        border-color: rgba(148, 0, 211, 0.3) !important;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+    }
+    html.dark .nearest-suggestion-panel .suggestion-header span {
+        color: #e2e8f0 !important;
+    }
+    html.dark .nearest-suggestion-panel .suggestion-item {
+        background: rgba(148, 0, 211, 0.1) !important;
+        border-color: rgba(148, 0, 211, 0.2) !important;
+    }
+    html.dark .nearest-suggestion-panel .suggestion-name {
+        color: #e2e8f0 !important;
+    }
+    html.dark .nearest-suggestion-panel .suggestion-meta {
+        color: #94a3b8 !important;
+    }
+    html.dark .nearest-suggestion-panel .close-suggestion {
+        color: #64748b !important;
+    }
+    html.dark .nearest-suggestion-panel .close-suggestion:hover {
+        color: #e2e8f0 !important;
+    }
+    html.dark #routeInfoBar {
+        background: rgba(15, 15, 35, 0.97) !important;
+        border-color: rgba(148, 0, 211, 0.3) !important;
+    }
+    html.dark #routeSummary {
+        color: #e2e8f0 !important;
     }
 </style>
 

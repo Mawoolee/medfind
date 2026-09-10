@@ -13,7 +13,7 @@
     </div>
 
     @if(session('success'))
-        <div class="mb-5 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800" role="status">
+        <div class="mb-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800" role="status">
             {{ session('success') }}
         </div>
     @endif
@@ -37,7 +37,7 @@
         <div class="rounded-xl border border-amber-300 bg-amber-50 p-6 text-amber-900">
             <h2 class="font-semibold">No medicines are currently available to sell.</h2>
             <p class="mt-1 text-sm">Receive a non-expired stock batch before recording a sale.</p>
-            <a href="{{ route('pharmacy.receiving.create') }}" class="mt-4 inline-flex rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white hover:bg-green-800">Add Stock</a>
+            <a href="{{ route('pharmacy.receiving.create') }}" class="mt-4 inline-flex rounded-xl bg-green-700 px-4 py-2 text-sm font-semibold text-white hover:bg-green-800">Add Stock</a>
         </div>
     @else
         @php
@@ -60,7 +60,7 @@
             @csrf
 
             @if($errors->has('items'))
-                <p class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{{ $errors->first('items') }}</p>
+                <p class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{{ $errors->first('items') }}</p>
             @endif
 
             <div class="space-y-4" data-sale-rows>
@@ -78,7 +78,7 @@
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_12rem]">
                             <div data-medicine-combobox>
                                 <label id="items_{{ $index }}_inventory_item_label" for="items_{{ $index }}_inventory_item_id" class="mb-1 block text-sm font-medium text-gray-700" data-medicine-combobox-label>Medicine</label>
-                                <select id="items_{{ $index }}_inventory_item_id" name="items[{{ $index }}][inventory_item_id]" aria-labelledby="items_{{ $index }}_inventory_item_label" class="w-full rounded-lg border px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 @error($medicineErrorKey) border-red-500 @else border-gray-300 @enderror" data-medicine-select @error($medicineErrorKey) aria-invalid="true" aria-describedby="items_{{ $index }}_inventory_item_error" @enderror required>
+                                <select id="items_{{ $index }}_inventory_item_id" name="items[{{ $index }}][inventory_item_id]" aria-labelledby="items_{{ $index }}_inventory_item_label" class="w-full rounded-xl border px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 @error($medicineErrorKey) border-red-500 @else border-gray-300 @enderror" data-medicine-select @error($medicineErrorKey) aria-invalid="true" aria-describedby="items_{{ $index }}_inventory_item_error" @enderror required>
                                     <option value="">Select a medicine</option>
                                     @foreach($inventory as $item)
                                         <option value="{{ $item->id }}" @selected($selectedMedicineLabel !== '' && $selectedInventoryItemId === (string) $item->id)>{{ $medicineLabels->get((string) $item->id) }}</option>
@@ -87,14 +87,14 @@
 
                                 <div data-medicine-combobox-ui hidden>
                                     <div class="relative">
-                                        <input id="items_{{ $index }}_inventory_item_search" type="text" value="{{ $selectedMedicineLabel }}" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="false" aria-controls="items_{{ $index }}_inventory_item_listbox" aria-activedescendant="" aria-labelledby="items_{{ $index }}_inventory_item_label" aria-required="true" autocomplete="off" spellcheck="false" class="w-full rounded-lg border py-2 pl-3 pr-10 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 @error($medicineErrorKey) border-red-500 @else border-gray-300 @enderror" data-medicine-combobox-input @error($medicineErrorKey) aria-invalid="true" aria-describedby="items_{{ $index }}_inventory_item_error" @enderror>
+                                        <input id="items_{{ $index }}_inventory_item_search" type="text" value="{{ $selectedMedicineLabel }}" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="false" aria-controls="items_{{ $index }}_inventory_item_listbox" aria-activedescendant="" aria-labelledby="items_{{ $index }}_inventory_item_label" aria-required="true" autocomplete="off" spellcheck="false" class="w-full rounded-xl border py-2 pl-3 pr-10 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 @error($medicineErrorKey) border-red-500 @else border-gray-300 @enderror" data-medicine-combobox-input @error($medicineErrorKey) aria-invalid="true" aria-describedby="items_{{ $index }}_inventory_item_error" @enderror>
                                         <button type="button" class="absolute inset-y-0 right-0 flex items-center rounded-r-lg px-3 text-gray-500 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500" aria-label="Show medicine options" aria-controls="items_{{ $index }}_inventory_item_listbox" aria-expanded="false" data-medicine-combobox-toggle>
                                             <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                                 <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" />
                                             </svg>
                                         </button>
                                     </div>
-                                    <div id="items_{{ $index }}_inventory_item_listbox" role="listbox" aria-labelledby="items_{{ $index }}_inventory_item_label" class="relative z-20 mt-1 max-h-64 w-full overflow-y-auto rounded-lg border border-gray-300 bg-white py-1 shadow-lg" data-medicine-listbox hidden>
+                                    <div id="items_{{ $index }}_inventory_item_listbox" role="listbox" aria-labelledby="items_{{ $index }}_inventory_item_label" class="relative z-20 mt-1 max-h-64 w-full overflow-y-auto rounded-xl border border-gray-300 bg-white py-1 shadow-lg" data-medicine-listbox hidden>
                                         @foreach($inventory as $item)
                                             <div id="items_{{ $index }}_inventory_item_option_{{ $item->id }}" role="option" aria-selected="{{ $selectedMedicineLabel !== '' && $selectedInventoryItemId === (string) $item->id ? 'true' : 'false' }}" tabindex="-1" class="cursor-pointer px-3 py-2 text-sm text-gray-900 hover:bg-blue-50" data-medicine-option data-value="{{ $item->id }}" data-label="{{ $medicineLabels->get((string) $item->id) }}" data-search="{{ $medicineLabels->get((string) $item->id) }}">
                                                 {{ $medicineLabels->get((string) $item->id) }}
@@ -107,7 +107,7 @@
                             </div>
                             <div>
                                 <label for="items_{{ $index }}_quantity" class="mb-1 block text-sm font-medium text-gray-700">Quantity Sold</label>
-                                <input id="items_{{ $index }}_quantity" name="items[{{ $index }}][quantity]" type="number" min="1" step="1" inputmode="numeric" value="{{ $row['quantity'] ?? 1 }}" class="w-full rounded-lg border px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500 @error("items.{$index}.quantity") border-red-500 @else border-gray-300 @enderror" required>
+                                <input id="items_{{ $index }}_quantity" name="items[{{ $index }}][quantity]" type="number" min="1" step="1" inputmode="numeric" value="{{ $row['quantity'] ?? 1 }}" class="w-full rounded-xl border px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500 @error("items.{$index}.quantity") border-red-500 @else border-gray-300 @enderror" required>
                                 @error("items.{$index}.quantity")<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                             </div>
                         </div>
@@ -115,19 +115,19 @@
                 @endforeach
             </div>
 
-            <button type="button" class="inline-flex w-full items-center justify-center rounded-lg border border-blue-600 px-4 py-3 text-sm font-semibold text-blue-700 hover:bg-blue-50 min-h-11 sm:w-auto sm:justify-start sm:py-2" data-add-row>
+            <button type="button" class="inline-flex w-full items-center justify-center rounded-xl border border-blue-600 px-4 py-3 text-sm font-semibold text-blue-700 hover:bg-blue-50 min-h-11 sm:w-auto sm:justify-start sm:py-2" data-add-row>
                 <i class="fas fa-plus mr-2" aria-hidden="true"></i>Add Another Medicine
             </button>
 
             <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
                 <label for="notes" class="mb-1 block text-sm font-medium text-gray-700">Notes <span class="font-normal text-gray-500">(optional)</span></label>
-                <textarea id="notes" name="notes" rows="3" maxlength="1000" class="w-full rounded-lg border px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500 @error('notes') border-red-500 @else border-gray-300 @enderror" placeholder="Reason or internal note for this stock deduction">{{ old('notes') }}</textarea>
+                <textarea id="notes" name="notes" rows="3" maxlength="1000" class="w-full rounded-xl border px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500 @error('notes') border-red-500 @else border-gray-300 @enderror" placeholder="Reason or internal note for this stock deduction">{{ old('notes') }}</textarea>
                 @error('notes')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                <a href="{{ route('pharmacy.dashboard') }}" class="w-full sm:w-auto inline-flex items-center justify-center rounded-lg border border-gray-300 px-5 py-3 sm:py-2.5 text-center text-sm font-semibold text-gray-700 hover:bg-gray-50 min-h-11">Cancel</a>
-                <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center rounded-lg bg-blue-700 px-5 py-3 sm:py-2.5 text-sm font-semibold text-white hover:bg-blue-800 min-h-11">Record Sale</button>
+                <a href="{{ route('pharmacy.dashboard') }}" class="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-gray-300 px-5 py-3 sm:py-2.5 text-center text-sm font-semibold text-gray-700 hover:bg-gray-50 min-h-11">Cancel</a>
+                <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-blue-700 px-5 py-3 sm:py-2.5 text-sm font-semibold text-white hover:bg-blue-800 min-h-11">Record Sale</button>
             </div>
         </form>
 
@@ -140,7 +140,7 @@
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_12rem]">
                     <div data-medicine-combobox>
                         <label id="items___INDEX___inventory_item_label" for="items___INDEX___inventory_item_id" class="mb-1 block text-sm font-medium text-gray-700" data-medicine-combobox-label>Medicine</label>
-                        <select id="items___INDEX___inventory_item_id" name="items[__INDEX__][inventory_item_id]" aria-labelledby="items___INDEX___inventory_item_label" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500" data-medicine-select required>
+                        <select id="items___INDEX___inventory_item_id" name="items[__INDEX__][inventory_item_id]" aria-labelledby="items___INDEX___inventory_item_label" class="w-full rounded-xl border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500" data-medicine-select required>
                             <option value="">Select a medicine</option>
                             @foreach($inventory as $item)
                                 <option value="{{ $item->id }}">{{ $medicineLabels->get((string) $item->id) }}</option>
@@ -149,14 +149,14 @@
 
                         <div data-medicine-combobox-ui hidden>
                             <div class="relative">
-                                <input id="items___INDEX___inventory_item_search" type="text" value="" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="false" aria-controls="items___INDEX___inventory_item_listbox" aria-activedescendant="" aria-labelledby="items___INDEX___inventory_item_label" aria-required="true" autocomplete="off" spellcheck="false" class="w-full rounded-lg border border-gray-300 py-2 pl-3 pr-10 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500" data-medicine-combobox-input>
+                                <input id="items___INDEX___inventory_item_search" type="text" value="" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="false" aria-controls="items___INDEX___inventory_item_listbox" aria-activedescendant="" aria-labelledby="items___INDEX___inventory_item_label" aria-required="true" autocomplete="off" spellcheck="false" class="w-full rounded-xl border border-gray-300 py-2 pl-3 pr-10 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500" data-medicine-combobox-input>
                                 <button type="button" class="absolute inset-y-0 right-0 flex items-center rounded-r-lg px-3 text-gray-500 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500" aria-label="Show medicine options" aria-controls="items___INDEX___inventory_item_listbox" aria-expanded="false" data-medicine-combobox-toggle>
                                     <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                         <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" />
                                     </svg>
                                 </button>
                             </div>
-                            <div id="items___INDEX___inventory_item_listbox" role="listbox" aria-labelledby="items___INDEX___inventory_item_label" class="relative z-20 mt-1 max-h-64 w-full overflow-y-auto rounded-lg border border-gray-300 bg-white py-1 shadow-lg" data-medicine-listbox hidden>
+                            <div id="items___INDEX___inventory_item_listbox" role="listbox" aria-labelledby="items___INDEX___inventory_item_label" class="relative z-20 mt-1 max-h-64 w-full overflow-y-auto rounded-xl border border-gray-300 bg-white py-1 shadow-lg" data-medicine-listbox hidden>
                                 @foreach($inventory as $item)
                                     <div id="items___INDEX___inventory_item_option_{{ $item->id }}" role="option" aria-selected="false" tabindex="-1" class="cursor-pointer px-3 py-2 text-sm text-gray-900 hover:bg-blue-50" data-medicine-option data-value="{{ $item->id }}" data-label="{{ $medicineLabels->get((string) $item->id) }}" data-search="{{ $medicineLabels->get((string) $item->id) }}">
                                         {{ $medicineLabels->get((string) $item->id) }}
@@ -168,7 +168,7 @@
                     </div>
                     <div>
                         <label for="items___INDEX___quantity" class="mb-1 block text-sm font-medium text-gray-700">Quantity Sold</label>
-                        <input id="items___INDEX___quantity" name="items[__INDEX__][quantity]" type="number" min="1" step="1" inputmode="numeric" value="1" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500" required>
+                        <input id="items___INDEX___quantity" name="items[__INDEX__][quantity]" type="number" min="1" step="1" inputmode="numeric" value="1" class="w-full rounded-xl border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500" required>
                     </div>
                 </div>
             </div>

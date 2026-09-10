@@ -10,34 +10,34 @@
             <p class="text-sm text-gray-500 mt-1">One row per medicine. Available stock is combined from all non-expired batches.</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-            <a href="{{ route('pharmacy.inventory.create') }}" class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 min-h-11 rounded text-sm"><i class="fas fa-plus mr-1"></i>Add New Medicine</a>
-            <a href="{{ route('pharmacy.receiving.create') }}" class="inline-flex items-center bg-green-600 hover:bg-green-700 text-white px-3 py-2 min-h-11 rounded text-sm"><i class="fas fa-truck-ramp-box mr-1"></i>Add Stock</a>
-            <a href="{{ route('pharmacy.inventory.batches') }}" class="inline-flex items-center bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 min-h-11 rounded text-sm"><i class="fas fa-layer-group mr-1"></i>View Stock Batches</a>
-            <a href="{{ route('pharmacy.inventory.export') }}" class="inline-flex items-center bg-gray-700 hover:bg-gray-800 text-white px-3 py-2 min-h-11 rounded text-sm"><i class="fas fa-file-csv mr-1"></i>Export CSV</a>
+            <a href="{{ route('pharmacy.inventory.create') }}" class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 min-h-11 rounded-xl text-sm"><i class="fas fa-plus mr-1"></i>Add New Medicine</a>
+            <a href="{{ route('pharmacy.receiving.create') }}" class="inline-flex items-center bg-green-600 hover:bg-green-700 text-white px-3 py-2 min-h-11 rounded-xl text-sm"><i class="fas fa-truck-ramp-box mr-1"></i>Add Stock</a>
+            <a href="{{ route('pharmacy.inventory.batches') }}" class="inline-flex items-center bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 min-h-11 rounded-xl text-sm"><i class="fas fa-layer-group mr-1"></i>View Stock Batches</a>
+            <a href="{{ route('pharmacy.inventory.export') }}" class="inline-flex items-center bg-gray-700 hover:bg-gray-800 text-white px-3 py-2 min-h-11 rounded-xl text-sm"><i class="fas fa-file-csv mr-1"></i>Export CSV</a>
             <x-back-button :href="route('pharmacy.dashboard')" label="Back to Dashboard" />
         </div>
     </div>
 
     @if(session('success'))
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4">{{ session('success') }}</div>
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl mb-4">{{ session('success') }}</div>
     @endif
     @if(session('error'))
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4">{{ session('error') }}</div>
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-4">{{ session('error') }}</div>
     @endif
 
-    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
         <div class="p-6 border-b border-gray-200">
             <form method="GET" action="{{ route('pharmacy.inventory') }}" class="grid grid-cols-1 md:grid-cols-6 gap-3">
                 <div class="md:col-span-2">
-                    <input id="pharmacyInventorySearch" name="q" value="{{ $q }}" type="text" placeholder="Medicine, brand, or manufacturer" autocomplete="off" class="w-full px-3 py-2.5 border border-gray-300 rounded text-base focus:outline-none">
+                    <input id="pharmacyInventorySearch" name="q" value="{{ $q }}" type="text" placeholder="Medicine, brand, or manufacturer" autocomplete="off" class="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-base focus:outline-none">
                 </div>
-                <select name="category" class="px-3 py-2.5 border border-gray-300 rounded text-base">
+                <select name="category" class="px-3 py-2.5 border border-gray-300 rounded-xl text-base">
                     <option value="">All Categories</option>
                     @foreach($categoryOptions as $value => $label)
                         <option value="{{ $value }}" {{ $category === $value ? 'selected' : '' }}>{{ $label }}</option>
                     @endforeach
                 </select>
-                <select name="stock" class="px-3 py-2.5 border border-gray-300 rounded text-base">
+                <select name="stock" class="px-3 py-2.5 border border-gray-300 rounded-xl text-base">
                     <option value="">All Stock</option>
                     <option value="in" {{ $stock === 'in' ? 'selected' : '' }}>In Stock</option>
                     <option value="low" {{ $stock === 'low' ? 'selected' : '' }}>At / Below Par</option>
@@ -45,14 +45,14 @@
                     <option value="expiring" {{ $stock === 'expiring' ? 'selected' : '' }}>Expiring in 90 Days</option>
                     <option value="expired" {{ $stock === 'expired' ? 'selected' : '' }}>Has Expired Stock</option>
                 </select>
-                <select name="sort" class="px-3 py-2.5 border border-gray-300 rounded text-base">
+                <select name="sort" class="px-3 py-2.5 border border-gray-300 rounded-xl text-base">
                     <option value="recent" {{ $sort === 'recent' ? 'selected' : '' }}>Recently Updated</option>
                     <option value="fefo" {{ $sort === 'fefo' ? 'selected' : '' }}>FEFO</option>
                     <option value="name" {{ $sort === 'name' ? 'selected' : '' }}>Medicine Name</option>
                     <option value="low" {{ $sort === 'low' ? 'selected' : '' }}>Stock: Low to High</option>
                     <option value="high" {{ $sort === 'high' ? 'selected' : '' }}>Stock: High to Low</option>
                 </select>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded text-sm min-h-11">Filter</button>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm min-h-11">Filter</button>
             </form>
             <p id="inventorySearchResultCount" class="mt-3 text-sm text-gray-500">Showing {{ $inventory->total() }} medicine(s).</p>
             <script>window.inventoryMedicineNames = @json($inventoryMedicineNames);</script>
@@ -110,18 +110,18 @@
                             <td class="px-4 py-3">₱{{ number_format((float) $item->representative_price, 2) }}</td>
                             <td class="px-4 py-3">
                                 @if($isOut)
-                                    <span class="px-2 py-1 rounded text-xs bg-red-100 text-red-700">Out of Stock</span>
+                                    <span class="px-2 py-1 rounded-xl text-xs bg-red-100 text-red-700">Out of Stock</span>
                                 @elseif($isLow)
-                                    <span class="px-2 py-1 rounded text-xs bg-yellow-100 text-yellow-700">At / Below Par</span>
+                                    <span class="px-2 py-1 rounded-xl text-xs bg-yellow-100 text-yellow-700">At / Below Par</span>
                                 @else
-                                    <span class="px-2 py-1 rounded text-xs bg-green-100 text-green-700">In Stock</span>
+                                    <span class="px-2 py-1 rounded-xl text-xs bg-green-100 text-green-700">In Stock</span>
                                 @endif
                             </td>
                             <td class="px-4 py-3">
                                 <div class="flex flex-wrap gap-2">
-                                    <a href="{{ route('pharmacy.inventory.batches', ['inventory_item_id' => $item->id]) }}" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-800 px-3 py-1 rounded text-xs">View Batches</a>
-                                    <a href="{{ route('pharmacy.receiving.create', ['inventory_item_id' => $item->id]) }}" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs">Add Stock</a>
-                                    <a href="{{ route('pharmacy.inventory.edit', $item->id) }}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded text-xs">Edit Medicine</a>
+                                    <a href="{{ route('pharmacy.inventory.batches', ['inventory_item_id' => $item->id]) }}" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-800 px-3 py-1 rounded-xl text-xs">View Batches</a>
+                                    <a href="{{ route('pharmacy.receiving.create', ['inventory_item_id' => $item->id]) }}" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-xl text-xs">Add Stock</a>
+                                    <a href="{{ route('pharmacy.inventory.edit', $item->id) }}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded-xl text-xs">Edit Medicine</a>
                                 </div>
                             </td>
                         </tr>

@@ -163,7 +163,7 @@ function showNearestSuggestion() {
  const med = item.medicine;
  const price = med ? '\u20B1' + parseFloat(med.price).toFixed(2) : '';
  const stock = med ? med.stock + ' in stock' : '';
- const badge = idx === 0 ? '<span style="background:#D9F855;color:#191970;font-size:9px;font-weight:800;padding:2px 6px;border-radius:9999px;margin-left:6px;">NEAREST</span>' : '';
+ const badge = '';
 
  html += '<div class="suggestion-item">';
  html += '<div class="suggestion-info">';
