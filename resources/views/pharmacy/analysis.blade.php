@@ -5,7 +5,7 @@
 @section('content')
 <div class="container mx-auto px-4 py-8">
     <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">📊 ABC/VED Analysis</h1>
+        <h1 class="text-2xl font-bold text-gray-800">ABC/VED Analysis</h1>
         <x-back-button :href="route('pharmacy.dashboard')" label="Back to Dashboard" />
     </div>
 

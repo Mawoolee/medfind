@@ -8,7 +8,7 @@
 <div class="container mx-auto px-4 py-8">
 <div class="flex items-center justify-between mb-6">
         <h1 class="text-2xl font-bold text-gray-800">Manage Users</h1>
-        <a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:text-blue-800">
+        <a href="{{ route('admin.dashboard') }}" class="text-[#9400D3] hover:text-[#7a00b0]">
             <i class="fas fa-arrow-left mr-2"></i>Back
         </a>
     </div>
@@ -67,7 +67,7 @@
                                 <td class="px-4 py-3 text-sm">{{ $user->created_at->format('M d, Y') }}</td>
 <td class="px-4 py-3">
                                     <div class="flex gap-4 items-center">
-                                        <a href="{{ route('admin.user.edit', $user->id) }}" class="text-blue-600 hover:text-blue-800 text-base py-1">
+                                        <a href="{{ route('admin.user.edit', $user->id) }}" class="text-[#9400D3] hover:text-[#7a00b0] text-base py-1">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         <form action="{{ route('admin.user.delete', $user->id) }}" method="POST" class="inline">

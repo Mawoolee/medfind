@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
-use App\Models\InventoryItem;
 use App\Models\Medicine;
 use App\Models\Pharmacy;
 use App\Models\User;
 use App\Notifications\PharmacyStatusNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class AdminDashboardController extends Controller
@@ -28,11 +28,11 @@ class AdminDashboardController extends Controller
     protected function logActivity(string $action, string $entityType, ?int $entityId = null, ?string $details = null): void
     {
         ActivityLog::create([
-            'user_id'     => auth()->id(),
-            'action'      => $action,
+            'user_id' => auth()->id(),
+            'action' => $action,
             'entity_type' => $entityType,
-            'entity_id'   => $entityId,
-            'details'     => $details,
+            'entity_id' => $entityId,
+            'details' => $details,
         ]);
     }
 
@@ -46,7 +46,7 @@ class AdminDashboardController extends Controller
             $term = $request->search;
             $query->where(function ($q) use ($term) {
                 $q->where('name', 'like', "%{$term}%")
-                  ->orWhere('email', 'like', "%{$term}%");
+                    ->orWhere('email', 'like', "%{$term}%");
             });
         }
 
@@ -60,7 +60,7 @@ class AdminDashboardController extends Controller
         return view('admin.users', compact('users'));
     }
 
-public function editUser(User $user): View
+    public function editUser(User $user): View
     {
         return view('admin.edit-user', compact('user'));
     }
@@ -68,13 +68,14 @@ public function editUser(User $user): View
     public function updateUser(Request $request, User $user)
     {
         $request->validate([
-            'name'  => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'role'  => 'required|in:consumer,pharmacy,pharmacy_operator,admin',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,'.$user->id,
+            'role' => 'required|in:consumer,pharmacy,pharmacy_operator,admin',
         ]);
 
         $user->update($request->only('name', 'email', 'role'));
         $this->logActivity('updated', 'User', $user->id, "Updated user {$user->name} ({$user->email})");
+
         return redirect()->route('admin.users')->with('success', 'User updated successfully.');
     }
 
@@ -84,6 +85,7 @@ public function editUser(User $user): View
         $name = $user->name;
         $user->delete();
         $this->logActivity('deleted', 'User', null, "Deleted user {$name}");
+
         return redirect()->route('admin.users')->with('success', 'User deleted successfully.');
     }
 
@@ -97,7 +99,7 @@ public function editUser(User $user): View
             $term = $request->search;
             $query->where(function ($q) use ($term) {
                 $q->where('pharmacy_name', 'like', "%{$term}%")
-                  ->orWhere('pharmacyAddress', 'like', "%{$term}%");
+                    ->orWhere('pharmacyAddress', 'like', "%{$term}%");
             });
         }
 
@@ -114,7 +116,32 @@ public function editUser(User $user): View
     public function addPharmacy(): View
     {
         $users = User::whereIn('role', ['pharmacy', 'pharmacy_operator'])->orderBy('name')->get();
+
         return view('admin.add-pharmacy', compact('users'));
+    }
+
+    public function locationPicker(): View
+    {
+        $location = session('admin_add_pharmacy.location', []);
+
+        return view('admin.pharmacy-location', compact('location'));
+    }
+
+    public function storeLocation(Request $request)
+    {
+        $request->validate([
+            'latitude' => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
+            'address' => 'nullable|string|max:500',
+        ]);
+
+        session(['admin_add_pharmacy.location' => [
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+            'address' => $request->address,
+        ]]);
+
+        return redirect()->route('admin.pharmacy.add');
     }
 
     public function logs(): View
@@ -133,60 +160,93 @@ public function editUser(User $user): View
     public function storePharmacy(Request $request)
     {
         $request->validate([
-            'pharmacy_name'   => 'required|string|max:255',
+            'pharmacy_name' => 'required|string|max:255',
             'pharmacyAddress' => 'required|string|max:500',
-            'latitude'        => 'nullable|numeric',
-            'longitude'       => 'nullable|numeric',
-            'contactNumber'   => 'nullable|string|max:50',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+            'contactNumber' => 'nullable|string|max:50',
             'operating_hours' => 'nullable|string|max:255',
-            'user_id'         => 'nullable|exists:users,id',
+            'user_id' => 'nullable|exists:users,id',
         ]);
 
         $pharmacy = Pharmacy::create([
-            'pharmacy_name'   => $request->pharmacy_name,
+            'pharmacy_name' => $request->pharmacy_name,
             'pharmacyAddress' => $request->pharmacyAddress,
-            'latitude'        => $request->latitude,
-            'longitude'       => $request->longitude,
-            'contactNumber'   => $request->contactNumber,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+            'contactNumber' => $request->contactNumber,
             'operating_hours' => $request->operating_hours,
-            'user_id'         => $request->user_id,
-            'status'          => 'approved',
+            'user_id' => $request->user_id,
+            'status' => 'approved',
         ]);
 
         $this->logActivity('created', 'Pharmacy', $pharmacy->id, "Created pharmacy {$pharmacy->pharmacy_name}");
+        session()->forget('admin_add_pharmacy.location');
+
         return redirect()->route('admin.pharmacies')->with('success', 'Pharmacy added successfully.');
     }
 
-public function editPharmacy(Pharmacy $pharmacy): View
+    public function editPharmacy(Pharmacy $pharmacy): View
     {
         $users = User::whereIn('role', ['pharmacy', 'pharmacy_operator'])->orderBy('name')->get();
+
         return view('admin.edit-pharmacy', compact('pharmacy', 'users'));
+    }
+
+    public function locationPickerEdit(Pharmacy $pharmacy): View
+    {
+        $sessionKey = 'admin_edit_pharmacy_'.$pharmacy->id.'.location';
+        $location = session($sessionKey, [
+            'latitude' => $pharmacy->latitude,
+            'longitude' => $pharmacy->longitude,
+            'address' => null,
+        ]);
+
+        return view('admin.pharmacy-location-edit', compact('pharmacy', 'location'));
+    }
+
+    public function storeLocationEdit(Request $request, Pharmacy $pharmacy)
+    {
+        $request->validate([
+            'latitude' => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
+            'address' => 'nullable|string|max:500',
+        ]);
+
+        $sessionKey = 'admin_edit_pharmacy_'.$pharmacy->id.'.location';
+        session([$sessionKey => [
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+            'address' => $request->address,
+        ]]);
+
+        return redirect()->route('admin.pharmacy.edit', $pharmacy->id);
     }
 
     public function updatePharmacy(Request $request, Pharmacy $pharmacy)
     {
         $request->validate([
-            'pharmacy_name'   => 'required|string|max:255',
+            'pharmacy_name' => 'required|string|max:255',
             'pharmacyAddress' => 'required|string|max:500',
-            'latitude'        => 'nullable|numeric',
-            'longitude'       => 'nullable|numeric',
-            'contactNumber'   => 'nullable|string|max:50',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+            'contactNumber' => 'nullable|string|max:50',
             'operating_hours' => 'nullable|string|max:255',
-            'user_id'         => 'nullable|exists:users,id',
-            'status'          => 'required|in:pending,approved,rejected',
+            'user_id' => 'nullable|exists:users,id',
+            'status' => 'required|in:pending,approved,rejected',
         ]);
 
         $oldStatus = $pharmacy->status;
 
         $pharmacy->update([
-            'pharmacy_name'   => $request->pharmacy_name,
+            'pharmacy_name' => $request->pharmacy_name,
             'pharmacyAddress' => $request->pharmacyAddress,
-            'latitude'        => $request->latitude,
-            'longitude'       => $request->longitude,
-            'contactNumber'   => $request->contactNumber,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+            'contactNumber' => $request->contactNumber,
             'operating_hours' => $request->operating_hours,
-            'user_id'         => $request->user_id,
-            'status'          => $request->status,
+            'user_id' => $request->user_id,
+            'status' => $request->status,
         ]);
 
         $this->logActivity('updated', 'Pharmacy', $pharmacy->id, "Updated pharmacy {$pharmacy->pharmacy_name}");
@@ -197,6 +257,8 @@ public function editPharmacy(Pharmacy $pharmacy): View
             $this->logActivity($request->status, 'Pharmacy', $pharmacy->id, "Pharmacy {$pharmacy->pharmacy_name} {$request->status}");
         }
 
+        session()->forget('admin_edit_pharmacy_'.$pharmacy->id.'.location');
+
         return redirect()->route('admin.pharmacies')->with('success', 'Pharmacy updated successfully.');
     }
 
@@ -205,6 +267,7 @@ public function editPharmacy(Pharmacy $pharmacy): View
         $name = $pharmacy->pharmacy_name;
         $pharmacy->delete();
         $this->logActivity('deleted', 'Pharmacy', null, "Deleted pharmacy {$name}");
+
         return redirect()->route('admin.pharmacies')->with('success', 'Pharmacy deleted successfully.');
     }
 
@@ -215,6 +278,7 @@ public function editPharmacy(Pharmacy $pharmacy): View
             $pharmacy->user->notify(new PharmacyStatusNotification($pharmacy, 'approved'));
         }
         $this->logActivity('approved', 'Pharmacy', $pharmacy->id, "Approved pharmacy {$pharmacy->pharmacy_name}");
+
         return redirect()->route('admin.pharmacies')->with('success', 'Pharmacy approved successfully.');
     }
 
@@ -227,8 +291,8 @@ public function editPharmacy(Pharmacy $pharmacy): View
             $term = $request->search;
             $query->where(function ($q) use ($term) {
                 $q->where('medicine_name', 'like', "%{$term}%")
-                  ->orWhere('manufacturer', 'like', "%{$term}%")
-                  ->orWhere('category', 'like', "%{$term}%");
+                    ->orWhere('manufacturer', 'like', "%{$term}%")
+                    ->orWhere('category', 'like', "%{$term}%");
             });
         }
 
@@ -248,7 +312,7 @@ public function editPharmacy(Pharmacy $pharmacy): View
         return view('admin.add-medicine');
     }
 
-public function editMedicine(Medicine $medicine): View
+    public function editMedicine(Medicine $medicine): View
     {
         return view('admin.edit-medicine', compact('medicine'));
     }
@@ -256,44 +320,46 @@ public function editMedicine(Medicine $medicine): View
     public function storeMedicine(Request $request)
     {
         $request->validate([
-            'medicine_name'       => 'required|string|max:255',
-            'dosage'              => 'nullable|string|max:100',
-            'manufacturer'        => 'nullable|string|max:255',
-            'category'            => 'nullable|string|max:100',
-            'requiresPrescription'=> 'boolean',
+            'medicine_name' => 'required|string|max:255',
+            'dosage' => 'nullable|string|max:100',
+            'manufacturer' => 'nullable|string|max:255',
+            'category' => 'nullable|string|max:100',
+            'requiresPrescription' => 'boolean',
         ]);
 
         $medicine = Medicine::create([
-            'medicine_name'        => $request->medicine_name,
-            'dosage'               => $request->dosage,
-            'manufacturer'         => $request->manufacturer,
-            'category'             => $request->category,
+            'medicine_name' => $request->medicine_name,
+            'dosage' => $request->dosage,
+            'manufacturer' => $request->manufacturer,
+            'category' => $request->category,
             'requiresPrescription' => $request->boolean('requiresPrescription'),
         ]);
 
         $this->logActivity('created', 'Medicine', $medicine->id, "Created medicine {$medicine->medicine_name}");
+
         return redirect()->route('admin.medicines')->with('success', 'Medicine added successfully.');
     }
 
     public function updateMedicine(Request $request, Medicine $medicine)
     {
         $request->validate([
-            'medicine_name'       => 'required|string|max:255',
-            'dosage'              => 'nullable|string|max:100',
-            'manufacturer'        => 'nullable|string|max:255',
-            'category'            => 'nullable|string|max:100',
-            'requiresPrescription'=> 'boolean',
+            'medicine_name' => 'required|string|max:255',
+            'dosage' => 'nullable|string|max:100',
+            'manufacturer' => 'nullable|string|max:255',
+            'category' => 'nullable|string|max:100',
+            'requiresPrescription' => 'boolean',
         ]);
 
         $medicine->update([
-            'medicine_name'        => $request->medicine_name,
-            'dosage'               => $request->dosage,
-            'manufacturer'         => $request->manufacturer,
-            'category'             => $request->category,
+            'medicine_name' => $request->medicine_name,
+            'dosage' => $request->dosage,
+            'manufacturer' => $request->manufacturer,
+            'category' => $request->category,
             'requiresPrescription' => $request->boolean('requiresPrescription'),
         ]);
 
         $this->logActivity('updated', 'Medicine', $medicine->id, "Updated medicine {$medicine->medicine_name}");
+
         return redirect()->route('admin.medicines')->with('success', 'Medicine updated successfully.');
     }
 
@@ -302,6 +368,7 @@ public function editMedicine(Medicine $medicine): View
         $name = $medicine->medicine_name;
         $medicine->delete();
         $this->logActivity('deleted', 'Medicine', null, "Deleted medicine {$name}");
+
         return redirect()->route('admin.medicines')->with('success', 'Medicine deleted successfully.');
     }
 
@@ -354,15 +421,16 @@ public function editMedicine(Medicine $medicine): View
         if ($missingRequiredDocuments !== []) {
             return redirect()->route('admin.requirements')->with(
                 'error',
-                'Cannot approve pharmacy. Missing required documents: ' . implode(', ', $missingRequiredDocuments) . '.'
+                'Cannot approve pharmacy. Missing required documents: '.implode(', ', $missingRequiredDocuments).'.'
             );
         }
 
         $pharmacy->update(['status' => 'approved']);
         if ($pharmacy->user) {
-            $pharmacy->user->notify(new \App\Notifications\PharmacyStatusNotification($pharmacy, 'approved'));
+            $pharmacy->user->notify(new PharmacyStatusNotification($pharmacy, 'approved'));
         }
         $this->logActivity('approved', 'Pharmacy', $pharmacy->id, "Approved requirements for {$pharmacy->pharmacy_name}");
+
         return redirect()->route('admin.requirements')->with('success', "{$pharmacy->pharmacy_name} has been approved.");
     }
 
@@ -370,9 +438,10 @@ public function editMedicine(Medicine $medicine): View
     {
         $pharmacy->update(['status' => 'rejected']);
         if ($pharmacy->user) {
-            $pharmacy->user->notify(new \App\Notifications\PharmacyStatusNotification($pharmacy, 'rejected'));
+            $pharmacy->user->notify(new PharmacyStatusNotification($pharmacy, 'rejected'));
         }
         $this->logActivity('rejected', 'Pharmacy', $pharmacy->id, "Rejected requirements for {$pharmacy->pharmacy_name}");
+
         return redirect()->route('admin.requirements')->with('success', "{$pharmacy->pharmacy_name} has been rejected.");
     }
 
@@ -380,22 +449,22 @@ public function editMedicine(Medicine $medicine): View
     public function serveRequirement(Pharmacy $pharmacy, string $key)
     {
         $docs = $pharmacy->requirements ?? [];
-        if (!array_key_exists($key, $docs)) {
+        if (! array_key_exists($key, $docs)) {
             abort(404, 'Document not found.');
         }
 
         $path = $docs[$key];
-        if (!\Illuminate\Support\Facades\Storage::disk('local')->exists($path)) {
+        if (! Storage::disk('local')->exists($path)) {
             abort(404, 'File not found on disk.');
         }
 
-        $fullPath = \Illuminate\Support\Facades\Storage::disk('local')->path($path);
+        $fullPath = Storage::disk('local')->path($path);
         $mime = mime_content_type($fullPath) ?: 'application/octet-stream';
         $filename = basename($path);
 
         return response()->file($fullPath, [
-            'Content-Type'        => $mime,
-            'Content-Disposition' => 'inline; filename="' . $filename . '"',
+            'Content-Type' => $mime,
+            'Content-Disposition' => 'inline; filename="'.$filename.'"',
         ]);
     }
 }

@@ -5,7 +5,7 @@
 @section('content')
 <div class="container mx-auto px-4 py-8">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">📋 New Cycle Count</h1>
+        <h1 class="text-2xl font-bold text-gray-800">New Cycle Count</h1>
         <x-back-button :href="route('pharmacy.dashboard')" label="Back to Dashboard" />
     </div>
 

@@ -12,7 +12,7 @@
             <a href="{{ route('admin.pharmacy.add') }}" class="inline-flex items-center justify-center bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg transition duration-200">
                 <i class="fas fa-plus mr-2"></i>Add Pharmacy
             </a>
-            <a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:text-blue-800 whitespace-nowrap">
+            <a href="{{ route('admin.dashboard') }}" class="text-[#9400D3] hover:text-[#7a00b0] whitespace-nowrap">
                 <i class="fas fa-arrow-left mr-2"></i>Back
             </a>
         </div>
@@ -33,7 +33,7 @@
         </div>
         <div>
             <label class="block text-sm font-semibold text-gray-600 mb-1">Status</label>
-            <select name="status" class="w-full sm:w-auto border border-gray-300 rounded-lg px-3 py-2.5 text-base sm:text-sm focus:ring-2 focus:ring-purple-300 focus:border-purple-400">
+            <select name="status" class="w-full sm:w-auto sm:min-w-[130px] border border-gray-300 rounded-lg px-3 py-2.5 text-base sm:text-sm focus:ring-2 focus:ring-purple-300 focus:border-purple-400">
                 <option value="all">All Statuses</option>
                 @foreach(['approved', 'pending', 'rejected'] as $status)
                     <option value="{{ $status }}" {{ request('status') === $status ? 'selected' : '' }}>{{ ucfirst($status) }}</option>
@@ -75,7 +75,7 @@
                                                 {{ $pharmacy->status === 'pending'  ? 'border-yellow-400 bg-yellow-50 text-yellow-700' : '' }}
                                                 {{ $pharmacy->status === 'rejected' ? 'border-red-400 bg-red-50 text-red-700' : '' }}">
                                             {{ ucfirst($pharmacy->status) }}
-                                            <svg class="w-3 h-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                                         </button>
                                         <div x-show="open" @click.away="open = false" x-cloak
                                              class="absolute left-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 w-32">
@@ -105,7 +105,7 @@
                                 </td>
                                 <td class="px-4 py-3">
                                     <div class="flex gap-4 items-center">
-                                        <a href="{{ route('admin.pharmacy.edit', $pharmacy->id) }}" class="text-blue-600 hover:text-blue-800 text-base py-1">
+                                        <a href="{{ route('admin.pharmacy.edit', $pharmacy->id) }}" class="text-[#9400D3] hover:text-[#7a00b0] text-base py-1">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         <form action="{{ route('admin.pharmacy.delete', $pharmacy->id) }}" method="POST" class="inline">

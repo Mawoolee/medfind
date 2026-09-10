@@ -198,8 +198,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Pharmacies
     Route::get('/pharmacies', [AdminDashboardController::class, 'pharmacies'])->name('pharmacies');
     Route::get('/pharmacy/add', [AdminDashboardController::class, 'addPharmacy'])->name('pharmacy.add');
+    Route::get('/pharmacy/location', [AdminDashboardController::class, 'locationPicker'])->name('pharmacy.location');
+    Route::post('/pharmacy/location', [AdminDashboardController::class, 'storeLocation'])->name('pharmacy.location.store');
     Route::post('/pharmacy/store', [AdminDashboardController::class, 'storePharmacy'])->name('pharmacy.store');
     Route::get('/pharmacy/{pharmacy}/edit', [AdminDashboardController::class, 'editPharmacy'])->name('pharmacy.edit');
+    Route::get('/pharmacy/{pharmacy}/location', [AdminDashboardController::class, 'locationPickerEdit'])->name('pharmacy.location.edit');
+    Route::post('/pharmacy/{pharmacy}/location', [AdminDashboardController::class, 'storeLocationEdit'])->name('pharmacy.location.edit.store');
     Route::put('/pharmacy/{pharmacy}', [AdminDashboardController::class, 'updatePharmacy'])->name('pharmacy.update');
     Route::post('/pharmacy/{pharmacy}/approve', [AdminDashboardController::class, 'approvePharmacy'])->name('pharmacy.approve');
     Route::delete('/pharmacy/{pharmacy}', [AdminDashboardController::class, 'deletePharmacy'])->name('pharmacy.delete');

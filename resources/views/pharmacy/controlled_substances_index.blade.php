@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Controlled Substances Logbook')
+@section('title', 'Stock Movement Logbook')
 
 @section('content')
 <div class="container mx-auto px-4 py-8">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">🛡️ Controlled Substances Logbook</h1>
+        <h1 class="text-2xl font-bold text-gray-800">Stock Movement Logbook</h1>
         <div class="flex flex-wrap items-center gap-3">
             <a href="{{ route('pharmacy.controlled-substances.create') }}"
                class="inline-flex items-center bg-[#9400D3] text-white px-4 py-2 min-h-11 rounded-lg text-sm font-semibold hover:bg-[#7a00b0] transition">
@@ -17,7 +17,7 @@
 
     <!-- Controlled items snapshot -->
     <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-        <h3 class="text-lg font-semibold text-gray-800 mb-3">Controlled Substances in Stock</h3>
+        <h3 class="text-lg font-semibold text-gray-800 mb-3">Medicines in Stock</h3>
         <div class="overflow-x-auto -mx-6 px-6">
             <table class="w-full text-sm min-w-[640px]">
                 <thead>
@@ -41,7 +41,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="px-4 py-4 text-center text-gray-500">No controlled substances currently in stock.</td></tr>
+                        <tr><td colspan="5" class="px-4 py-4 text-center text-gray-500">No medicines currently in stock.</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -51,9 +51,9 @@
     <!-- Logbook -->
     <div class="bg-white rounded-lg shadow-lg overflow-hidden">
         <div class="p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <h3 class="text-lg font-semibold text-gray-800">Logbook Entries</h3>
+            <h3 class="text-lg font-semibold text-gray-800">Movement Records</h3>
             <form method="GET" action="{{ route('pharmacy.controlled-substances.index') }}" class="mt-2 md:mt-0">
-                <select name="action" onchange="this.form.submit()" class="w-full md:w-auto border border-gray-300 rounded px-3 py-2.5 text-base">
+                <select name="action" onchange="this.form.submit()" class="w-full md:w-auto md:min-w-[130px] border border-gray-300 rounded px-3 py-2.5 text-base">
                     <option value="">All actions</option>
                     @foreach($actions as $a)
                         <option value="{{ $a }}" {{ $action === $a ? 'selected' : '' }}>{{ ucfirst($a) }}</option>

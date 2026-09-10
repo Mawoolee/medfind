@@ -1,4 +1,4 @@
-﻿{{-- resources/views/admin/dashboard.blade.php --}}
+{{-- resources/views/admin/dashboard.blade.php --}}
 
 @extends('layouts.app')
 
@@ -66,7 +66,7 @@
  <div class="bg-white rounded-lg shadow-lg overflow-hidden">
  <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
  <h2 class="text-lg font-semibold text-gray-800">Recent Users</h2>
- <a href="{{ route('admin.users') }}" class="text-sm text-blue-600 hover:text-blue-800">View all</a>
+ <a href="{{ route('admin.users') }}" class="text-sm text-[#9400D3] hover:text-[#7a00b0]">View all</a>
  </div>
  <div class="divide-y divide-gray-100">
  @forelse($recentUsers as $user)
@@ -91,7 +91,7 @@
  <div class="bg-white rounded-lg shadow-lg overflow-hidden">
  <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
  <h2 class="text-lg font-semibold text-gray-800">Recent Pharmacies</h2>
- <a href="{{ route('admin.pharmacies') }}" class="text-sm text-blue-600 hover:text-blue-800">View all</a>
+ <a href="{{ route('admin.pharmacies') }}" class="text-sm text-[#9400D3] hover:text-[#7a00b0]">View all</a>
  </div>
  <div class="divide-y divide-gray-100">
  @forelse($recentPharmacies as $pharmacy)

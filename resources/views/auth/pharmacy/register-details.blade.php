@@ -97,8 +97,8 @@
                             <a href="{{ route('register.pharmacy.location') }}"
                                aria-label="Change location"
                                title="Change location"
-                               class="absolute top-1.5 right-1.5 z-10 flex items-center justify-center p-1.5 text-[#9400D3] transition hover:text-[#191970]">
-                                <i class="fas fa-pen text-xs"></i>
+                               class="absolute top-2.5 right-3 z-20 inline-flex items-center justify-center text-[#9400D3] transition hover:text-[#191970]">
+                                <i class="fas fa-pen text-sm"></i>
                             </a>
                             <div class="relative z-10">
                                 <div class="flex items-center gap-1.5 pr-8 text-sm font-semibold text-green-700">

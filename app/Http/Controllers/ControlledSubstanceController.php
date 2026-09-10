@@ -27,7 +27,7 @@ class ControlledSubstanceController extends Controller
             ->with('medicine')
             ->where('pharmacy_id', $pharmacy->id);
         $aggregateQuery->withProjections($inventoryQuery);
-        $controlledItems = $inventoryQuery->get()->filter(fn (InventoryItem $item) => $item->is_controlled);
+        $controlledItems = $inventoryQuery->get();
 
         $action = (string) $request->query('action', '');
         $logsQuery = ControlledSubstanceLog::query()
@@ -67,9 +67,7 @@ class ControlledSubstanceController extends Controller
             ->with('medicine')
             ->where('pharmacy_id', $pharmacy->id);
         $aggregateQuery->withProjections($query);
-        $controlledItems = $query->get()
-            ->filter(fn (InventoryItem $item) => $item->is_controlled)
-            ->values();
+        $controlledItems = $query->get()->values();
 
         return view('pharmacy.controlled_substance_log', compact('pharmacy', 'controlledItems'));
     }
@@ -100,12 +98,6 @@ class ControlledSubstanceController extends Controller
             ->whereKey($data['inventory_item_id'])
             ->where('pharmacy_id', $pharmacy->id)
             ->firstOrFail();
-
-        if (! $item->is_controlled) {
-            return redirect()->back()
-                ->withErrors(['inventory_item_id' => 'Selected item is not a controlled substance.'])
-                ->withInput();
-        }
 
         $notes = trim((string) ($data['notes'] ?? ''));
         if (! empty($data['patient_reference'])) {

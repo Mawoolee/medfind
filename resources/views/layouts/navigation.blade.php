@@ -61,7 +61,7 @@
                                 <a href="{{ route('pharmacy.messages') }}"             class="block px-4 py-2 text-sm text-gray-700 hover:bg-[#9400D3]/5"><i class="fas fa-comments mr-2 text-[#9400D3]"></i>Messages</a>
                                 <div class="border-t border-gray-100 my-1"></div>
                                 <a href="{{ route('pharmacy.audit-log') }}"            class="block px-4 py-2 text-sm text-gray-700 hover:bg-[#9400D3]/5"><i class="fas fa-history mr-2 text-[#9400D3]"></i>Audit Log</a>
-                                <a href="{{ route('pharmacy.controlled-substances.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-[#9400D3]/5"><i class="fas fa-shield-halved mr-2 text-[#9400D3]"></i>Controlled Substances</a>
+                                <a href="{{ route('pharmacy.controlled-substances.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-[#9400D3]/5"><i class="fas fa-shield-halved mr-2 text-[#9400D3]"></i>Stock Movement Log</a>
                                 <div class="border-t border-gray-100 my-1"></div>
                                 <a href="{{ route('pharmacy.profile.edit') }}"         class="block px-4 py-2 text-sm text-gray-700 hover:bg-[#9400D3]/5"><i class="fas fa-hospital mr-2 text-[#9400D3]"></i>Pharmacy Profile</a>
                             </div>

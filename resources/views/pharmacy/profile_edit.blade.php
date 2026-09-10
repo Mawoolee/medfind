@@ -211,8 +211,8 @@
                 <a href="{{ route('pharmacy.profile.location') }}"
                     aria-label="Change location"
                     title="Change location"
-                    class="location-edit-pen absolute top-2 right-2 z-10 flex items-center justify-center p-2 transition">
-                    <i class="fas fa-pen text-xs"></i>
+                    class="location-edit-pen absolute top-3 right-4 z-20 pointer-events-auto inline-flex items-center justify-center transition">
+                    <i class="fas fa-pen text-sm"></i>
                 </a>
                 <div class="relative z-10">
                     <div class="flex items-center gap-2 pr-9 text-sm font-semibold text-green-700">

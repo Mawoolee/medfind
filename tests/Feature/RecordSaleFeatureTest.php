@@ -59,7 +59,7 @@ final class RecordSaleFeatureTest extends TestCase
                 'View Stock Batches',
                 'Messages',
                 'Audit Log',
-                'Controlled Substances',
+                'Stock Movement Log',
             ])
             ->assertSee('Record sold medicines and deduct eligible stock automatically by FEFO.');
 

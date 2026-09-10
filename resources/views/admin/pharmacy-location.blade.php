@@ -1,138 +1,126 @@
+{{-- resources/views/admin/pharmacy-location.blade.php --}}
+
 @extends('layouts.app')
 
 @section('title', 'Set Pharmacy Location')
 
-@section('content')
-<div class="min-h-screen" style="background:#f0f0ff;">
-<div class="container mx-auto px-4 py-10 max-w-2xl">
+@push('styles')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+@endpush
 
-    {{-- Page header --}}
-    <div class="flex items-center justify-between mb-8">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background:#191970;">
-                <i class="fas fa-map-location-dot text-white text-lg"></i>
-            </div>
-            <div>
-                <h1 class="text-2xl font-bold" style="color:#191970;">Pharmacy Location</h1>
-                <p class="text-sm text-gray-500">Search an address or drag the pin to set your location</p>
-            </div>
-        </div>
-        <x-back-button :href="route('pharmacy.dashboard')" label="Back to Dashboard" />
+@section('content')
+<div class="container mx-auto px-4 py-8">
+    <div class="flex items-center justify-between mb-6 max-w-2xl mx-auto">
+        <h1 class="text-2xl font-bold text-gray-800">Set Pharmacy Location</h1>
+        <a href="{{ route('admin.pharmacy.add') }}" class="text-[#9400D3] hover:text-[#7a00b0]">
+            <i class="fas fa-arrow-left mr-2"></i>Back without saving
+        </a>
     </div>
 
-    <form method="POST" action="{{ route('pharmacy.profile.location.store') }}">
-        @csrf
-
-        <div class="bg-white rounded-[20px] shadow-sm p-6 mb-6 border border-gray-100">
+    <div class="bg-white rounded-lg shadow-lg p-5 sm:p-6 max-w-2xl mx-auto">
+        <form method="POST" action="{{ route('admin.pharmacy.location.store') }}">
+            @csrf
 
             {{-- Search address --}}
-            <label for="addressSearch" class="block text-sm font-medium mb-1" style="color:#191970;">
-                Search Address
-            </label>
-            <div class="flex gap-2 mb-3">
-                <input id="addressSearch" type="text" autocomplete="off"
-                    class="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 transition-shadow"
-                    placeholder="Enter street address, city, or area...">
-                <button type="button" id="addressSearchBtn"
-                    class="px-4 py-2.5 rounded-xl text-base font-semibold text-white transition-opacity hover:opacity-90"
-                    style="background:#9400D3;">
-                    <i class="fas fa-magnifying-glass"></i>
-                </button>
+            <div class="mb-4">
+                <label for="addressSearch" class="block text-gray-700 text-sm font-medium mb-2">
+                    Search Address
+                </label>
+                <div class="flex gap-2">
+                    <input id="addressSearch"
+                           type="text"
+                           autocomplete="off"
+                           class="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="Enter street address, city, or area...">
+                    <button type="button"
+                            id="addressSearchBtn"
+                            class="px-4 py-2.5 rounded-lg text-base font-semibold text-white bg-blue-600 hover:bg-blue-700 transition">
+                        <i class="fas fa-magnifying-glass"></i>
+                    </button>
+                </div>
+                {{-- Search results list --}}
+                <ul id="searchResults" class="hidden mt-2 border border-gray-200 rounded-lg divide-y divide-gray-100 overflow-hidden"></ul>
             </div>
-            <ul id="searchResults" class="hidden mb-3 border border-gray-200 rounded-xl divide-y divide-gray-100 overflow-hidden"></ul>
 
             {{-- Use my current location --}}
-            <button type="button" id="useMyLocationBtn"
-                class="inline-flex items-center gap-2 mb-3 px-4 py-2.5 rounded-full text-sm font-semibold text-white transition-opacity hover:opacity-90"
-                style="background:#191970;">
+            <button type="button"
+                    id="useMyLocationBtn"
+                    class="inline-flex items-center gap-1.5 mb-2 px-4 py-2 rounded-full text-sm font-semibold text-white bg-gray-700 hover:bg-gray-800 transition">
                 <i class="fas fa-location-crosshairs"></i>
                 Use my current location
             </button>
 
-            {{-- Inline notice --}}
-            <p id="geoNotice" class="hidden text-xs mb-3"></p>
+            {{-- Inline feedback notice --}}
+            <p id="geoNotice" class="hidden text-xs mb-2"></p>
 
             {{-- Map --}}
-            <div id="profileLocationMap"
-                class="w-full max-w-full h-[260px] sm:h-[320px] rounded-xl border border-gray-200 overflow-hidden"></div>
-            <p class="text-xs text-gray-400 mt-2">
-                <i class="fas fa-hand-pointer"></i> Drag to refine.
-                Coordinates auto-generated from address and map placement.
+            <div id="adminLocationMap"
+                 class="w-full max-w-full h-[240px] sm:h-[320px] rounded-lg border border-gray-300 overflow-hidden"></div>
+            <p class="text-xs text-gray-400 mt-1">
+                <i class="fas fa-hand-pointer"></i> Click or drag the marker to refine.
+                Coordinates are auto-generated from address and map placement.
             </p>
 
             {{-- Hidden fields submitted to the backend --}}
-            <input type="hidden" name="latitude" id="latitude" value="{{ $location['latitude'] ?? '' }}">
+            <input type="hidden" name="latitude"  id="latitude"  value="{{ $location['latitude']  ?? '' }}">
             <input type="hidden" name="longitude" id="longitude" value="{{ $location['longitude'] ?? '' }}">
-            <input type="hidden" name="address" id="address" value="{{ $location['address'] ?? '' }}">
+            <input type="hidden" name="address"   id="address"   value="{{ $location['address']   ?? '' }}">
 
             @error('latitude')
-                <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
+                <p class="mt-2 text-xs text-red-600">{{ $message }}</p>
             @enderror
             @error('longitude')
-                <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
+                <p class="mt-2 text-xs text-red-600">{{ $message }}</p>
             @enderror
 
-        </div>
-
-        {{-- Save button --}}
-        <button type="submit"
-            class="w-full py-3 rounded-full font-bold text-sm transition-opacity hover:opacity-90 flex items-center justify-center gap-2"
-            style="background:#191970;color:#D9F855;">
-            <i class="fas fa-map-pin"></i>
-            Save Location
-        </button>
-
-        <div class="mt-4 text-center">
-            <a href="{{ route('pharmacy.profile.edit') }}" class="text-sm hover:underline" style="color:#9400D3;">
-                <i class="fas fa-arrow-left mr-1"></i> Back without saving
-            </a>
-        </div>
-    </form>
-
+            {{-- Save --}}
+            <button type="submit"
+                    id="saveLocationBtn"
+                    class="w-full mt-5 bg-green-600 hover:bg-green-700 text-white text-base font-medium py-2.5 rounded-lg transition">
+                <i class="fas fa-floppy-disk mr-2"></i>Save Location
+            </button>
+        </form>
+    </div>
 </div>
-</div>
+@endsection
 
-{{-- Leaflet CSS (guarded against double-loading) --}}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-{{-- Leaflet JS (guarded) --}}
+@push('scripts')
 <script>
     if (typeof L === 'undefined') {
         document.write('<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script>');
     }
 </script>
-
 <script>
     (function () {
-        // Philippines default center (Manila).
+        // Philippines default centre (Manila).
         var DEFAULT_LAT = 14.5995;
         var DEFAULT_LNG = 120.9842;
-        var NOMINATIM = 'https://nominatim.openstreetmap.org';
-        var APP_REF = 'MedFind Pharmacy Locator';
+        var NOMINATIM   = 'https://nominatim.openstreetmap.org';
+        var APP_REF     = 'MedFind Admin Pharmacy Locator';
 
         function init() {
             if (typeof L === 'undefined') {
                 return setTimeout(init, 100);
             }
 
-            var mapEl = document.getElementById('profileLocationMap');
-            if (! mapEl || mapEl.dataset.initialized) {
+            var mapEl = document.getElementById('adminLocationMap');
+            if (!mapEl || mapEl.dataset.initialized) {
                 return;
             }
             mapEl.dataset.initialized = 'true';
 
-            var latInput = document.getElementById('latitude');
-            var lngInput = document.getElementById('longitude');
-            var addrInput = document.getElementById('address');
-            var notice = document.getElementById('geoNotice');
-            var geoBtn = document.getElementById('useMyLocationBtn');
+            var latInput    = document.getElementById('latitude');
+            var lngInput    = document.getElementById('longitude');
+            var addrInput   = document.getElementById('address');
+            var notice      = document.getElementById('geoNotice');
+            var geoBtn      = document.getElementById('useMyLocationBtn');
             var searchInput = document.getElementById('addressSearch');
-            var searchBtn = document.getElementById('addressSearchBtn');
-            var resultsEl = document.getElementById('searchResults');
+            var searchBtn   = document.getElementById('addressSearchBtn');
+            var resultsEl   = document.getElementById('searchResults');
 
             var hasExisting = latInput.value !== '' && lngInput.value !== '';
-            var startLat = hasExisting ? parseFloat(latInput.value) : DEFAULT_LAT;
-            var startLng = hasExisting ? parseFloat(lngInput.value) : DEFAULT_LNG;
+            var startLat    = hasExisting ? parseFloat(latInput.value)  : DEFAULT_LAT;
+            var startLng    = hasExisting ? parseFloat(lngInput.value) : DEFAULT_LNG;
 
             var map = L.map(mapEl).setView([startLat, startLng], hasExisting ? 15 : 12);
 
@@ -174,23 +162,20 @@
                 notice.classList.add(isError ? 'text-red-500' : 'text-green-600');
             }
 
-            // ---- Nominatim address search (only fires on user action) ----
             function runSearch() {
                 var q = (searchInput.value || '').trim();
                 if (q.length < 3) {
                     showNotice('Type at least 3 characters to search.', true);
                     return;
                 }
-                showNotice('Searching…', false);
+                showNotice('Searching\u2026', false);
                 var url = NOMINATIM + '/search?format=json&limit=5&addressdetails=1'
                     + '&q=' + encodeURIComponent(q)
                     + '&email=' + encodeURIComponent(APP_REF);
 
                 fetch(url, { headers: { 'Accept': 'application/json' } })
                     .then(function (r) { return r.json(); })
-                    .then(function (data) {
-                        renderResults(data || []);
-                    })
+                    .then(function (data) { renderResults(data || []); })
                     .catch(function () {
                         showNotice('Address search is unavailable right now. Please set the pin manually.', true);
                     });
@@ -198,7 +183,7 @@
 
             function renderResults(items) {
                 resultsEl.innerHTML = '';
-                if (! items.length) {
+                if (!items.length) {
                     resultsEl.classList.add('hidden');
                     showNotice('No matches found. Try a different address or set the pin manually.', true);
                     return;
@@ -206,7 +191,7 @@
                 showNotice(items.length + ' result(s). Pick one or drag the pin.', false);
                 items.forEach(function (item) {
                     var li = document.createElement('li');
-                    li.className = 'px-3 py-2 text-xs text-[#191970] hover:bg-[#f0ebff] cursor-pointer';
+                    li.className = 'px-3 py-2 text-xs text-gray-700 hover:bg-blue-50 cursor-pointer';
                     li.textContent = item.display_name;
                     li.addEventListener('click', function () {
                         updateCoords(parseFloat(item.lat), parseFloat(item.lon), true, item.display_name);
@@ -247,11 +232,11 @@
 
             if (geoBtn) {
                 geoBtn.addEventListener('click', function () {
-                    if (! navigator.geolocation || ! window.isSecureContext) {
+                    if (!navigator.geolocation || !window.isSecureContext) {
                         showNotice('Location access needs a secure (HTTPS) connection. Please set the pin manually.', true);
                         return;
                     }
-                    showNotice('Locating you…', false);
+                    showNotice('Locating you\u2026', false);
                     navigator.geolocation.getCurrentPosition(
                         function (position) {
                             updateCoords(position.coords.latitude, position.coords.longitude, true);
@@ -270,6 +255,7 @@
                 });
             }
 
+            // Fix rendering when the container becomes visible.
             setTimeout(function () { map.invalidateSize(); }, 200);
         }
 
@@ -280,4 +266,4 @@
         }
     })();
 </script>
-@endsection
+@endpush

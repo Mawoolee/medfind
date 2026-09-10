@@ -6,7 +6,7 @@
 <div class="container mx-auto px-4 py-8">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-gray-800">📦 System Inventory Overview</h1>
+            <h1 class="text-2xl font-bold text-gray-800">System Inventory Overview</h1>
             <p class="text-sm text-gray-500 mt-1">Real-time stock levels across all partner pharmacies.</p>
         </div>
         <a href="{{ route('admin.dashboard') }}" class="text-[#9400D3] hover:text-[#7a00b0] text-sm font-medium whitespace-nowrap">

@@ -1,4 +1,4 @@
-﻿{{-- resources/views/admin/requirements.blade.php --}}
+{{-- resources/views/admin/requirements.blade.php --}}
 
 @extends('layouts.app')
 
@@ -9,20 +9,14 @@
  <div class="max-w-7xl mx-auto px-4 py-8">
 
  {{-- Page Header --}}
- <div class="flex items-center justify-between mb-6">
- <div class="flex items-center gap-4">
- <a href="{{ route('admin.dashboard') }}"
- class="text-[#9400D3] hover:text-[#191970] transition"
- title="Back to Dashboard">
- <i class="fas fa-arrow-left text-lg"></i>
- </a>
+ <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
  <div>
- <h1 class="text-2xl font-bold text-[#191970]">
- <i class="fas fa-file-check mr-2 text-[#9400D3]"></i>Requirements Review
- </h1>
+ <h1 class="text-2xl font-bold text-gray-800">Requirements Review</h1>
  <p class="text-sm text-gray-500 mt-0.5">Review pharmacy documents and approve or reject registrations</p>
  </div>
- </div>
+ <a href="{{ route('admin.dashboard') }}" class="text-[#9400D3] hover:text-[#7a00b0] whitespace-nowrap">
+ <i class="fas fa-arrow-left mr-2"></i>Back
+ </a>
  </div>
 
  {{-- Flash Messages --}}

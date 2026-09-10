@@ -6,7 +6,7 @@
 <div class="container mx-auto px-4 py-8 max-w-3xl">
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-gray-800">🔔 Notifications</h1>
+            <h1 class="text-2xl font-bold text-gray-800">Notifications</h1>
             @if($unreadCount > 0)
                 <p class="text-sm text-[#9400D3] mt-1 font-medium">{{ $unreadCount }} unread notification{{ $unreadCount === 1 ? '' : 's' }}</p>
             @else

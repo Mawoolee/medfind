@@ -5,7 +5,7 @@
 @section('content')
 <div class="container mx-auto px-4 py-8">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">📋 Cycle Counts</h1>
+        <h1 class="text-2xl font-bold text-gray-800">Cycle Counts</h1>
         <div class="flex flex-wrap items-center gap-2">
             <a href="{{ route('pharmacy.cycle-counts.create') }}" class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 min-h-11 rounded">
                 <i class="fas fa-plus mr-2"></i>New Cycle Count

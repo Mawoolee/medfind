@@ -1,3 +1,18 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    /* Apply consistent rounded corners to all form inputs, selects, and textareas.
+       @layer base has lower specificity than @layer utilities, so any element with
+       an explicit Tailwind rounded-* class keeps its own value. */
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="hidden"]) {
+        border-radius: 12px;
+    }
+    select {
+        border-radius: 12px;
+    }
+    textarea {
+        border-radius: 12px;
+    }
+}

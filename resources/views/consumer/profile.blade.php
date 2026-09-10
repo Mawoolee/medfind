@@ -17,12 +17,12 @@
 
         @if(session('status') === 'profile-updated')
             <div class="bg-green-50 border border-green-300 text-green-700 text-xs font-semibold px-4 py-3 rounded-xl">
-                ✅ Profile updated successfully.
+                Profile updated successfully.
             </div>
         @endif
         @if(session('status') === 'password-updated')
             <div class="bg-green-50 border border-green-300 text-green-700 text-xs font-semibold px-4 py-3 rounded-xl">
-                ✅ Password updated successfully.
+                Password updated successfully.
             </div>
         @endif
 

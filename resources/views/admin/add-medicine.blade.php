@@ -8,7 +8,7 @@
 <div class="container mx-auto px-4 py-8">
     <div class="flex items-center justify-between mb-6">
         <h1 class="text-2xl font-bold text-gray-800">Add Medicine</h1>
-        <a href="{{ route('admin.medicines') }}" class="text-blue-600 hover:text-blue-800">
+        <a href="{{ route('admin.medicines') }}" class="text-[#9400D3] hover:text-[#7a00b0]">
             <i class="fas fa-arrow-left mr-2"></i>Back
         </a>
     </div>

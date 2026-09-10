@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Log Controlled Substance')
+@section('title', 'Log Stock Movement')
 
 @section('content')
 <div class="container mx-auto px-4 py-8 max-w-2xl">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-        <div><h1 class="text-2xl font-bold text-gray-800">Log Controlled Substance</h1><p class="text-sm text-gray-500 mt-1">Stock decreases are allocated to available batches in FEFO order.</p></div>
+        <div><h1 class="text-2xl font-bold text-gray-800">Log Stock Movement</h1><p class="text-sm text-gray-500 mt-1">Stock decreases are allocated to available batches in FEFO order.</p></div>
         <x-back-button :href="route('pharmacy.dashboard')" label="Back to Dashboard" />
     </div>
 
@@ -86,7 +86,7 @@
         if (!items.length) {
             if (medOptions.length === 0) {
                 const li = document.createElement('li');
-                li.textContent = 'No controlled substances in stock.';
+                li.textContent = 'No medicines in stock.';
                 li.style.cssText = 'padding:8px 12px;font-size:0.875rem;color:#6b7280;font-style:italic;';
                 dropList.appendChild(li);
                 dropList.style.display = 'block';

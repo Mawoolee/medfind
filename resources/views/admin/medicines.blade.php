@@ -12,7 +12,7 @@
             <a href="{{ route('admin.medicine.add') }}" class="inline-flex items-center justify-center bg-purple-600 hover:bg-purple-700 text-white px-4 py-2.5 rounded-lg transition duration-200">
                 <i class="fas fa-plus mr-2"></i>Add Medicine
             </a>
-            <a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:text-blue-800 whitespace-nowrap">
+            <a href="{{ route('admin.dashboard') }}" class="text-[#9400D3] hover:text-[#7a00b0] whitespace-nowrap">
                 <i class="fas fa-arrow-left mr-2"></i>Back
             </a>
         </div>
@@ -82,7 +82,7 @@
                                 </td>
                                 <td class="px-4 py-3">
                                     <div class="flex gap-4 items-center">
-                                        <a href="{{ route('admin.medicine.edit', $medicine->id) }}" class="text-blue-600 hover:text-blue-800 text-base py-1">
+                                        <a href="{{ route('admin.medicine.edit', $medicine->id) }}" class="text-[#9400D3] hover:text-[#7a00b0] text-base py-1">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         <form action="{{ route('admin.medicine.delete', $medicine->id) }}" method="POST" class="inline">
