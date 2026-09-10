@@ -17,7 +17,8 @@ php artisan serve --host=127.0.0.1 --port=8000
 php artisan reverb:start --host=127.0.0.1 --port=8080
 
 # Terminal 3 - Nginx (optional)
-cd C:\nginx; .\nginx.exe
+cd C:\nginx
+.\nginx.exe
 
 Optional:
 # Terminal 4 - Queue Worker (Broadcasting)
@@ -30,18 +31,12 @@ npm run dev
 
 
 
-One-time setup steps (only needed if running on a fresh machine):
-# Install PHP dependencies
+First-time setup (bagong machine):
 composer install
-# Install JS dependencies
 npm install
-# Copy environment file
 copy .env.example .env
-# Generate app key
 php artisan key:generate
-# Run database migrations
 php artisan migrate
-# Create storage symlink (for pharmacy logos)
 php artisan storage:link
 
 
