@@ -1,7 +1,7 @@
-﻿<x-guest-layout>
+﻿﻿<x-guest-layout>
     <div class="min-h-screen flex flex-col items-center justify-center px-4">
         <!-- Logo -->
-        <div class="auth-logo-container mb-4 text-center px-6 py-3 rounded-xl bg-white dark:bg-[rgba(15,25,70,0.90)] border border-gray-200/50 dark:border-[rgba(0,220,255,0.3)] shadow-sm dark:shadow-none">
+        <div class="auth-logo-container mb-4 text-center px-6 pt-0 pb-3 overflow-hidden rounded-xl border border-gray-200/50 dark:border-[rgba(0,220,255,0.45)] shadow-lg dark:shadow-[0_0_18px_rgba(0,200,255,0.15),0_8px_32px_rgba(0,0,0,0.5)]">
             <div class="flex items-center justify-center gap-0 overflow-hidden">
                 <img src="{{ asset('images/MedFind Final Icon.png') }}" alt="MedFind Icon" class="h-16 sm:h-20 w-auto -mr-9">
                 <img src="{{ asset('images/Final Logo MedFind.png') }}" alt="MedFind" class="h-36 sm:h-52 w-auto -my-10 sm:-my-16" style="filter: drop-shadow(0 0 0.5px white) drop-shadow(0 0 0.5px white);">
@@ -10,7 +10,7 @@
         </div>
 
         <!-- Card -->
-        <div class="auth-card-container auth-card w-full max-w-sm rounded-xl overflow-hidden bg-white/5 dark:bg-[rgba(15,25,70,0.92)] backdrop-blur-xl border border-gray-200/50 dark:border-[rgba(0,220,255,0.45)] shadow-lg dark:shadow-[0_0_18px_rgba(0,200,255,0.15),0_8px_32px_rgba(0,0,0,0.5)]">
+        <div class="auth-card-container auth-card w-full max-w-sm rounded-xl overflow-hidden backdrop-blur-xl border border-gray-200/50 dark:border-[rgba(0,220,255,0.45)] shadow-lg dark:shadow-[0_0_18px_rgba(0,200,255,0.15),0_8px_32px_rgba(0,0,0,0.5)]">
             <div class="p-6">
                 <x-auth-session-status class="mb-4" :status="session('status')" />
 
@@ -29,7 +29,7 @@
                                required
                                autofocus
                                autocomplete="username"
-                               class="w-full px-4 py-3 bg-white/5 dark:bg-white/10 border border-gray-300/30 dark:border-white/20 rounded-lg text-base text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-white/30 focus:border-blue-500 dark:focus:border-white/50 transition"
+                               class="w-full px-4 py-3 bg-gray-50 dark:bg-white/10 border border-gray-300 dark:border-white/20 rounded-lg text-base text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-white/30 focus:border-blue-500 dark:focus:border-white/50 transition"
                                placeholder="Email">
                         <x-input-error :messages="$errors->get('email')" class="mt-1" />
                     </div>
@@ -45,7 +45,7 @@
                                    name="password"
                                    required
                                    autocomplete="current-password"
-                                   class="w-full px-4 py-3 pr-10 bg-white/5 dark:bg-white/10 border border-gray-300/30 dark:border-white/20 rounded-lg text-base text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-white/30 focus:border-blue-500 dark:focus:border-white/50 transition"
+                                   class="w-full px-4 py-3 pr-10 bg-gray-50 dark:bg-white/10 border border-gray-300 dark:border-white/20 rounded-lg text-base text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-white/30 focus:border-blue-500 dark:focus:border-white/50 transition"
                                    placeholder="••••••••">
                             <button type="button" class="password-toggle-icon absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 dark:text-white/40 hover:text-gray-600 dark:hover:text-white/70 focus:outline-none" onclick="togglePassword(this)" tabindex="-1" aria-label="Toggle password visibility"><i class="fas fa-eye"></i></button>
                         </div>
@@ -82,7 +82,7 @@
         </div>
 
         <!-- Footer -->
-        <p class="text-xs text-black dark:text-white/70 font-light mt-8 px-4 py-2 rounded-lg bg-white dark:bg-[rgba(15,25,70,0.92)] border border-gray-200 dark:border-[rgba(0,220,255,0.3)]">
+        <p class="auth-footer text-xs text-gray-700 dark:text-white/70 font-light mt-8 px-4 py-2 rounded-lg border border-white/30 dark:border-[rgba(0,220,255,0.3)]">
             &copy; 2026 MedFind. All rights reserved.
         </p>
     </div>

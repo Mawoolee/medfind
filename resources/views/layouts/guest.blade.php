@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
@@ -66,7 +66,7 @@
                 background-color: #0a0f3d;
             }
             html.dark body::before {
-                background: rgba(5, 10, 40, 0.60);
+                background: rgba(5, 10, 40, 0.20);
             }
         </style>
     </head>

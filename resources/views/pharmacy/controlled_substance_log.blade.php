@@ -65,10 +65,11 @@
 <script>
 // Medicine searchable combobox
 (() => {
-    const medOptions = @json($controlledItems->map(fn($item) => [
-        'id'   => $item->id,
-        'name' => ($item->medicine?->medicine_name ?? '(unknown)') . ' — Available: ' . $item->available_stock,
-    ])->values());
+    const medOptions = @json($controlledItems->filter(fn($item) => ($item->available_stock ?? 0) > 0)
+        ->map(fn($item) => [
+            'id'   => $item->id,
+            'name' => ($item->medicine?->medicine_name ?? '(unknown)') . ' — Available: ' . $item->available_stock,
+        ])->values());
 
     const textInput   = document.getElementById('inventory_item_id_text');
     const hiddenInput = document.getElementById('inventory_item_id_hidden');

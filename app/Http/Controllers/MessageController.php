@@ -91,6 +91,16 @@ class MessageController extends Controller
 
         $message->save();
 
+        // Notify the pharmacy owner of the new message
+        $pharmacyUser = \App\Models\User::find(\App\Models\Pharmacy::find($request->pharmacy_id)?->user_id);
+        if ($pharmacyUser) {
+            $pharmacyUser->notify(new \App\Notifications\NewMessageNotification(
+                from: $user->name,
+                message: $request->message,
+                url: route('pharmacy.messages')
+            ));
+        }
+
         // Handle multiple attachments
         $attachmentData = [];
         if ($request->hasFile('attachments')) {
@@ -253,6 +263,16 @@ class MessageController extends Controller
         $message->replied_at = now();
         $message->is_read = true;
         $message->save();
+
+        // Notify the consumer of the pharmacy reply
+        $consumer = \App\Models\User::find($message->consumer_id);
+        if ($consumer) {
+            $consumer->notify(new \App\Notifications\NewMessageNotification(
+                from: auth()->user()->name,
+                message: $request->reply,
+                url: route('consumer.messages')
+            ));
+        }
 
         // Broadcast reply to consumer
         MessageSent::dispatch(

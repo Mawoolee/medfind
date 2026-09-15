@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('title', 'Add Stock / Receive Delivery')
 
@@ -32,9 +32,8 @@
             <form id="receiving-form" action="{{ route('pharmacy.receiving.store') }}" method="POST">
                 @csrf
 
-                {{-- Hidden fields that the request still accepts as nullable --}}
+                {{-- Hidden field: supplier_id not collected in this UI --}}
                 <input type="hidden" name="supplier_id" value="">
-                <input type="hidden" name="purchase_order" value="">
 
                 {{-- Row 1: Medicine searchable combobox --}}
                 <div class="mb-4">
@@ -140,15 +139,45 @@
                         >
                     </div>
                 </div>
-
-                {{-- Row 5: Expiry Date + Date Received --}}
+                {{-- Row 5: Supplier + Reference / PO No. --}}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
-                        <label for="expiry_date" class="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
+                        <label for="supplier_name" class="block text-sm font-medium text-gray-700 mb-1">Supplier <span class="text-red-500">*</span></label>
+                        <input
+                            type="text"
+                            id="supplier_name"
+                            name="supplier_name"
+                            value="{{ old('supplier_name', '') }}"
+                            maxlength="255"
+                            required
+                            class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-base"
+                            placeholder="e.g. ABC Pharma Distributors"
+                        >
+                    </div>
+                    <div>
+                        <label for="purchase_order" class="block text-sm font-medium text-gray-700 mb-1">Reference / PO No. <span class="text-red-500">*</span></label>
+                        <input
+                            type="text"
+                            id="purchase_order"
+                            name="purchase_order"
+                            value="{{ old('purchase_order', '') }}"
+                            maxlength="255"
+                            required
+                            class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-base"
+                            placeholder="e.g. PO-2025-001"
+                        >
+                    </div>
+                </div>
+
+                {{-- Row 6: Expiry Date + Date Received --}}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="expiry_date" class="block text-sm font-medium text-gray-700 mb-1">Expiry Date <span class="text-red-500">*</span></label>
                         <input
                             type="date"
                             id="expiry_date"
                             name="items[0][expiry_date]"
+                            required
                             value="{{ old('items.0.expiry_date', '') }}"
                             class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-base"
                         >
@@ -168,7 +197,7 @@
                     </div>
                 </div>
 
-                {{-- Row 6: Cold Chain + Requires Prescription --}}
+                {{-- Row 7: Cold Chain + Requires Prescription --}}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                     <div class="flex items-center gap-3 pt-1">
                         <input type="hidden" name="items[0][cold_chain]" value="0">

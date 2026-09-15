@@ -1,4 +1,4 @@
-@tailwind base;
+ï»¿@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -40,17 +40,29 @@ html.dark {
 
 /* Force white background for auth cards in light mode */
 html:not(.dark) .auth-logo-container,
-html:not(.dark) .auth-card {
-    background-color: white !important;
+html:not(.dark) .auth-card,
+html:not(.dark) .auth-card-container,
+html:not(.dark) .auth-footer {
+    background-color: rgba(255, 255, 255, 0.45) !important;
+    backdrop-filter: blur(12px) !important;
+}
+/* Force glass effect for auth cards in dark mode */
+html.dark .auth-logo-container,
+html.dark .auth-card,
+html.dark .auth-card-container,
+html.dark .auth-footer {
+    background-color: rgba(15, 25, 70, 0.45) !important;
+    backdrop-filter: blur(12px) !important;
 }
 /* Force white footer in light mode */
 html:not(.dark) p[class*="rounded-lg"] {
-    background-color: white !important;
+    background-color: rgba(255, 255, 255, 0.45) !important;
+    backdrop-filter: blur(12px) !important;
 }
 
 html.dark .auth-logo-container + .auth-card + p,
 html.dark p[class*="text-xs"][class*="rounded-lg"] {
-    background-color: rgba(15,25,70,0.90) !important;
+    background-color: rgba(15,25,70,0.45) !important;
 }
 
 /* Ensure text is visible in light mode on auth pages */
@@ -82,7 +94,7 @@ input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.05) inset !important;
+    -webkit-box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.08) inset !important;
     -webkit-text-fill-color: #000000 !important;
     transition: background-color 5000s ease-in-out 0s;
 }
@@ -91,7 +103,7 @@ html.dark input:-webkit-autofill,
 html.dark input:-webkit-autofill:hover,
 html.dark input:-webkit-autofill:focus,
 html.dark input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.1) inset !important;
+    -webkit-box-shadow: 0 0 0 1000px rgba(15, 25, 70, 1) inset !important;
     -webkit-text-fill-color: #ffffff !important;
 }
 
@@ -203,7 +215,7 @@ html.dark .bg-amber-50  { background-color: rgba(245,158,11,0.1) !important; }
 html.dark .bg-orange-50 { background-color: rgba(249,115,22,0.1) !important; }
 html.dark .bg-purple-50 { background-color: rgba(168,85,247,0.1) !important; }
 html.dark .bg-indigo-50 { background-color: rgba(99,102,241,0.1) !important; }
-/* Consumer dashboard map panels — stats bar & search panel */
+/* Consumer dashboard map panels ï¿½ stats bar & search panel */
 html.dark .stats-bar-fixed {
     background: rgba(26, 26, 46, 0.95) !important;
     border-color: rgba(148, 0, 211, 0.2) !important;

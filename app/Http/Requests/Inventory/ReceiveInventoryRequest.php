@@ -19,8 +19,8 @@ final class ReceiveInventoryRequest extends PharmacyInventoryRequest
 
         return [
             'supplier_id' => ['nullable', 'integer', Rule::exists('suppliers', 'id')],
-            'supplier_name' => ['nullable', 'string', 'max:255'],
-            'purchase_order' => ['nullable', 'string', 'max:255'],
+            'supplier_name' => ['required', 'string', 'max:255'],
+            'purchase_order' => ['required', 'string', 'max:255'],
             'items' => ['required', 'array', 'min:1'],
             'items.*' => ['required', 'array'],
             'items.*.inventory_item_id' => [
@@ -35,7 +35,7 @@ final class ReceiveInventoryRequest extends PharmacyInventoryRequest
             'items.*.price' => ['required', 'numeric', 'min:0', 'decimal:0,2'],
             'items.*.supplier_id' => ['nullable', 'integer', Rule::exists('suppliers', 'id')],
             'items.*.supplier_name' => ['nullable', 'string', 'max:255'],
-            'items.*.expiry_date' => ['nullable', 'date_format:Y-m-d'],
+            'items.*.expiry_date' => ['required', 'date_format:Y-m-d'],
             'items.*.cold_chain' => ['sometimes', 'boolean'],
             'items.*.received_date' => ['required', 'date_format:Y-m-d'],
             'items.*.received_reference' => ['nullable', 'string', 'max:255'],

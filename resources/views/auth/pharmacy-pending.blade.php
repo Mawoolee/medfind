@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('content')
 <div class="min-h-full flex flex-col items-center justify-center bg-[#f0f0ff] px-4 py-16">
@@ -77,7 +77,7 @@
     </div>
 
     <!-- Footer -->
-    <p class="text-xs text-[#9400D3]/30 font-light mt-8">
+    <p class="auth-footer text-xs text-gray-700 dark:text-white/70 font-light mt-8 px-4 py-2 rounded-lg border border-white/30 dark:border-[rgba(0,220,255,0.3)]">
         &copy; 2026 MedFind. All rights reserved.
     </p>
 </div>

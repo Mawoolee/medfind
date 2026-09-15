@@ -9,6 +9,15 @@
             </div>
 
             <div class="flex items-center gap-3">
+                {{-- Dark Mode Toggle --}}
+                <button type="button" id="darkModeToggle"
+                    onclick="toggleDarkMode()"
+                    class="flex items-center justify-center w-9 h-9 rounded-full transition"
+                    style="background-color:#e5e7eb;color:#374151;border:1px solid #d1d5db;"
+                    title="Toggle dark/light mode"
+                    aria-label="Toggle dark/light mode">
+                    <i id="darkModeIcon" class="fas fa-moon text-sm"></i>
+                </button>
 @auth
                     {{-- Notification Bell --}}
                     @php $notifCount = auth()->user()->unreadNotifications()->count(); @endphp

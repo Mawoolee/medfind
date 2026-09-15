@@ -98,16 +98,7 @@
     @endif
 </head>
 <body>
-<!-- Floating Dark Mode Toggle -->
-        <button type="button" id="darkModeToggle"
-            onclick="toggleDarkMode()"
-            class="fixed top-3 right-4 z-[99999] flex items-center justify-center w-10 h-10 rounded-full bg-[#191970] dark:bg-white/20 backdrop-blur-md border border-[#191970] dark:border-white/30 text-white dark:text-white hover:bg-[#2a2a8a] dark:hover:bg-white/30 transition shadow-lg" style="background-color:#e5e7eb;color:#374151;border-color:#d1d5db;"
-            title="Toggle dark/light mode"
-            aria-label="Toggle dark/light mode">
-            <i id="darkModeIcon" class="fas fa-moon text-base"></i>
-        </button>
-
-        <div class="app-shell h-screen overflow-hidden">
+<div class="app-shell h-screen overflow-hidden">
         <!-- Navigation with fixed position -->
         <div class="navigation-wrapper">
             @include('layouts.navigation')
