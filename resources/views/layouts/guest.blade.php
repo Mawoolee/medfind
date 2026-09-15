@@ -85,6 +85,13 @@
     
     <!-- Dark Mode Toggle Script -->
     <script>
+        function updateAuthContainers() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const bg = isDark ? 'rgba(15,25,70,0.45)' : 'rgba(255,255,255,0.45)';
+            document.querySelectorAll('.auth-logo-container, .auth-footer').forEach(el => {
+                el.style.backgroundColor = bg;
+            });
+        }
         function toggleDarkMode() {
             const html = document.documentElement;
             const icon = document.getElementById('darkModeIcon');
@@ -97,6 +104,7 @@
                 localStorage.setItem('medfind-theme', 'dark');
                 if (icon) { icon.classList.replace('fa-moon', 'fa-sun'); }
             }
+            updateAuthContainers();
         }
         // Set correct icon on load
         document.addEventListener('DOMContentLoaded', function() {
@@ -105,6 +113,7 @@
                 icon.classList.replace('fa-moon', 'fa-sun');
             }
         });
+        updateAuthContainers();
     </script>
 </body>
 </html>
