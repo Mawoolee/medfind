@@ -8,13 +8,7 @@
                 </a>
             </div>
 
-            <div class="flex items-center gap-0">
-                                {{-- Dark Mode Toggle --}}
-                <button type="button" id="darkModeToggle" class="relative flex items-center justify-center w-11 h-11 text-gray-500 hover:text-[#9400D3] transition -mr-1"
-                    title="Toggle dark/light mode"
-                    aria-label="Toggle dark/light mode">
-                    <i id="darkModeIcon" class="fas fa-moon text-xl"></i>
-                </button>
+            <div class="flex items-center gap-3">
 @auth
                     {{-- Notification Bell --}}
                     @php $notifCount = auth()->user()->unreadNotifications()->count(); @endphp

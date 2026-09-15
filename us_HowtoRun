@@ -1,0 +1,38 @@
+How to run this project
+Open terminals:
+
+# Terminal 1 - Laravel App
+php artisan serve --host=127.0.0.1 --port=8000
+
+# Terminal 2 - Reverb WebSocket
+php artisan reverb:start --host=127.0.0.1 --port=8080
+
+# Terminal 3 - Nginx (optional)
+cd C:\nginx
+.\nginx.exe
+
+Optional:
+# Terminal 4 - Queue Worker (Broadcasting)
+php artisan queue:work 
+Note: Processes background jobs (sending notifications when pharmacy status changes)
+
+# Terminal 5 - (Vite (Frontend assets - only needed if editing the CSS/JS)) 
+npm run dev 
+Note: Skip this if you're not making frontend changes
+
+
+
+First-time setup (bagong machine):
+composer install
+npm install
+copy .env.example .env
+php artisan key:generate
+php artisan migrate
+php artisan storage:link
+
+
+Checklist before opening the browser:
+    PostgreSQL is running on port 5432
+    .env has correct DB_PASSWORD set to root123
+    Terminals 1, 2, and 3 are all running
+    Open http://127.0.0.1:8000

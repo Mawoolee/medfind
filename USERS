@@ -1,6 +1,18 @@
-Login and Test
+Login credentials:
+Note: Deployed accounts
 
-Role	           Email	            Password	        Dashboard URL
-Pharmacy	pharmacy@medfind.com	    password	    /pharmacy/dashboard
-Consumer	consumer@medfind.com	    password	    /consumer/dashboard
-Admin	    admin@medfind.com	        password	    /admin/dashboard
+Pharmacy	                                         Email                                      Password
+Legazpi City Pharmacy                       07305868@dwc-legazpi.edu                         Legazpi_city01             
+
+	        
+
+Note: Localhost accounts
+
+Pharmacy	                                            Email                                    Password
+Albay Medical Center Pharmacy              	 albaymedicalcenter@medfind.com	                    password123
+
+                                             sanjose.pharmacy@medfind.com                       password123
+                                             nuevaecija.drugstore@medfind.com                   password123
+
+                                             holyspirit.pharmacy@medfind.com	                password123	
+                                             qchealthplus@medfind.com	                        password123

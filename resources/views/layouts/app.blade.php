@@ -98,7 +98,16 @@
     @endif
 </head>
 <body>
-<div class="app-shell h-screen overflow-hidden">
+<!-- Floating Dark Mode Toggle -->
+        <button type="button" id="darkModeToggle"
+            onclick="toggleDarkMode()"
+            class="fixed top-3 right-4 z-[99999] flex items-center justify-center w-10 h-10 rounded-full bg-[#191970] dark:bg-white/20 backdrop-blur-md border border-[#191970] dark:border-white/30 text-white dark:text-white hover:bg-[#2a2a8a] dark:hover:bg-white/30 transition shadow-lg" style="background-color:#e5e7eb;color:#374151;border-color:#d1d5db;"
+            title="Toggle dark/light mode"
+            aria-label="Toggle dark/light mode">
+            <i id="darkModeIcon" class="fas fa-moon text-base"></i>
+        </button>
+
+        <div class="app-shell h-screen overflow-hidden">
         <!-- Navigation with fixed position -->
         <div class="navigation-wrapper">
             @include('layouts.navigation')
@@ -119,6 +128,19 @@
 
     <!-- Dark Mode Toggle Script -->
     <script>
+        function updateToggleStyle() {
+            const btn = document.getElementById('darkModeToggle');
+            if (!btn) return;
+            if (document.documentElement.classList.contains('dark')) {
+                btn.style.backgroundColor = 'rgba(255,255,255,0.2)';
+                btn.style.color = 'white';
+                btn.style.borderColor = 'rgba(255,255,255,0.3)';
+            } else {
+                btn.style.backgroundColor = '#e5e7eb';
+                btn.style.color = '#374151';
+                btn.style.borderColor = '#d1d5db';
+            }
+        }
         function toggleDarkMode() {
             const html = document.documentElement;
             const icon = document.getElementById('darkModeIcon');
@@ -130,7 +152,8 @@
                 html.classList.add('dark');
                 localStorage.setItem('medfind-theme', 'dark');
                 if (icon) { icon.classList.replace('fa-moon', 'fa-sun'); }
-            }
+            updateToggleStyle();
+        }
         }
         // Set correct icon on load
         document.addEventListener('DOMContentLoaded', function() {
@@ -138,6 +161,7 @@
             if (icon && document.documentElement.classList.contains('dark')) {
                 icon.classList.replace('fa-moon', 'fa-sun');
             }
+            updateToggleStyle();
         });
     </script>
 </body>

@@ -1,4 +1,4 @@
-<x-guest-layout>
+﻿<x-guest-layout>
     <div class="min-h-screen flex flex-col items-center justify-center px-4">
         <!-- Logo -->
         <div class="auth-logo-container mb-4 text-center px-6 py-3 rounded-xl bg-white dark:bg-[rgba(15,25,70,0.90)] border border-gray-200/50 dark:border-[rgba(0,220,255,0.3)] shadow-sm dark:shadow-none">
@@ -46,7 +46,7 @@
                                    required
                                    autocomplete="current-password"
                                    class="w-full px-4 py-3 pr-10 bg-white/5 dark:bg-white/10 border border-gray-300/30 dark:border-white/20 rounded-lg text-base text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-white/30 focus:border-blue-500 dark:focus:border-white/50 transition"
-                                   placeholder="????????">
+                                   placeholder="••••••••">
                             <button type="button" class="password-toggle-icon absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 dark:text-white/40 hover:text-gray-600 dark:hover:text-white/70 focus:outline-none" onclick="togglePassword(this)" tabindex="-1" aria-label="Toggle password visibility"><i class="fas fa-eye"></i></button>
                         </div>
                         <x-input-error :messages="$errors->get('password')" class="mt-1" />
