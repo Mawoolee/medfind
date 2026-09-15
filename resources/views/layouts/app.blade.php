@@ -147,13 +147,13 @@
             if (html.classList.contains('dark')) {
                 html.classList.remove('dark');
                 localStorage.setItem('medfind-theme', 'light');
-                if (icon) { icon.classList.replace('fa-sun', 'fa-moon'); }
+                if (icon) { icon.classList.remove('fa-sun'); icon.classList.add('fa-moon'); }
             } else {
                 html.classList.add('dark');
                 localStorage.setItem('medfind-theme', 'dark');
-                if (icon) { icon.classList.replace('fa-moon', 'fa-sun'); }
+                if (icon) { icon.classList.remove('fa-moon'); icon.classList.add('fa-sun'); }
+            }
             updateToggleStyle();
-        }
         }
         // Set correct icon on load
         document.addEventListener('DOMContentLoaded', function() {
