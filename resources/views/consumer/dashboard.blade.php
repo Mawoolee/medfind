@@ -111,6 +111,42 @@
     });
 
     // -------------------------------------------------------
+    // Toggle Alternative Routes Visibility
+    // -------------------------------------------------------
+    let alternativesVisible = false;
+    
+    window.toggleAlternatives = function() {
+        alternativesVisible = !alternativesVisible;
+        const alts = document.querySelectorAll('.leaflet-routing-alt-minimized');
+        const btn = document.getElementById('toggleAltsBtn');
+        const label = document.getElementById('toggleAltsLabel');
+        const chevron = btn ? btn.querySelector('.chevron') : null;
+        
+        if (alternativesVisible) {
+            alts.forEach(alt => alt.style.display = 'block');
+            if (label) label.textContent = 'Hide alternatives';
+            if (chevron) chevron.className = 'fas fa-chevron-up chevron';
+        } else {
+            alts.forEach(alt => alt.style.display = 'none');
+            if (label) label.textContent = 'Show alternatives';
+            if (chevron) chevron.className = 'fas fa-chevron-down chevron';
+        }
+    };
+    
+    // Show the toggle alternatives button when routes are loaded
+    // This will be called by the routing control when alternatives are available
+    window.showAlternativesButton = function() {
+        const btn = document.getElementById('toggleAltsBtn');
+        if (btn) btn.style.display = 'flex';
+    };
+    
+    window.hideAlternativesButton = function() {
+        const btn = document.getElementById('toggleAltsBtn');
+        if (btn) btn.style.display = 'none';
+        alternativesVisible = false;
+    };
+
+    // -------------------------------------------------------
     // REAL-TIME: Listen for inventory updates via Reverb/Echo
     // Updates the in-memory pharmaciesData and re-renders map.
     // -------------------------------------------------------
@@ -340,15 +376,18 @@
         opacity: 0.6 !important;
     }
     .leaflet-routing-alt-minimized {
-        max-height: 44px !important;
-        padding: 12px 16px !important;
+        display: none !important;
+        max-height: 80px !important;
+        padding: 14px 16px !important;
         overflow: hidden !important;
-        opacity: 0.6 !important;
-        background: rgba(148, 0, 211, 0.03) !important;
+        background: rgba(148, 0, 211, 0.08) !important;
+        border: 1px solid rgba(148, 0, 211, 0.2) !important;
+        border-radius: 10px !important;
+        margin-bottom: 8px !important;
     }
     .leaflet-routing-alt-minimized:hover {
-        background: rgba(148, 0, 211, 0.06) !important;
-        opacity: 0.85 !important;
+        background: rgba(148, 0, 211, 0.12) !important;
+        border-color: rgba(148, 0, 211, 0.35) !important;
     }
     .leaflet-routing-alt:not(.leaflet-routing-alt-minimized) {
         max-height: 40vh !important;
@@ -505,6 +544,33 @@
     }
     #clearRouteBtn:hover {
         background: #a916e0 !important;
+    }
+    /* Toggle Alternatives button - similar to other route buttons */
+    #toggleAltsBtn {
+        flex: 1 !important;
+        background: #191970 !important;
+        color: #D9F855 !important;
+        border: none !important;
+        padding: 0 14px !important;
+        min-height: 40px !important;
+        border-radius: 9999px !important;
+        font-weight: 700 !important;
+        font-size: 12px !important;
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        box-shadow: 0 2px 8px rgba(25, 25, 112, 0.3) !important;
+        white-space: nowrap !important;
+        transition: background 0.2s ease !important;
+        font-family: system-ui, -apple-system, sans-serif !important;
+    }
+    #toggleAltsBtn:hover {
+        background: #2a2a8a !important;
+    }
+    #toggleAltsBtn .chevron {
+        transition: transform 0.2s ease !important;
     }
     #toggleStepsBtn .chevron {
         transition: transform 0.2s ease !important;
