@@ -1,4 +1,5 @@
 import './bootstrap';
+import './echo';  // ✨ Real-time WebSocket support
 
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';

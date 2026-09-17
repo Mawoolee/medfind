@@ -1265,3 +1265,182 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 console.log('MedFind JS loaded - All functions ready');
+
+// ============================================
+// REAL-TIME WEBSOCKET LISTENERS (Laravel Echo + Reverb)
+// ============================================
+
+/**
+ * Initialize real-time listeners for inventory updates and messages.
+ * Only active when Echo is properly configured with Reverb.
+ */
+function initializeRealtimeListeners() {
+    if (!window.Echo || typeof window.Echo.channel !== 'function') {
+        console.debug('[MedFind] Real-time listeners skipped (Echo not available)');
+        return;
+    }
+
+    // ========== INVENTORY REAL-TIME UPDATES ==========
+    // Listen on public 'inventory' channel for stock changes
+    window.Echo.channel('inventory')
+        .listen('.inventory.updated', (data) => {
+            console.info('[MedFind] Inventory updated:', data);
+            
+            // Update map markers if on consumer map page
+            if (typeof pharmaciesData !== 'undefined' && Array.isArray(pharmaciesData)) {
+                const pharmacy = pharmaciesData.find(p => p.id === data.pharmacyId);
+                if (pharmacy && pharmacy.medicines) {
+                    const medicine = pharmacy.medicines.find(m => m.id === data.medicineId);
+                    if (medicine) {
+                        medicine.stock = data.stock;
+                        medicine.price = data.price;
+                        
+                        // Re-render map if current search matches this medicine
+                        if (currentSearchQuery && data.medicineName && 
+                            data.medicineName.toLowerCase().includes(currentSearchQuery)) {
+                            performSearch();
+                        }
+                    }
+                }
+            }
+            
+            // Update pharmacy dashboard inventory table if present
+            const inventoryRow = document.querySelector(`tr[data-medicine-id="${data.medicineId}"]`);
+            if (inventoryRow) {
+                const stockCell = inventoryRow.querySelector('.stock-quantity');
+                const priceCell = inventoryRow.querySelector('.medicine-price');
+                
+                if (stockCell) stockCell.textContent = data.stock;
+                if (priceCell) priceCell.textContent = `₱${parseFloat(data.price).toFixed(2)}`;
+                
+                // Visual feedback
+                inventoryRow.style.backgroundColor = '#d1fae5';
+                setTimeout(() => { inventoryRow.style.backgroundColor = ''; }, 2000);
+            }
+        });
+
+    // ========== MESSAGE REAL-TIME NOTIFICATIONS ==========
+    // Listen for pharmacy-specific messages (if logged in as pharmacy)
+    const pharmacyId = document.querySelector('meta[name="pharmacy-id"]')?.content;
+    if (pharmacyId) {
+        window.Echo.channel(`pharmacy.${pharmacyId}`)
+            .listen('.message.sent', (data) => {
+                console.info('[MedFind] New message received:', data);
+                
+                // Update unread count badge
+                if (data.direction === 'consumer_to_pharmacy') {
+                    const badge = document.getElementById('pharmacyUnreadCountBadge');
+                    if (badge) {
+                        const current = parseInt(badge.textContent) || 0;
+                        updateUnreadBadge(current + 1);
+                    }
+                    
+                    // Show toast notification
+                    showMessageNotification(data);
+                }
+                
+                // Live-update chat if on messages page
+                refreshMessageList();
+            });
+    }
+
+    // Listen for consumer-specific messages (if logged in as consumer)
+    const consumerId = document.querySelector('meta[name="consumer-id"]')?.content;
+    if (consumerId) {
+        window.Echo.channel(`consumer.${consumerId}`)
+            .listen('.message.sent', (data) => {
+                console.info('[MedFind] Pharmacy replied:', data);
+                
+                if (data.direction === 'pharmacy_to_consumer') {
+                    showMessageNotification({
+                        consumerName: 'Pharmacy',
+                        message: data.reply || data.message,
+                    });
+                }
+            });
+    }
+
+    console.info('[MedFind] Real-time listeners initialized ✓');
+}
+
+/**
+ * Show toast notification for new messages
+ */
+function showMessageNotification(data) {
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        background: linear-gradient(135deg, #9400D3, #7a00b0);
+        color: white;
+        padding: 16px 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(148, 0, 211, 0.3);
+        z-index: 10000;
+        font-family: system-ui, -apple-system, sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        max-width: 350px;
+        animation: slideIn 0.3s ease-out;
+    `;
+    
+    toast.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="background: rgba(255,255,255,0.2); padding: 8px; border-radius: 50%;">
+                <i class="fas fa-envelope" style="font-size: 16px;"></i>
+            </div>
+            <div>
+                <div style="font-weight: 700; margin-bottom: 4px;">New Message</div>
+                <div style="opacity: 0.95; font-weight: 400; font-size: 13px;">
+                    ${data.consumerName || 'Consumer'}: ${(data.message || '').substring(0, 60)}${data.message?.length > 60 ? '...' : ''}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease-in';
+        setTimeout(() => toast.remove(), 300);
+    }, 5000);
+}
+
+/**
+ * Refresh message list on messages page
+ */
+function refreshMessageList() {
+    const messageContainer = document.querySelector('.message-list-container');
+    if (messageContainer && typeof htmx !== 'undefined') {
+        // Trigger HTMX refresh if available
+        htmx.trigger(messageContainer, 'refresh');
+    } else if (window.location.pathname.includes('/pharmacy/messages')) {
+        // Fallback: soft reload
+        setTimeout(() => window.location.reload(), 1000);
+    }
+}
+
+// Initialize on DOM ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeRealtimeListeners);
+} else {
+    initializeRealtimeListeners();
+}
+
+// Add CSS animations for toast
+const style = document.createElement('style');
+style.textContent = `
+@keyframes slideIn {
+    from { transform: translateX(400px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+@keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(400px); opacity: 0; }
+}
+`;
+document.head.appendChild(style);
+
+console.log('[MedFind] Real-time WebSocket module loaded ✓');
