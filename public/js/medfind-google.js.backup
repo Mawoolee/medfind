@@ -1,0 +1,533 @@
+// ============================================
+// MEDFIND - GOOGLE MAPS IMPLEMENTATION
+// ============================================
+
+// Global variables
+let map;
+let markers = [];
+let userLat = 13.1475;  // Default: Legazpi City
+let userLng = 123.7431;
+let userMarker = null;
+let currentSearchQuery = "";
+let currentFilteredPharmacies = [];
+
+// Ensure globals exist when pages don't provide them to avoid ReferenceErrors
+if (typeof window !== 'undefined') {
+    if (typeof window.allMedicineNames === 'undefined') window.allMedicineNames = [];
+    if (typeof window.inventoryMedicineNames === 'undefined') window.inventoryMedicineNames = [];
+}
+
+/**
+ * Calculate distance between two geographic coordinates using Haversine formula
+ * @param {number} lat1 - First point latitude
+ * @param {number} lon1 - First point longitude
+ * @param {number} lat2 - Second point latitude
+ * @param {number} lon2 - Second point longitude
+ * @returns {number} Distance in kilometers
+ */
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Earth's radius in kilometers
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+}
+
+/**
+ * Main initialization function with retry logic for Google Maps API
+ * Called by the global callback when Google Maps API loads
+ * Implements 5 retry attempts with 200ms delay for reliability in tunneled/proxied environments
+ */
+function initializeMap(attemptCount = 0) {
+    const maxAttempts = 5;
+    
+    // Check if Google Maps API is loaded
+    if (typeof google === 'undefined' || !google.maps) {
+        if (attemptCount < maxAttempts) {
+            console.warn(`Google Maps API not ready, retrying... (${attemptCount + 1}/${maxAttempts})`);
+            setTimeout(() => initializeMap(attemptCount + 1), 200);
+        } else {
+            displayErrorMessage('Map failed to load. Please refresh the page.');
+            console.error('Google Maps API failed to load after 5 attempts');
+        }
+        return;
+    }
+    
+    // Check if map container exists
+    const mapContainer = document.getElementById('medfindMap');
+    if (!mapContainer) {
+        console.warn('Map container #medfindMap not found on this page');
+        return;
+    }
+    
+    // Initialize map components
+    try {
+        const mapManager = new GoogleMapManager('medfindMap');
+        mapManager.initialize();
+        console.log('Google Maps initialized successfully');
+    } catch (error) {
+        console.error('Error initializing map:', error);
+        displayErrorMessage('Map initialization failed. Please refresh the page.');
+    }
+}
+
+/**
+ * Display error message to user
+ * @param {string} message - Error message to display
+ */
+function displayErrorMessage(message) {
+    // Create error message element if it doesn't exist
+    let errorDiv = document.getElementById('mapErrorMessage');
+    if (!errorDiv) {
+        errorDiv = document.createElement('div');
+        errorDiv.id = 'mapErrorMessage';
+        errorDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ef4444;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 10000;
+            font-family: system-ui, -apple-system, sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+        `;
+        document.body.appendChild(errorDiv);
+    }
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+}
+
+// ============================================
+// GoogleMapManager Class
+// ============================================
+
+/**
+ * Manages Google Maps initialization, configuration, and geolocation
+ * Handles map setup with retry logic and geolocation fallback
+ */
+class GoogleMapManager {
+    /**
+     * @param {string} containerId - ID of the HTML element to contain the map
+     * @param {Object} options - Map configuration options (optional)
+     */
+    constructor(containerId, options = {}) {
+        this.containerId = containerId;
+        this.options = {
+            center: options.center || { lat: 13.1475, lng: 123.7431 }, // Legazpi City default
+            zoom: options.zoom || 13,
+            minZoom: options.minZoom || 10,
+            maxZoom: options.maxZoom || 19,
+            mapTypeId: options.mapTypeId || 'roadmap',
+            gestureHandling: options.gestureHandling || 'greedy',
+            zoomControl: options.zoomControl !== false,
+            mapTypeControl: options.mapTypeControl !== false,
+            streetViewControl: options.streetViewControl !== false,
+            fullscreenControl: options.fullscreenControl !== false
+        };
+        this.map = null;
+    }
+    
+    /**
+     * Initialize the Google Maps instance with geolocation handling
+     * Attempts to get user location, falls back to default center if denied
+     */
+    initialize() {
+        const container = document.getElementById(this.containerId);
+        if (!container) {
+            throw new Error(`Map container #${this.containerId} not found`);
+        }
+        
+        // Create map instance
+        this.map = new google.maps.Map(container, {
+            center: this.options.center,
+            zoom: this.options.zoom,
+            minZoom: this.options.minZoom,
+            maxZoom: this.options.maxZoom,
+            mapTypeId: this.options.mapTypeId,
+            gestureHandling: this.options.gestureHandling,
+            zoomControl: this.options.zoomControl,
+            mapTypeControl: this.options.mapTypeControl,
+            streetViewControl: this.options.streetViewControl,
+            fullscreenControl: this.options.fullscreenControl
+        });
+        
+        // Store map reference globally
+        window.map = this.map;
+        map = this.map;
+        
+        // Handle geolocation
+        this.handleGeolocation();
+        
+        // Create pharmacy markers if pharmaciesData is available
+        if (typeof pharmaciesData !== 'undefined' && pharmaciesData.length > 0) {
+            const pharmacyMarkerManager = new PharmacyMarkerManager(this.map, pharmaciesData);
+            pharmacyMarkerManager.createMarkers();
+            
+            // Store reference globally for search filtering (Stage 2+)
+            window.pharmacyMarkerManager = pharmacyMarkerManager;
+        } else {
+            console.warn('pharmaciesData not available or empty - no markers created');
+        }
+        
+        return this.map;
+    }
+    
+    /**
+     * Attempt to get user's current location via browser geolocation API
+     * Falls back to default center (Legazpi City) if permission denied or unavailable
+     */
+    handleGeolocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    // Success: use user's actual location
+                    userLat = position.coords.latitude;
+                    userLng = position.coords.longitude;
+                    
+                    const userLocation = { lat: userLat, lng: userLng };
+                    this.map.setCenter(userLocation);
+                    
+                    console.log(`User location: ${userLat}, ${userLng}`);
+                    
+                    // Create and show user location marker
+                    const userLocationMarker = new UserLocationMarker(this.map);
+                    userLocationMarker.setPosition(userLat, userLng);
+                    userLocationMarker.show();
+                    
+                    // Store reference globally for future updates
+                    window.userMarker = userLocationMarker;
+                },
+                (error) => {
+                    // Error: fall back to default location
+                    console.warn('Geolocation error:', error.message);
+                    userLat = 13.1475;  // Legazpi City
+                    userLng = 123.7431;
+                    
+                    const defaultLocation = { lat: userLat, lng: userLng };
+                    this.map.setCenter(defaultLocation);
+                    
+                    console.log('Using default location: Legazpi City');
+                    // Do NOT show user location marker if permission denied
+                }
+            );
+        } else {
+            // Geolocation not supported
+            console.warn('Geolocation is not supported by this browser');
+            userLat = 13.1475;
+            userLng = 123.7431;
+            
+            const defaultLocation = { lat: userLat, lng: userLng };
+            this.map.setCenter(defaultLocation);
+        }
+    }
+    
+    /**
+     * Set map center to specific coordinates
+     * @param {number} lat - Latitude
+     * @param {number} lng - Longitude
+     */
+    setCenter(lat, lng) {
+        if (this.map) {
+            this.map.setCenter({ lat, lng });
+        }
+    }
+    
+    /**
+     * Fit map to specified bounds
+     * @param {google.maps.LatLngBounds} bounds - Bounds to fit
+     */
+    fitBounds(bounds) {
+        if (this.map) {
+            this.map.fitBounds(bounds);
+        }
+    }
+    
+    /**
+     * Get the Google Maps instance
+     * @returns {google.maps.Map} The map instance
+     */
+    getMap() {
+        return this.map;
+    }
+}
+
+// ============================================
+// UserLocationMarker Class
+// ============================================
+
+/**
+ * Manages the user's location marker with pulsing blue dot animation
+ * Displays "You are here" tooltip and maintains higher z-index than pharmacy markers
+ */
+class UserLocationMarker {
+    /**
+     * @param {google.maps.Map} map - The Google Maps instance
+     */
+    constructor(map) {
+        this.map = map;
+        this.marker = null;
+        this.position = null;
+    }
+    
+    /**
+     * Set or update the marker position
+     * @param {number} lat - Latitude
+     * @param {number} lng - Longitude
+     */
+    setPosition(lat, lng) {
+        this.position = { lat, lng };
+        
+        if (this.marker) {
+            // Update existing marker position
+            this.marker.setPosition(this.position);
+        } else {
+            // Create new marker with custom icon
+            this.createMarker();
+        }
+    }
+    
+    /**
+     * Create the user location marker with custom pulsing icon
+     */
+    createMarker() {
+        if (!this.position) {
+            console.warn('Cannot create user marker: position not set');
+            return;
+        }
+        
+        // Create custom pulsing blue dot icon
+        const icon = {
+            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                <svg width="40" height="40" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Pulsing outer circle (animation handled by CSS) -->
+                    <circle cx="20" cy="20" r="18" fill="rgba(66,133,244,0.2)" class="pulse-circle"/>
+                    <!-- White border -->
+                    <circle cx="20" cy="20" r="10" fill="white"/>
+                    <!-- Inner blue dot -->
+                    <circle cx="20" cy="20" r="7" fill="#4285F4"/>
+                </svg>
+            `),
+            scaledSize: new google.maps.Size(40, 40),
+            anchor: new google.maps.Point(20, 20)
+        };
+        
+        // Create marker
+        this.marker = new google.maps.Marker({
+            position: this.position,
+            map: this.map,
+            icon: icon,
+            title: 'You are here',
+            zIndex: 1000, // Higher than pharmacy markers
+            optimized: false // Required for custom SVG icons
+        });
+        
+        // Add pulsing animation via CSS
+        this.addPulsingAnimation();
+    }
+    
+    /**
+     * Add CSS animation for pulsing effect
+     */
+    addPulsingAnimation() {
+        // Check if animation already added
+        if (document.getElementById('medfind-pulse-animation')) {
+            return;
+        }
+        
+        // Create style element with pulse animation
+        const style = document.createElement('style');
+        style.id = 'medfind-pulse-animation';
+        style.textContent = `
+            @keyframes medfindPulse {
+                0% {
+                    r: 18;
+                    opacity: 1;
+                }
+                50% {
+                    r: 22;
+                    opacity: 0.5;
+                }
+                100% {
+                    r: 18;
+                    opacity: 1;
+                }
+            }
+            .pulse-circle {
+                animation: medfindPulse 2s ease-out infinite;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    /**
+     * Show the marker on the map
+     */
+    show() {
+        if (this.marker) {
+            this.marker.setMap(this.map);
+        }
+    }
+    
+    /**
+     * Hide the marker from the map
+     */
+    hide() {
+        if (this.marker) {
+            this.marker.setMap(null);
+        }
+    }
+    
+    /**
+     * Get the current marker position
+     * @returns {Object|null} Position object {lat, lng} or null
+     */
+    getPosition() {
+        return this.position;
+    }
+}
+
+// ============================================
+// PharmacyMarkerManager Class
+// ============================================
+
+/**
+ * Manages pharmacy markers on the map
+ * Handles marker creation, filtering, and click events
+ */
+class PharmacyMarkerManager {
+    /**
+     * @param {google.maps.Map} map - The Google Maps instance
+     * @param {Array} pharmaciesData - Array of pharmacy objects
+     */
+    constructor(map, pharmaciesData) {
+        this.map = map;
+        this.pharmaciesData = pharmaciesData || [];
+        this.markers = [];
+    }
+    
+    /**
+     * Create markers for all pharmacies
+     * Calculates distance from user location for each pharmacy
+     */
+    createMarkers() {
+        // Clear existing markers
+        this.clearMarkers();
+        
+        // Create marker for each pharmacy
+        this.pharmaciesData.forEach(pharmacy => {
+            // Calculate distance from user location
+            pharmacy.distance = calculateDistance(
+                userLat, 
+                userLng, 
+                pharmacy.lat, 
+                pharmacy.lng
+            );
+            
+            // Create marker icon
+            const icon = this.createMarkerIcon(pharmacy);
+            
+            // Create marker
+            const marker = new google.maps.Marker({
+                position: { lat: pharmacy.lat, lng: pharmacy.lng },
+                map: this.map,
+                icon: icon,
+                title: pharmacy.name,
+                zIndex: 100, // Lower than user location marker
+                optimized: false // Required for custom icons to display properly
+            });
+            
+            // Store pharmacy data reference on marker
+            marker.pharmacyData = pharmacy;
+            
+            // Add click event listener (will be used in Stage 2)
+            marker.addListener('click', () => {
+                console.log('Pharmacy marker clicked:', pharmacy.name);
+                // TODO: Open InfoWindow (Stage 2, Task 4.2)
+            });
+            
+            // Store marker
+            this.markers.push(marker);
+        });
+        
+        console.log(`Created ${this.markers.length} pharmacy markers`);
+    }
+    
+    /**
+     * Create marker icon based on pharmacy logo availability
+     * @param {Object} pharmacy - Pharmacy object
+     * @returns {Object} Google Maps icon configuration
+     */
+    createMarkerIcon(pharmacy) {
+        const hasLogo = pharmacy.logo && pharmacy.logo.trim() !== '';
+        
+        if (hasLogo) {
+            // Use pharmacy logo as marker icon (circular frame)
+            return {
+                url: pharmacy.logo,
+                scaledSize: new google.maps.Size(48, 48),
+                anchor: new google.maps.Point(24, 48)
+            };
+        } else {
+            // Use Google's built-in marker with custom purple color
+            // This is more reliable than SVG
+            return {
+                path: google.maps.SymbolPath.CIRCLE,
+                fillColor: '#9400D3',
+                fillOpacity: 1,
+                strokeColor: '#191970',
+                strokeWeight: 3,
+                scale: 24  // Makes it 48px diameter (24 * 2)
+            };
+        }
+    }
+    
+    /**
+     * Filter markers based on search query
+     * @param {Array} filteredPharmacies - Array of pharmacy objects to display
+     */
+    filterMarkers(filteredPharmacies) {
+        const filteredIds = new Set(filteredPharmacies.map(p => p.id));
+        
+        this.markers.forEach(marker => {
+            const pharmacyId = marker.pharmacyData.id;
+            if (filteredIds.has(pharmacyId)) {
+                marker.setMap(this.map); // Show marker
+            } else {
+                marker.setMap(null); // Hide marker
+            }
+        });
+    }
+    
+    /**
+     * Clear all markers from the map
+     */
+    clearMarkers() {
+        this.markers.forEach(marker => {
+            marker.setMap(null);
+        });
+        this.markers = [];
+    }
+    
+    /**
+     * Get marker for a specific pharmacy ID
+     * @param {number} pharmacyId - Pharmacy ID
+     * @returns {google.maps.Marker|null} Marker or null if not found
+     */
+    getMarkerByPharmacyId(pharmacyId) {
+        return this.markers.find(marker => marker.pharmacyData.id === pharmacyId) || null;
+    }
+}
+
+// Make initializeMap available globally for the callback
+window.initializeMap = initializeMap;

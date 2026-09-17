@@ -1,0 +1,408 @@
+.pharmacy-info-window {
+    position: relative;
+    width: 320px;
+    max-width: calc(100vw - 48px);
+    box-sizing: border-box;
+    padding: 18px;
+    overflow: visible;
+    border: 1px solid rgba(148, 0, 211, 0.1);
+    border-radius: 24px;
+    background: #ffffff;
+    box-shadow: 0 4px 18px rgba(25, 25, 112, 0.12);
+    color: #191970;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.piw-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 2;
+    display: inline-flex;
+    width: 28px;
+    height: 28px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #94a3b8;
+    font: 700 22px/1 Arial, sans-serif;
+    cursor: pointer;
+}
+
+.piw-close:hover,
+.piw-close:focus-visible {
+    background: rgba(148, 0, 211, 0.08);
+    color: #9400D3;
+    outline: none;
+}
+
+.piw-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding-right: 22px;
+    margin-bottom: 8px;
+}
+
+.piw-logo,
+.piw-logo-fallback {
+    width: 48px;
+    height: 48px;
+    box-sizing: border-box;
+    flex: 0 0 48px;
+    border-radius: 50%;
+}
+
+.piw-logo {
+    border: 2px solid #9400D3;
+    background: #ffffff;
+    object-fit: cover;
+}
+
+.piw-logo-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #D9F855;
+    background: #191970;
+    color: #D9F855;
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.piw-title-section {
+    min-width: 0;
+    flex: 1;
+}
+
+.piw-name {
+    display: inline-block;
+    color: #191970;
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.2;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+}
+
+.piw-name:hover,
+.piw-name:focus-visible {
+    color: #9400D3;
+    outline: none;
+}
+
+.piw-address {
+    margin-top: 3px;
+    color: #64748b;
+    font-size: 11px;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.piw-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.piw-distance {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 9999px;
+    background: rgba(148, 0, 211, 0.08);
+    color: #191970;
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.piw-contact {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    color: #9400D3;
+    font-size: 10px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.piw-hours {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin-top: 4px;
+    color: #64748b;
+    font-size: 10px;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.piw-medicines {
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    border: 1px solid rgba(148, 0, 211, 0.06);
+    border-radius: 16px;
+    background: rgba(148, 0, 211, 0.04);
+}
+
+.piw-medicines-title {
+    margin-bottom: 6px;
+    color: #191970;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.piw-medicine-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(148, 0, 211, 0.08);
+}
+
+.piw-medicine-item:last-child {
+    border-bottom: 0;
+}
+
+.piw-medicine-name {
+    min-width: 0;
+    color: #191970;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.piw-medicine-price {
+    flex: 0 0 auto;
+    color: #9400D3;
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.piw-no-stock {
+    color: #94a3b8;
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.piw-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.piw-btn {
+    display: flex;
+    min-width: 90px;
+    flex: 1 1 90px;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: 9px 8px;
+    border: 0;
+    border-radius: 9999px;
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.piw-btn-view {
+    background: #9400D3;
+    box-shadow: 0 2px 4px rgba(148, 0, 211, 0.2);
+    color: #ffffff;
+}
+
+.piw-btn-message {
+    background: #191970;
+    color: #D9F855;
+}
+
+.piw-btn-directions {
+    background: #0ea5e9;
+    color: #ffffff;
+}
+
+.piw-btn:hover,
+.piw-btn:focus-visible {
+    filter: brightness(0.92);
+    outline: none;
+}
+
+.piw-btn:disabled,
+.piw-btn[aria-disabled='true'] {
+    cursor: not-allowed;
+    filter: grayscale(0.45);
+    opacity: 0.55;
+}
+
+/* These overrides are applied only to the Google chrome wrapping this popup. */
+.gm-style-iw-c.medfind-pharmacy-iw {
+    max-width: none !important;
+    max-height: none !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    border-radius: 24px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.gm-style-iw-d.medfind-pharmacy-iw-content {
+    max-width: none !important;
+    max-height: none !important;
+    padding: 0 !important;
+    overflow: visible !important;
+}
+
+.gm-style-iw-c.medfind-pharmacy-iw > .gm-style-iw-chr,
+.gm-style-iw-c.medfind-pharmacy-iw > button.gm-ui-hover-effect {
+    display: none !important;
+}
+
+.medfind-pharmacy-iw-wrapper .gm-style-iw-tc::after {
+    background: #ffffff !important;
+}
+
+@media (max-width: 380px) {
+    .pharmacy-info-window {
+        max-width: calc(100vw - 32px);
+        padding: 15px;
+    }
+
+    .piw-header {
+        padding-right: 20px;
+    }
+
+    .piw-btn {
+        min-width: 80px;
+        flex-basis: 80px;
+    }
+}
+
+/* ============================================
+   MEDICINE SEARCH SURFACES
+   ============================================ */
+
+/* Keyboard-highlighted autocomplete option (mouse hover is handled by medfind.css). */
+.autocomplete-item.is-active {
+    background: rgba(148, 0, 211, 0.15) !important;
+}
+
+html.dark .autocomplete-item.is-active {
+    background: rgba(148, 0, 211, 0.28) !important;
+}
+
+/* Transient "no results" toast: app-owned DOM centered under the search bar,
+   styled to match .nearest-suggestion-panel instead of Google InfoWindow chrome. */
+.medfind-no-results-toast {
+    position: fixed;
+    /* Sits in the gap between the search bar (ends ~168px) and the suggestion
+       panel slot, so it never covers the search input or the stats pill. */
+    top: 184px;
+    left: 50%;
+    z-index: 9996;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: max-content;
+    max-width: 340px;
+    padding: 11px 14px;
+    border: 1px solid rgba(148, 0, 211, 0.14);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.96);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 28px rgba(25, 25, 112, 0.12);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    /* Let clicks and drags reach the map underneath. */
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(-50%, -8px);
+    transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.medfind-no-results-toast.is-visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .medfind-no-results-toast {
+        transition: opacity 200ms ease;
+        transform: translate(-50%, 0);
+    }
+}
+
+.medfind-no-results-toast .mnr-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(148, 0, 211, 0.12);
+    color: #9400D3;
+    font-size: 12px;
+}
+
+.medfind-no-results-toast .mnr-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.medfind-no-results-toast .mnr-title {
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.25;
+    color: #191970;
+}
+
+.medfind-no-results-toast .mnr-detail {
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.35;
+    color: #64748b;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+    .medfind-no-results-toast {
+        /* Mobile search bar starts at 84px and is ~46px tall. */
+        top: 146px;
+        width: calc(100vw - 24px);
+        max-width: calc(100vw - 24px);
+    }
+}
+
+html.dark .medfind-no-results-toast {
+    background: rgba(15, 15, 35, 0.97);
+    border-color: rgba(148, 0, 211, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+html.dark .medfind-no-results-toast .mnr-badge {
+    background: rgba(148, 0, 211, 0.22);
+    color: #D9F855;
+}
+
+html.dark .medfind-no-results-toast .mnr-title {
+    color: #e2e8f0;
+}
+
+html.dark .medfind-no-results-toast .mnr-detail {
+    color: #94a3b8;
+}

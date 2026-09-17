@@ -74,17 +74,24 @@
     </div>
 
 <!-- Route Info Bar - clean summary card: summary line on top, buttons row below -->
-    <div id="routeInfoBar">
+    <div id="routeInfoBar" role="status" aria-live="polite">
         <div id="routeSummary"></div>
+        <div id="routeAlternativesPanel" class="route-alternatives-panel" role="region" aria-label="Alternative routes" aria-hidden="true" hidden></div>
         <div id="routeActions">
-            <button id="toggleStepsBtn" onclick="window.toggleDirections()">
+            <button id="toggleRoutesBtn" type="button" onclick="window.toggleRouteAlternatives()" aria-controls="routeAlternativesPanel" aria-expanded="false" hidden disabled>
+                <i class="fas fa-code-branch"></i> <span id="toggleRoutesLabel">Routes</span>
+            </button>
+            <button id="toggleStepsBtn" type="button" onclick="window.toggleDirections()" aria-controls="googleDirectionsPanel" aria-expanded="false" disabled>
                 <i class="fas fa-list-ul"></i> <span id="toggleStepsLabel">View steps</span> <i class="fas fa-chevron-up chevron"></i>
             </button>
-            <button id="clearRouteBtn" onclick="window.clearRoute()">
+            <button id="clearRouteBtn" type="button" onclick="window.clearRoute()">
                 <i class="fas fa-times"></i> Clear Route
             </button>
         </div>
     </div>
+
+    <!-- Google DirectionsRenderer writes turn-by-turn instructions here. -->
+    <aside id="googleDirectionsPanel" class="google-directions-panel" aria-label="Turn-by-turn directions" aria-hidden="true" hidden></aside>
 
 
 </div>
@@ -109,42 +116,6 @@
             }, 1200);
         }
     });
-
-    // -------------------------------------------------------
-    // Toggle Alternative Routes Visibility
-    // -------------------------------------------------------
-    let alternativesVisible = false;
-    
-    window.toggleAlternatives = function() {
-        alternativesVisible = !alternativesVisible;
-        const alts = document.querySelectorAll('.leaflet-routing-alt-minimized');
-        const btn = document.getElementById('toggleAltsBtn');
-        const label = document.getElementById('toggleAltsLabel');
-        const chevron = btn ? btn.querySelector('.chevron') : null;
-        
-        if (alternativesVisible) {
-            alts.forEach(alt => alt.style.display = 'block');
-            if (label) label.textContent = 'Hide alternatives';
-            if (chevron) chevron.className = 'fas fa-chevron-up chevron';
-        } else {
-            alts.forEach(alt => alt.style.display = 'none');
-            if (label) label.textContent = 'Show alternatives';
-            if (chevron) chevron.className = 'fas fa-chevron-down chevron';
-        }
-    };
-    
-    // Show the toggle alternatives button when routes are loaded
-    // This will be called by the routing control when alternatives are available
-    window.showAlternativesButton = function() {
-        const btn = document.getElementById('toggleAltsBtn');
-        if (btn) btn.style.display = 'flex';
-    };
-    
-    window.hideAlternativesButton = function() {
-        const btn = document.getElementById('toggleAltsBtn');
-        if (btn) btn.style.display = 'none';
-        alternativesVisible = false;
-    };
 
     // -------------------------------------------------------
     // REAL-TIME: Listen for inventory updates via Reverb/Echo
@@ -335,124 +306,185 @@
         color: #191970;
     }
 
-    /* Leaflet Routing Machine Container - Custom Styling */
-    /* Hidden by default: only the clean summary pill (#routeInfoBar) shows.
-       The detailed step list is revealed only when body.directions-open is set
-       (toggled by the "View steps" button). */
-    .leaflet-routing-container {
-        display: none !important;
-        background: rgba(255, 255, 255, 0.97) !important;
-        backdrop-filter: blur(12px) !important;
-        border-radius: 16px !important;
-        border: 1px solid rgba(148, 0, 211, 0.12) !important;
-        box-shadow: 0 8px 32px rgba(25, 25, 112, 0.12) !important;
-        padding: 0 !important;
-        overflow-y: auto !important;
-        max-height: 60vh !important;
-        font-family: system-ui, -apple-system, sans-serif !important;
-        width: 320px !important;
-        /* Sit clear of the top search bar: anchored to the right, well below it */
-        margin-top: 200px !important;
+    /* Controlled MedFind turn-by-turn panel. Google renders the map route while
+       this panel owns the selected route's readable A-to-B instructions. */
+    .google-directions-panel {
+        --directions-surface: rgba(255, 255, 255, 0.98);
+        --directions-surface-solid: #ffffff;
+        --directions-text: #475569;
+        --directions-heading: #191970;
+        --directions-distance: #9400D3;
+        --directions-muted: #7c879b;
+        --directions-tint: rgba(148, 0, 211, 0.045);
+        --directions-border: rgba(148, 0, 211, 0.14);
+        --directions-row-border: rgba(148, 0, 211, 0.09);
+        --directions-shadow: 0 14px 38px rgba(25, 25, 112, 0.16);
+        display: none;
+        position: fixed;
+        top: 188px;
+        right: 20px;
+        z-index: 9998;
+        width: min(370px, calc(100vw - 40px));
+        max-height: min(56vh, calc(100dvh - 336px));
+        overflow-x: hidden;
+        overflow-y: auto;
+        box-sizing: border-box;
+        background: var(--directions-surface);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border: 1px solid var(--directions-border);
+        border-radius: 16px;
+        box-shadow: var(--directions-shadow);
+        color: var(--directions-text);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: 13px;
+        line-height: 1.45;
+        overscroll-behavior: contain;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(148, 0, 211, 0.28) transparent;
+        -webkit-overflow-scrolling: touch;
     }
-    /* Reveal the steps panel when the toggle turns on directions-open.
-       Positioned as a right-side panel on desktop, clear of the search bar
-       and above the bottom summary pill. */
-    body.directions-open .leaflet-routing-container {
-        display: block !important;
+    body.directions-open .google-directions-panel {
+        display: block;
     }
-    .leaflet-routing-container .leaflet-routing-alternatives-container {
-        padding: 0 !important;
-        overflow-y: visible !important;
+    /* Controlled route markup replaces Google provider tables and alternatives. */
+    .google-directions-panel::before {
+        content: none;
+        display: none;
     }
-    /* Route alternative tabs - only show the selected one */
-    .leaflet-routing-alt {
-        padding: 14px 16px !important;
-        border-bottom: 1px solid rgba(148, 0, 211, 0.08) !important;
-        cursor: pointer !important;
-        transition: all 0.2s ease !important;
-        max-height: 0 !important;
-        overflow: hidden !important;
-        padding: 0 16px !important;
-        opacity: 0.6 !important;
+    .mfd-route {
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
     }
-    .leaflet-routing-alt-minimized {
-        display: none !important;
-        max-height: 80px !important;
-        padding: 14px 16px !important;
-        overflow: hidden !important;
-        background: rgba(148, 0, 211, 0.08) !important;
-        border: 1px solid rgba(148, 0, 211, 0.2) !important;
-        border-radius: 10px !important;
-        margin-bottom: 8px !important;
+    .mfd-route-header {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        padding: 16px 18px 13px;
+        background: var(--directions-surface-solid);
+        border-bottom: 1px solid var(--directions-border);
+        box-shadow: 0 4px 12px rgba(25, 25, 112, 0.045);
     }
-    .leaflet-routing-alt-minimized:hover {
-        background: rgba(148, 0, 211, 0.12) !important;
-        border-color: rgba(148, 0, 211, 0.35) !important;
+    .mfd-route-title {
+        margin: 0;
+        color: var(--directions-heading);
+        font-size: 15px;
+        font-weight: 800;
+        line-height: 1.3;
+        overflow-wrap: anywhere;
     }
-    .leaflet-routing-alt:not(.leaflet-routing-alt-minimized) {
-        max-height: 40vh !important;
-        overflow-y: auto !important;
-        padding: 14px 16px !important;
-        opacity: 1 !important;
-        background: #fff !important;
+    .mfd-route-meta {
+        margin: 7px 0 0;
+        color: var(--directions-heading);
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1.3;
     }
-    /* Route header (distance/time summary per route) */
-    .leaflet-routing-alt h2,
-    .leaflet-routing-alt h3 {
-        font-size: 13px !important;
-        font-weight: 700 !important;
-        color: #191970 !important;
-        margin: 0 0 8px 0 !important;
-        padding: 0 !important;
-        border: none !important;
+    .mfd-route-steps {
+        width: 100%;
+        min-width: 0;
+        padding: 0;
+        margin: 0;
+        list-style: none;
     }
-    .leaflet-routing-alt-minimized h2,
-    .leaflet-routing-alt-minimized h3 {
-        font-size: 12px !important;
-        color: #64748b !important;
-        margin: 0 !important;
+    .mfd-route-step {
+        display: grid;
+        grid-template-columns: 44px minmax(0, 1fr) 62px;
+        align-items: center;
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        padding: 11px 14px;
+        border-bottom: 1px solid var(--directions-row-border);
+        background: var(--directions-surface-solid);
     }
-    /* Individual instruction rows */
-    .leaflet-routing-alt table {
-        width: 100% !important;
-        border-collapse: collapse !important;
+    .mfd-route-step:nth-child(even) {
+        background: var(--directions-tint);
     }
-    .leaflet-routing-alt table tr {
-        border-bottom: 1px solid rgba(148, 0, 211, 0.05) !important;
-        transition: background 0.15s ease !important;
+    .mfd-route-step.is-interactive {
+        cursor: pointer;
+        transition: background-color 0.15s ease, box-shadow 0.15s ease;
     }
-    .leaflet-routing-alt table tr:hover {
-        background: rgba(148, 0, 211, 0.04) !important;
+    .mfd-route-step.is-interactive:hover,
+    .mfd-route-step.is-interactive:focus-visible {
+        background: rgba(148, 0, 211, 0.09);
+        outline: none;
+        box-shadow: inset 3px 0 0 rgba(148, 0, 211, 0.5);
     }
-    .leaflet-routing-alt table tr td {
-        padding: 8px 4px !important;
-        font-size: 12px !important;
-        color: #334155 !important;
-        vertical-align: middle !important;
+    .mfd-route-step.is-selected {
+        background: rgba(148, 0, 211, 0.14) !important;
+        box-shadow: inset 4px 0 0 #9400D3;
     }
-    .leaflet-routing-alt table tr td:last-child {
-        text-align: right !important;
-        font-weight: 600 !important;
-        color: #9400D3 !important;
-        white-space: nowrap !important;
-        font-size: 11px !important;
+    .mfd-route-step.is-selected .mfd-route-endpoint,
+    .mfd-route-step.is-selected .mfd-route-maneuver,
+    .mfd-route-step.is-selected .mfd-route-instruction {
+        color: #9400D3;
     }
-    /* Direction icons */
-    .leaflet-routing-icon {
-        width: 20px !important;
-        height: 20px !important;
-        margin-right: 8px !important;
+    .mfd-route-step:last-child {
+        border-bottom: 0;
     }
-    /* Scrollbar styling */
-    .leaflet-routing-alt:not(.leaflet-routing-alt-minimized)::-webkit-scrollbar {
-        width: 4px;
+    .mfd-route-endpoint,
+    .mfd-route-maneuver {
+        display: inline-flex;
+        width: 32px;
+        height: 32px;
+        align-items: center;
+        justify-content: center;
+        justify-self: start;
+        color: var(--directions-heading);
+        font-size: 21px;
+        font-weight: 800;
+        line-height: 1;
     }
-    .leaflet-routing-alt:not(.leaflet-routing-alt-minimized)::-webkit-scrollbar-track {
+    .mfd-route-endpoint {
+        font-size: 20px;
+    }
+    .mfd-route-copy {
+        min-width: 0;
+        padding-right: 8px;
+    }
+    .mfd-route-instruction {
+        color: var(--directions-text);
+        font-size: 13px;
+        font-weight: 500;
+        line-height: 1.42;
+        overflow-wrap: anywhere;
+    }
+    .mfd-route-detail {
+        margin-top: 2px;
+        color: var(--directions-muted);
+        font-size: 11px;
+        font-weight: 400;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+    }
+    .mfd-route-distance {
+        min-width: 0;
+        justify-self: end;
+        color: var(--directions-distance);
+        font-size: 12px;
+        font-weight: 800;
+        line-height: 1.25;
+        text-align: right;
+        white-space: nowrap;
+    }
+    .mfd-route-step-end .mfd-route-instruction {
+        color: var(--directions-muted);
+    }
+    .google-directions-panel::-webkit-scrollbar {
+        width: 5px;
+        height: 0;
+    }
+    .google-directions-panel::-webkit-scrollbar-track {
         background: transparent;
     }
-    .leaflet-routing-alt:not(.leaflet-routing-alt-minimized)::-webkit-scrollbar-thumb {
-        background: rgba(148, 0, 211, 0.2);
-        border-radius: 4px;
+    .google-directions-panel::-webkit-scrollbar-thumb {
+        background: rgba(148, 0, 211, 0.28);
+        border-radius: 9999px;
+    }
+    .google-directions-panel::-webkit-scrollbar-thumb:hover {
+        background: rgba(148, 0, 211, 0.42);
     }
 
     /* Route summary card: a compact rounded card, centered at the bottom.
@@ -463,17 +495,17 @@
         display: none;
         flex-direction: column;
         align-items: stretch;
-        gap: 8px;
+        gap: 10px;
         position: fixed;
         bottom: 24px;
         left: 50%;
         transform: translateX(-50%);
         z-index: 9999;
         width: calc(100% - 24px);
-        max-width: 440px;
+        max-width: 480px;
         background: #ffffff;
         border-radius: 16px;
-        padding: 10px 14px;
+        padding: 12px 16px;
         box-shadow: 0 4px 20px rgba(25, 25, 112, 0.15);
         border: 1px solid rgba(148, 0, 211, 0.12);
         font-family: system-ui, -apple-system, sans-serif;
@@ -485,7 +517,7 @@
         align-items: center;
         justify-content: center;
         gap: 6px;
-        font-size: 13px;
+        font-size: 14px;
         font-weight: 700;
         color: #191970;
         text-align: center;
@@ -494,20 +526,179 @@
     #routeActions {
         display: flex;
         align-items: stretch;
+        gap: 10px;
+        min-width: 0;
+    }
+
+    /* Optional route alternatives live in a separate popover above the summary. */
+    .route-alternatives-panel {
+        position: absolute;
+        right: 0;
+        bottom: calc(100% + 10px);
+        left: 0;
+        z-index: 10001;
+        display: none;
+        max-height: min(320px, 44vh);
+        padding: 12px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        border: 1px solid rgba(148, 0, 211, 0.16);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.98);
+        box-shadow: 0 12px 32px rgba(25, 25, 112, 0.18);
+        box-sizing: border-box;
+        overscroll-behavior: contain;
+    }
+    body.route-alternatives-open .route-alternatives-panel {
+        display: block;
+    }
+    .route-alternatives-panel[hidden],
+    #toggleRoutesBtn[hidden] {
+        display: none !important;
+    }
+    .route-alternatives-header {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        padding: 2px 2px 10px;
+        border-bottom: 1px solid rgba(148, 0, 211, 0.1);
+    }
+    .route-alternatives-header strong {
+        color: #191970;
+        font-size: 14px;
+        font-weight: 800;
+        line-height: 1.25;
+    }
+    .route-alternatives-header span {
+        color: #64748b;
+        font-size: 11px;
+        line-height: 1.35;
+    }
+    .route-alternatives-list {
+        display: flex;
+        flex-direction: column;
         gap: 8px;
+        padding-top: 10px;
+    }
+    .route-alternative-option {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 10px;
+        width: 100%;
+        min-width: 0;
+        padding: 10px 12px;
+        border: 1px solid rgba(148, 0, 211, 0.12);
+        border-radius: 12px;
+        background: #ffffff;
+        color: #334155;
+        font-family: inherit;
+        text-align: left;
+        cursor: pointer;
+        transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+    }
+    .route-alternative-option:hover,
+    .route-alternative-option:focus-visible {
+        border-color: rgba(148, 0, 211, 0.42);
+        background: rgba(148, 0, 211, 0.035);
+        outline: none;
+    }
+    .route-alternative-option.is-active {
+        border-color: #9400D3;
+        background: rgba(148, 0, 211, 0.07);
+        box-shadow: inset 3px 0 0 #9400D3;
+    }
+    .route-alternative-copy {
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .route-alternative-name {
+        color: #191970;
+        font-size: 12.5px;
+        font-weight: 750;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+    }
+    .route-alternative-meta {
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 600;
+        line-height: 1.25;
+    }
+    .route-alternative-badges {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 5px;
+    }
+    .route-alternative-badge,
+    .route-alternative-selected {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3px 7px;
+        border-radius: 9999px;
+        font-size: 9px;
+        font-weight: 800;
+        line-height: 1.2;
+        white-space: nowrap;
+    }
+    .route-alternative-badge {
+        background: rgba(217, 248, 85, 0.45);
+        color: #191970;
+    }
+    .route-alternative-selected {
+        background: #191970;
+        color: #D9F855;
+    }
+    #toggleRoutesBtn {
+        flex: 1 !important;
+        min-width: 0 !important;
+        min-height: 44px !important;
+        padding: 0 12px !important;
+        border: 1px solid rgba(148, 0, 211, 0.22) !important;
+        border-radius: 9999px !important;
+        background: rgba(148, 0, 211, 0.08) !important;
+        color: #191970 !important;
+        box-shadow: 0 2px 8px rgba(148, 0, 211, 0.12) !important;
+        font-family: system-ui, -apple-system, sans-serif !important;
+        font-size: 12px !important;
+        font-weight: 700 !important;
+        white-space: nowrap !important;
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 5px !important;
+    }
+    #toggleRoutesBtn:hover,
+    #toggleRoutesBtn:focus-visible,
+    body.route-alternatives-open #toggleRoutesBtn {
+        border-color: #9400D3 !important;
+        background: #9400D3 !important;
+        color: #ffffff !important;
+        outline: none !important;
+    }
+    #toggleRoutesBtn:disabled {
+        cursor: not-allowed !important;
+        opacity: 0.55 !important;
+        box-shadow: none !important;
     }
 
     /* "View steps" / "Hide steps" toggle button */
     #toggleStepsBtn {
         flex: 1 !important;
+        min-width: 0 !important;
         background: #191970 !important;
         color: #D9F855 !important;
         border: none !important;
-        padding: 0 14px !important;
-        min-height: 40px !important;
+        padding: 0 16px !important;
+        min-height: 44px !important;
         border-radius: 9999px !important;
         font-weight: 700 !important;
-        font-size: 12px !important;
+        font-size: 13px !important;
         cursor: pointer !important;
         display: flex !important;
         align-items: center !important;
@@ -524,14 +715,15 @@
     /* Clear Route button - purple, balanced beside the toggle */
     #clearRouteBtn {
         flex: 1 !important;
+        min-width: 0 !important;
         background: #9400D3 !important;
         color: #ffffff !important;
         border: none !important;
-        padding: 0 14px !important;
-        min-height: 40px !important;
+        padding: 0 16px !important;
+        min-height: 44px !important;
         border-radius: 9999px !important;
         font-weight: 700 !important;
-        font-size: 12px !important;
+        font-size: 13px !important;
         cursor: pointer !important;
         display: flex !important;
         align-items: center !important;
@@ -545,32 +737,10 @@
     #clearRouteBtn:hover {
         background: #a916e0 !important;
     }
-    /* Toggle Alternatives button - similar to other route buttons */
-    #toggleAltsBtn {
-        flex: 1 !important;
-        background: #191970 !important;
-        color: #D9F855 !important;
-        border: none !important;
-        padding: 0 14px !important;
-        min-height: 40px !important;
-        border-radius: 9999px !important;
-        font-weight: 700 !important;
-        font-size: 12px !important;
-        cursor: pointer !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        gap: 6px !important;
-        box-shadow: 0 2px 8px rgba(25, 25, 112, 0.3) !important;
-        white-space: nowrap !important;
-        transition: background 0.2s ease !important;
-        font-family: system-ui, -apple-system, sans-serif !important;
-    }
-    #toggleAltsBtn:hover {
-        background: #2a2a8a !important;
-    }
-    #toggleAltsBtn .chevron {
-        transition: transform 0.2s ease !important;
+    #toggleStepsBtn:disabled {
+        cursor: not-allowed !important;
+        opacity: 0.55 !important;
+        box-shadow: none !important;
     }
     #toggleStepsBtn .chevron {
         transition: transform 0.2s ease !important;
@@ -917,24 +1087,73 @@
             left: 12px !important;
             bottom: 12px !important;
         }
-        /* Routing panel becomes a bottom sheet on mobile: full-width, clear of
-           the search bar, and sitting above the #routeInfoBar summary pill. */
-        body.directions-open .leaflet-routing-container {
-            position: fixed !important;
-            left: 12px !important;
-            right: 12px !important;
-            bottom: 86px !important;
-            top: auto !important;
-            width: calc(100vw - 24px) !important;
-            max-width: none !important;
-            margin-top: 0 !important;
-            max-height: 45vh !important;
-            z-index: 9998 !important;
+        /* Controlled directions become a compact bottom sheet above route controls. */
+        body.directions-open .google-directions-panel {
+            position: fixed;
+            top: auto;
+            right: 12px;
+            bottom: 148px;
+            left: 12px;
+            width: calc(100vw - 24px);
+            max-height: min(42vh, calc(100dvh - 260px));
+            border-radius: 16px;
+            z-index: 9998;
         }
-        /* The route summary card already uses width:calc(100% - 24px) and a
-           clean column layout in the base rule, so it fits mobile without any
-           wrap hack. It sits at bottom:24px, below the directions bottom-sheet
-           (which uses bottom:86px), so the two never overlap. */
+        .mfd-route-header {
+            padding: 14px 16px 12px;
+        }
+        .mfd-route-title {
+            font-size: 14px;
+        }
+        .mfd-route-meta {
+            margin-top: 6px;
+            font-size: 12.5px;
+        }
+        .mfd-route-step {
+            grid-template-columns: 42px minmax(0, 1fr) 58px;
+            padding: 10px 12px;
+        }
+        .mfd-route-copy {
+            padding-right: 6px;
+        }
+        .mfd-route-instruction {
+            font-size: 12.5px;
+        }
+        .mfd-route-distance {
+            font-size: 11.5px;
+        }
+        .route-alternatives-panel {
+            bottom: calc(100% + 8px);
+            max-height: min(36vh, 280px);
+            padding: 10px;
+            border-radius: 14px;
+        }
+        .route-alternatives-header {
+            padding-bottom: 8px;
+        }
+        .route-alternative-option {
+            gap: 8px;
+            padding: 9px 10px;
+        }
+        .route-alternative-name {
+            font-size: 12px;
+        }
+        .route-alternative-badges {
+            gap: 4px;
+        }
+        #routeActions {
+            gap: 6px;
+        }
+        #toggleRoutesBtn,
+        #toggleStepsBtn,
+        #clearRouteBtn {
+            min-height: 42px !important;
+            padding: 0 7px !important;
+            gap: 4px !important;
+            font-size: 11px !important;
+        }
+        /* The sheet's 148px bottom offset clears the enlarged route card at
+           bottom:24px, preserving a comfortable gap on compact screens. */
         /* Nearest suggestion buttons stay tappable */
         .nearest-suggestion-panel .btn-directions,
         .nearest-suggestion-panel .btn-view {
@@ -1014,6 +1233,88 @@
     }
     html.dark #routeSummary {
         color: #e2e8f0 !important;
+    }
+    html.dark .route-alternatives-panel {
+        border-color: rgba(196, 91, 234, 0.28);
+        background: rgba(29, 29, 64, 0.98);
+        box-shadow: 0 12px 32px rgba(8, 8, 24, 0.5);
+    }
+    html.dark .route-alternatives-header {
+        border-bottom-color: rgba(196, 91, 234, 0.18);
+    }
+    html.dark .route-alternatives-header strong,
+    html.dark .route-alternative-name {
+        color: #f8fafc;
+    }
+    html.dark .route-alternatives-header span,
+    html.dark .route-alternative-meta {
+        color: #aeb4c5;
+    }
+    html.dark .route-alternative-option {
+        border-color: rgba(196, 91, 234, 0.18);
+        background: rgba(255, 255, 255, 0.035);
+        color: #d5d8e3;
+    }
+    html.dark .route-alternative-option:hover,
+    html.dark .route-alternative-option:focus-visible {
+        border-color: rgba(196, 91, 234, 0.48);
+        background: rgba(148, 0, 211, 0.11);
+    }
+    html.dark .route-alternative-option.is-active {
+        border-color: #c45bea;
+        background: rgba(148, 0, 211, 0.17);
+        box-shadow: inset 3px 0 0 #c45bea;
+    }
+    html.dark .route-alternative-badge {
+        background: rgba(217, 248, 85, 0.16);
+        color: #D9F855;
+    }
+    html.dark .route-alternative-selected {
+        background: #D9F855;
+        color: #191970;
+    }
+    html.dark #toggleRoutesBtn {
+        border-color: rgba(196, 91, 234, 0.32) !important;
+        background: rgba(148, 0, 211, 0.16) !important;
+        color: #D9F855 !important;
+    }
+    html.dark body.route-alternatives-open #toggleRoutesBtn,
+    html.dark #toggleRoutesBtn:hover,
+    html.dark #toggleRoutesBtn:focus-visible {
+        border-color: #c45bea !important;
+        background: #9400D3 !important;
+        color: #ffffff !important;
+    }
+    html.dark .google-directions-panel {
+        --directions-surface: rgba(29, 29, 64, 0.98);
+        --directions-surface-solid: #202047;
+        --directions-text: #d5d8e3;
+        --directions-heading: #ffffff;
+        --directions-distance: #D9F855;
+        --directions-muted: #aeb4c5;
+        --directions-tint: rgba(148, 0, 211, 0.11);
+        --directions-border: rgba(196, 91, 234, 0.25);
+        --directions-row-border: rgba(196, 91, 234, 0.16);
+        --directions-shadow: 0 14px 38px rgba(8, 8, 24, 0.45);
+    }
+    html.dark .mfd-route-header {
+        box-shadow: 0 4px 12px rgba(8, 8, 24, 0.2);
+    }
+    html.dark .mfd-route-step:nth-child(even) {
+        background: rgba(148, 0, 211, 0.13);
+    }
+    html.dark .mfd-route-step.is-interactive:hover,
+    html.dark .mfd-route-step.is-interactive:focus-visible {
+        background: rgba(148, 0, 211, 0.2);
+    }
+    html.dark .mfd-route-step.is-selected {
+        background: rgba(148, 0, 211, 0.28) !important;
+        box-shadow: inset 4px 0 0 #D9F855;
+    }
+    html.dark .mfd-route-step.is-selected .mfd-route-endpoint,
+    html.dark .mfd-route-step.is-selected .mfd-route-maneuver,
+    html.dark .mfd-route-step.is-selected .mfd-route-instruction {
+        color: #D9F855;
     }
 </style>
 

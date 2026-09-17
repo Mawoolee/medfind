@@ -16,6 +16,7 @@
 
     <!-- MedFind Custom CSS -->
     <link rel="stylesheet" href="{{ asset('css/medfind.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/pharmacy-info-window.css?v=37') }}">
 
     
     <!-- Dark Mode Init (runs before render to prevent flash) -->
@@ -113,7 +114,19 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <!-- MedFind Custom JS -->
-    <script src="{{ asset('js/medfind.js') }}"></script>
+    <script src="{{ asset('js/medfind-google.js?v=37') }}"></script>
+
+    <!-- Google Maps Initialization Callback -->
+    <script>
+        function initGoogleMaps() {
+            if (typeof window.initializeMap === 'function') {
+                window.initializeMap();
+            }
+        }
+    </script>
+
+    <!-- Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&libraries=places&callback=initGoogleMaps"></script>
 
     @stack('scripts')
 

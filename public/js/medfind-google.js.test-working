@@ -1,0 +1,65 @@
+﻿// ============================================
+// MEDFIND - GOOGLE MAPS IMPLEMENTATION (SIMPLE TEST)
+// ============================================
+
+let map;
+let markers = [];
+let userLat = 13.1475;
+let userLng = 123.7431;
+
+function initializeMap() {
+    const mapContainer = document.getElementById('medfindMap');
+    if (!mapContainer) {
+        console.warn('Map container not found');
+        return;
+    }
+    
+    // Create map
+    map = new google.maps.Map(mapContainer, {
+        center: { lat: 13.1475, lng: 123.7431 },
+        zoom: 13,
+        gestureHandling: 'greedy'
+    });
+    
+    console.log('Map created');
+    
+    // Test: Create ONE purple circle marker manually
+    const testMarker = new google.maps.Marker({
+        position: { lat: 13.15, lng: 123.75 },
+        map: map,
+        icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 10,
+            fillColor: '#9400D3',
+            fillOpacity: 1.0,
+            strokeColor: '#191970',
+            strokeWeight: 2
+        },
+        title: 'Test Purple Circle'
+    });
+    
+    console.log('Test marker created:', testMarker);
+    
+    // Load pharmacy markers if data exists
+    if (typeof pharmaciesData !== 'undefined') {
+        pharmaciesData.forEach(pharmacy => {
+            const marker = new google.maps.Marker({
+                position: { lat: pharmacy.lat, lng: pharmacy.lng },
+                map: map,
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 12,
+                    fillColor: '#FF00FF',  // Bright magenta to test
+                    fillOpacity: 1.0,
+                    strokeColor: '#000000',
+                    strokeWeight: 2
+                },
+                title: pharmacy.name
+            });
+            markers.push(marker);
+        });
+        console.log(`Created ${markers.length} pharmacy markers`);
+    }
+}
+
+window.initializeMap = initializeMap;

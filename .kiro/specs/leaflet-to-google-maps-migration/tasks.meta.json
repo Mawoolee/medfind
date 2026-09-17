@@ -1,0 +1,377 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1. Project Setup and Google Maps API Configuration": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634736887
+      },
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634750355
+      },
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789635301862
+      }
+    ],
+    "2.1 Create medfind-google.js file structure": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634736956
+      },
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789635307694
+      },
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789635405576
+      }
+    ],
+    "2.2 Implement GoogleMapManager for map initialization": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634737019
+      },
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789635308399
+      },
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789635406389
+      }
+    ],
+    "2.3 Implement UserLocationMarker for user position display": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634737133
+      },
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789635412505
+      },
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789635553747
+      }
+    ],
+    "2.4 Implement PharmacyMarkerManager for pharmacy markers": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634737220
+      },
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789635413056
+      },
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789635554454
+      }
+    ],
+    "3. Checkpoint - Stage 1 Verification": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634737278
+      }
+    ],
+    "4.1 Implement basic PharmacyInfoWindowManager": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634737351
+      }
+    ],
+    "4.2 Add marker click event listeners": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634737408
+      }
+    ],
+    "5. Checkpoint - Stage 2 Verification": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634737468
+      }
+    ],
+    "6.1 Create pharmacy-info-window.css file": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634737641
+      }
+    ],
+    "6.2 Implement full HTML InfoWindow template": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634737702
+      }
+    ],
+    "6.3 Implement HTML escaping for XSS prevention": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634737756
+      }
+    ],
+    "7.1 Add pharmacy-info-window.css link to app.blade.php": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634737819
+      }
+    ],
+    "8. Checkpoint - Stage 3 Verification": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634737893
+      }
+    ],
+    "9.1 Add medicine list rendering to InfoWindow": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634738002
+      }
+    ],
+    "9.2 Implement action buttons in InfoWindow": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634738102
+      }
+    ],
+    "9.3 Implement alternative pharmacy suggestions for search": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634738160
+      }
+    ],
+    "10. Checkpoint - Stage 4 Verification": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634738200
+      }
+    ],
+    "11.1 Implement DirectionsService class for route calculation": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634738238
+      }
+    ],
+    "11.2 Implement route display and visualization": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634738278
+      }
+    ],
+    "11.3 Implement route info bar display": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634738321
+      }
+    ],
+    "11.4 Implement getDirections() function and route clearing": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634738361
+      }
+    ],
+    "11.5 Implement turn-by-turn directions toggle": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634738399
+      }
+    ],
+    "12. Checkpoint - Stage 5 Verification": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634738434
+      }
+    ],
+    "13.1 Implement PharmacyLocationEditor class": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634738487
+      }
+    ],
+    "13.2 Implement draggable marker for location editor": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634738569
+      }
+    ],
+    "13.3 Implement geocoding and reverse geocoding": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634738609
+      }
+    ],
+    "13.4 Implement address autocomplete search": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634738659
+      }
+    ],
+    "13.5 Implement \"Use my current location\" button": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634738700
+      }
+    ],
+    "14. Checkpoint - Stage 6 Verification": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634738739
+      }
+    ],
+    "15.1 Implement SearchFilterService class": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634738791
+      }
+    ],
+    "15.2 Connect search UI to SearchFilterService": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634738836
+      }
+    ],
+    "15.3 Implement \"No results\" handling": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634738884
+      }
+    ],
+    "16.1 Implement SuggestionPanelManager class": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634738923
+      }
+    ],
+    "16.2 Add action buttons to suggestion panel items": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634738968
+      }
+    ],
+    "16.3 Position suggestion panel to avoid obstructing map controls": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634739008
+      }
+    ],
+    "17.1 Implement medicine name autocomplete": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634739077
+      }
+    ],
+    "17.2 Connect autocomplete selection to search": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634739172
+      }
+    ],
+    "18.1 Implement Google Maps API loading error handling": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634739239
+      }
+    ],
+    "18.2 Implement geolocation error handling": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634739293
+      }
+    ],
+    "18.3 Implement geocoding error handling": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634739366
+      }
+    ],
+    "18.4 Implement routing error handling": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634739412
+      }
+    ],
+    "19.1 Add Google Maps script tag to app.blade.php": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634739452
+      }
+    ],
+    "19.2 Replace medfind.js with medfind-google.js in app.blade.php": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634739499
+      }
+    ],
+    "20. Final Checkpoint - Full System Verification": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789634739621
+      }
+    ],
+    "2. Stage 1 - Basic Map and Markers Implementation": [
+      {
+        "executionId": "b95dd9b2-d46a-4a60-ac8e-19bca9207545",
+        "chatSessionId": "sess_f60d9f23-0ed9-4379-b5db-8a886ed0c146",
+        "timestamp": 1789635554543
+      }
+    ]
+  }
+}

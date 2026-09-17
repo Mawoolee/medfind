@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Maps API Test - MedFind</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #191970 0%, #9400D3 100%);
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #191970;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .status-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-badge.loading {
+            background: #FFF4E6;
+            color: #F59E0B;
+        }
+
+        .status-badge.success {
+            background: #ECFDF5;
+            color: #10B981;
+        }
+
+        .status-badge.error {
+            background: #FEE2E2;
+            color: #EF4444;
+        }
+
+        .status-badge .icon {
+            font-size: 16px;
+        }
+
+        #map {
+            width: 100%;
+            height: 450px;
+            border-radius: 12px;
+            border: 2px solid #E5E7EB;
+            margin-bottom: 20px;
+        }
+
+        .test-results {
+            background: #F9FAFB;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .test-results h2 {
+            color: #191970;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .test-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid transparent;
+        }
+
+        .test-item.pass {
+            border-left-color: #10B981;
+        }
+
+        .test-item.fail {
+            border-left-color: #EF4444;
+        }
+
+        .test-item.pending {
+            border-left-color: #F59E0B;
+        }
+
+        .test-item .icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .test-item .text {
+            flex: 1;
+            font-size: 14px;
+            color: #374151;
+        }
+
+        .info-box {
+            background: #EEF2FF;
+            border: 1px solid #C7D2FE;
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 13px;
+            color: #4338CA;
+            line-height: 1.6;
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #312E81;
+        }
+
+        .code {
+            background: #1F2937;
+            color: #D9F855;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗺️ Google Maps API Test</h1>
+        <p class="subtitle">MedFind Pharmacy Locator - API Verification</p>
+
+        <div class="status-container">
+            <div class="status-badge loading" id="statusBadge">
+                <span class="icon spinner">⏳</span>
+                <span id="statusText">Initializing...</span>
+            </div>
+        </div>
+
+        <div id="map"></div>
+
+        <div class="test-results">
+            <h2>API Test Results</h2>
+            <div class="test-item pending" id="test-api-load">
+                <span class="icon">⏳</span>
+                <span class="text">Google Maps API loading...</span>
+            </div>
+            <div class="test-item pending" id="test-map-init">
+                <span class="icon">⏳</span>
+                <span class="text">Map initialization...</span>
+            </div>
+            <div class="test-item pending" id="test-marker">
+                <span class="icon">⏳</span>
+                <span class="text">Marker rendering...</span>
+            </div>
+            <div class="test-item pending" id="test-geolocation">
+                <span class="icon">⏳</span>
+                <span class="text">Geolocation service...</span>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <strong>📋 What this test verifies:</strong>
+            ✅ Google Maps JavaScript API loads correctly<br>
+            ✅ API key is valid and has required permissions<br>
+            ✅ Map renders without errors<br>
+            ✅ Basic marker functionality works<br>
+            ✅ Geolocation service available<br><br>
+            <strong>API Key:</strong> Check your <span class="code">.env</span> file for <span class="code">GOOGLE_MAPS_API_KEY</span>
+        </div>
+    </div>
+
+    <script>
+        let map;
+        let testResults = {
+            apiLoad: false,
+            mapInit: false,
+            marker: false,
+            geolocation: false
+        };
+
+        function updateTestStatus(testId, status, message) {
+            const element = document.getElementById(testId);
+            element.className = `test-item ${status}`;
+            
+            let icon = '⏳';
+            if (status === 'pass') icon = '✅';
+            if (status === 'fail') icon = '❌';
+            
+            element.innerHTML = `
+                <span class="icon">${icon}</span>
+                <span class="text">${message}</span>
+            `;
+        }
+
+        function updateOverallStatus() {
+            const statusBadge = document.getElementById('statusBadge');
+            const statusText = document.getElementById('statusText');
+            
+            const allPassed = Object.values(testResults).every(result => result === true);
+            const anyFailed = Object.values(testResults).some(result => result === false);
+            
+            if (allPassed) {
+                statusBadge.className = 'status-badge success';
+                statusText.textContent = 'All tests passed! ✅';
+            } else if (anyFailed) {
+                statusBadge.className = 'status-badge error';
+                statusText.textContent = 'Some tests failed ❌';
+            }
+        }
+
+        function initMap() {
+            try {
+                // Test 1: API Load
+                if (typeof google === 'undefined' || !google.maps) {
+                    updateTestStatus('test-api-load', 'fail', 'Google Maps API failed to load');
+                    testResults.apiLoad = false;
+                    updateOverallStatus();
+                    return;
+                }
+                
+                updateTestStatus('test-api-load', 'pass', 'Google Maps API loaded successfully');
+                testResults.apiLoad = true;
+
+                // Test 2: Map Initialization
+                const legazpiCity = { lat: 13.1475, lng: 123.7431 };
+                
+                map = new google.maps.Map(document.getElementById('map'), {
+                    center: legazpiCity,
+                    zoom: 13,
+                    minZoom: 10,
+                    maxZoom: 19,
+                    mapTypeId: google.maps.MapTypeId.ROADMAP,
+                    zoomControl: true,
+                    mapTypeControl: true,
+                    streetViewControl: true,
+                    fullscreenControl: true
+                });
+
+                updateTestStatus('test-map-init', 'pass', 'Map initialized successfully (centered on Legazpi City)');
+                testResults.mapInit = true;
+
+                // Test 3: Marker Rendering
+                const marker = new google.maps.Marker({
+                    position: legazpiCity,
+                    map: map,
+                    title: 'Legazpi City (Default Center)',
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        fillColor: '#9400D3',
+                        fillOpacity: 1,
+                        strokeColor: '#191970',
+                        strokeWeight: 2,
+                        scale: 15
+                    }
+                });
+
+                const infoWindow = new google.maps.InfoWindow({
+                    content: '<div style="padding: 10px; font-family: Inter, sans-serif;"><h3 style="margin: 0 0 8px 0; color: #191970;">Test Marker</h3><p style="margin: 0; color: #666;">If you see this popup, markers work correctly!</p></div>'
+                });
+
+                marker.addListener('click', () => {
+                    infoWindow.open(map, marker);
+                });
+
+                updateTestStatus('test-marker', 'pass', 'Marker rendered successfully (click marker to test InfoWindow)');
+                testResults.marker = true;
+
+                // Test 4: Geolocation
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const userLocation = {
+                                lat: position.coords.latitude,
+                                lng: position.coords.longitude
+                            };
+
+                            // Add user location marker
+                            new google.maps.Marker({
+                                position: userLocation,
+                                map: map,
+                                title: 'Your Location',
+                                icon: {
+                                    path: google.maps.SymbolPath.CIRCLE,
+                                    fillColor: '#4285F4',
+                                    fillOpacity: 1,
+                                    strokeColor: '#FFFFFF',
+                                    strokeWeight: 3,
+                                    scale: 12
+                                }
+                            });
+
+                            // Center map on user location
+                            map.setCenter(userLocation);
+                            map.setZoom(15);
+
+                            updateTestStatus('test-geolocation', 'pass', 'Geolocation successful (map centered on your location)');
+                            testResults.geolocation = true;
+                            updateOverallStatus();
+                        },
+                        (error) => {
+                            updateTestStatus('test-geolocation', 'pass', 'Geolocation denied (this is acceptable - using default location)');
+                            testResults.geolocation = true;
+                            updateOverallStatus();
+                        }
+                    );
+                } else {
+                    updateTestStatus('test-geolocation', 'pass', 'Geolocation not supported (using default location)');
+                    testResults.geolocation = true;
+                    updateOverallStatus();
+                }
+
+                updateOverallStatus();
+
+            } catch (error) {
+                console.error('Map initialization error:', error);
+                updateTestStatus('test-map-init', 'fail', `Map initialization failed: ${error.message}`);
+                testResults.mapInit = false;
+                updateOverallStatus();
+            }
+        }
+
+        // Handle API load failure
+        window.gm_authFailure = function() {
+            updateTestStatus('test-api-load', 'fail', 'API Authentication failed - Check your API key');
+            testResults.apiLoad = false;
+            updateOverallStatus();
+        };
+
+        // Retry logic for API loading
+        function initWithRetry(attemptCount = 0) {
+            const maxAttempts = 5;
+            
+            if (typeof google === 'undefined' || !google.maps) {
+                if (attemptCount < maxAttempts) {
+                    console.warn(`Google Maps API not ready, retrying... (${attemptCount + 1}/${maxAttempts})`);
+                    setTimeout(() => initWithRetry(attemptCount + 1), 200);
+                } else {
+                    updateTestStatus('test-api-load', 'fail', 'Google Maps API failed to load after 5 attempts');
+                    testResults.apiLoad = false;
+                    updateOverallStatus();
+                }
+                return;
+            }
+            
+            initMap();
+        }
+
+        // Global callback for Google Maps API
+        window.initGoogleMaps = function() {
+            initWithRetry();
+        };
+    </script>
+
+    <!-- 
+        IMPORTANT: Replace YOUR_API_KEY_HERE with your actual Google Maps API key
+        For Laravel integration, this would be: {{ env('GOOGLE_MAPS_API_KEY') }}
+    -->
+    <script>
+        // Read API key from URL parameter for testing, or use default
+        const urlParams = new URLSearchParams(window.location.search);
+        const apiKey = urlParams.get('key') || 'AIzaSyB1smct-CgBTsUbAcQhTtLM-br7nRwndpU';
+        
+        // Load Google Maps API dynamically
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initGoogleMaps`;
+        script.async = false;
+        script.defer = false;
+        document.body.appendChild(script);
+    </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+﻿    /**
+     * Create the user location marker with simple blue dot
+     * FIXED: Use inline SymbolPath.CIRCLE instead of SVG data URL
+     */
+    createMarker() {
+        if (!this.position) {
+            console.warn('Cannot create user marker: position not set');
+            return;
+        }
+        
+        // Create marker with inline icon (WORKING APPROACH)
+        this.marker = new google.maps.Marker({
+            position: this.position,
+            map: this.map,
+            icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 10,
+                fillColor: '#4285F4',  // Google blue
+                fillOpacity: 1.0,
+                strokeColor: '#FFFFFF',  // White border
+                strokeWeight: 3
+            },
+            title: 'You are here',
+            zIndex: 1000 // Higher than pharmacy markers
+        });
+    }
