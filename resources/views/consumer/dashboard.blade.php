@@ -188,7 +188,9 @@
     /* Nearest pharmacy suggestion panel */
     .nearest-suggestion-panel {
         position: fixed !important;
-        top: 195px !important;
+        /* Matches .medfind-no-results-toast's desktop offset so the panel and the
+           toast sit at the same distance below the search bar (ends ~168px). */
+        top: 184px !important;
         left: 50% !important;
         transform: translateX(-50%) !important;
         z-index: 9997 !important;
@@ -1031,27 +1033,6 @@
         background: #2a2a8a !important;
     }
     
-    /* Force Leaflet popup to be below UI */
-    .leaflet-popup {
-        z-index: 50 !important;
-    }
-    
-    .leaflet-popup-content-wrapper {
-        z-index: 50 !important;
-    }
-    
-    .leaflet-popup-tip-container {
-        z-index: 50 !important;
-    }
-    
-    .leaflet-control-container {
-        z-index: 50 !important;
-    }
-    
-    .leaflet-control-zoom {
-        z-index: 50 !important;
-    }
-    
     @media (max-width: 640px) {
         .stats-bar-fixed {
             display: none !important;
@@ -1154,6 +1135,11 @@
         }
         /* The sheet's 148px bottom offset clears the enlarged route card at
            bottom:24px, preserving a comfortable gap on compact screens. */
+        /* Mobile search bar starts at 84px and is ~46px tall, so 146px keeps the
+           same gap the "no pharmacies found" toast uses on this breakpoint. */
+        .nearest-suggestion-panel {
+            top: 146px !important;
+        }
         /* Nearest suggestion buttons stay tappable */
         .nearest-suggestion-panel .btn-directions,
         .nearest-suggestion-panel .btn-view {

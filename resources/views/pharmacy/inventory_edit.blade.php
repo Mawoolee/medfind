@@ -29,7 +29,7 @@
             <div><p class="text-sm text-gray-500">Available Stock</p><p class="text-xl font-semibold">{{ $item->available_stock }}</p></div>
             <div><p class="text-sm text-gray-500">Nearest Valid Expiry</p><p class="font-medium">{{ $item->nearest_valid_expiry?->format('M d, Y') ?? '—' }}</p></div>
             <div class="flex flex-wrap items-center gap-2 md:justify-end">
-                <a href="{{ route('pharmacy.inventory.batches', ['inventory_item_id' => $item->id]) }}" class="inline-flex items-center bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-2 min-h-11 rounded-xl text-sm">View Batches</a>
+                <a href="{{ route('pharmacy.inventory.batches', ['inventory_item_id' => $item->id]) }}" class="inline-flex items-center bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-[#2b2b47] dark:hover:bg-[#3a3a5c] dark:text-gray-100 px-3 py-2 min-h-11 rounded-xl text-sm">View Batches</a>
                 <a href="{{ route('pharmacy.receiving.create', ['inventory_item_id' => $item->id]) }}" class="inline-flex items-center bg-green-600 hover:bg-green-700 text-white px-3 py-2 min-h-11 rounded-xl text-sm">Add Stock</a>
             </div>
         </div>

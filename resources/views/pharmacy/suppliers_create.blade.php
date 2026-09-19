@@ -45,7 +45,7 @@
 
             <div class="flex flex-col sm:flex-row sm:items-center gap-3">
                 <button type="submit" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 sm:py-2 rounded min-h-11">Save</button>
-                <a href="{{ route('pharmacy.suppliers.index') }}" class="w-full sm:w-auto inline-flex items-center justify-center bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 sm:py-2 rounded min-h-11">Cancel</a>
+                <a href="{{ route('pharmacy.suppliers.index') }}" class="w-full sm:w-auto inline-flex items-center justify-center bg-gray-200 hover:bg-gray-300 text-gray-700 dark:bg-[#2b2b47] dark:hover:bg-[#3a3a5c] dark:text-gray-100 px-6 py-3 sm:py-2 rounded min-h-11">Cancel</a>
             </div>
         </form>
     </div>

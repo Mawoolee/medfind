@@ -40,6 +40,30 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 }
 
 /**
+ * Map container IDs that host the shared pharmacy location picker.
+ * Every supported page reuses the same control and hidden field IDs, so the only
+ * per-page difference is the map container. Resolution order is stable and a page
+ * is expected to contain at most one of these containers.
+ */
+const LOCATION_PICKER_CONTAINER_IDS = [
+    'profileLocationMap',
+    'adminLocationMap',
+    'registerLocationMap'
+];
+
+/**
+ * Find the location picker container rendered on the current page, if any.
+ * @returns {HTMLElement|null}
+ */
+function findLocationPickerContainer() {
+    for (let index = 0; index < LOCATION_PICKER_CONTAINER_IDS.length; index++) {
+        const container = document.getElementById(LOCATION_PICKER_CONTAINER_IDS[index]);
+        if (container) return container;
+    }
+    return null;
+}
+
+/**
  * Main initialization function with retry logic for Google Maps API
  * Called by the global callback when Google Maps API loads
  * Implements 5 retry attempts with 200ms delay for reliability in tunneled/proxied environments
@@ -56,7 +80,7 @@ function initializeMap(attemptCount = 0) {
     }
 
     const consumerContainer = document.getElementById('medfindMap');
-    const locationEditorContainer = document.getElementById('profileLocationMap');
+    const locationEditorContainer = findLocationPickerContainer();
 
     // Most authenticated pages do not contain a map. The shared callback should be a no-op there.
     if (!consumerContainer && !locationEditorContainer) {
@@ -89,7 +113,7 @@ function initializeMap(attemptCount = 0) {
 
     if (locationEditorContainer && locationEditorContainer.dataset.googleMapInitialized !== 'true') {
         try {
-            initializeProfileLocationEditor();
+            initializeLocationEditor(locationEditorContainer.id);
         } catch (error) {
             delete locationEditorContainer.dataset.googleMapInitialized;
             console.error('Error initializing pharmacy location editor:', error);
@@ -376,9 +400,10 @@ class PharmacyLocationEditor {
         this.bindControls();
         this.populateInitialAddress();
 
-        if (this.hasExistingLocation) {
-            this.updateCoordinateFields(startPosition.lat, startPosition.lng);
-        }
+        // Always mirror the marker's initial position into the hidden inputs so the
+        // visible pin matches what gets submitted, including the default position
+        // used when the pharmacy has no saved coordinates yet.
+        this.updateCoordinateFields(startPosition.lat, startPosition.lng);
 
         container.dataset.googleMapInitialized = 'true';
         return this.map;
@@ -602,15 +627,22 @@ class PharmacyLocationEditor {
     }
 }
 
-/** Initialize the profile editor from its existing hidden form fields. */
-function initializeProfileLocationEditor() {
-    const container = document.getElementById('profileLocationMap');
+/**
+ * Initialize the shared location picker for whichever supported container is on the page,
+ * using the existing hidden latitude/longitude/address fields. Idempotent per container.
+ * @param {string} [containerId] - Optional explicit container ID
+ * @returns {PharmacyLocationEditor|null}
+ */
+function initializeLocationEditor(containerId) {
+    const container = containerId
+        ? document.getElementById(containerId)
+        : findLocationPickerContainer();
     if (!container || container.dataset.googleMapInitialized === 'true') return null;
 
     const latitudeInput = document.getElementById('latitude');
     const longitudeInput = document.getElementById('longitude');
     const editor = new PharmacyLocationEditor(
-        'profileLocationMap',
+        container.id,
         latitudeInput ? latitudeInput.value : null,
         longitudeInput ? longitudeInput.value : null
     );
@@ -2168,6 +2200,8 @@ window.toggleRouteAlternatives = function() {
 // Expose the reusable editor and initialization callback for Google Maps and tests.
 window.PharmacyLocationEditor = PharmacyLocationEditor;
 window.initializeMap = initializeMap;
+window.initializeLocationEditor = initializeLocationEditor;
+window.LOCATION_PICKER_CONTAINER_IDS = LOCATION_PICKER_CONTAINER_IDS;
 
 // ============================================
 // Search Data Helpers

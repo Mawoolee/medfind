@@ -110,11 +110,12 @@
         </main>
     </div>
 
-    <!-- Alpine.js for interactive dropdowns -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    {{-- Alpine.js is bundled via resources/js/app.js (@vite above). Do not load it
+         again from a CDN: two Alpine instances initialize the same x-data
+         components and swallow the first click. --}}
 
     <!-- MedFind Custom JS -->
-    <script src="{{ asset('js/medfind-google.js?v=37') }}"></script>
+    <script src="{{ asset('js/medfind-google.js?v=39') }}"></script>
 
     <!-- Google Maps Initialization Callback -->
     <script>

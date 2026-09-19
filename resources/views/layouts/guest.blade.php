@@ -115,5 +115,24 @@
         });
         updateAuthContainers();
     </script>
+
+    {{-- Google Maps is only loaded for guest pages that render a map container
+         (opt in with <x-guest-layout :google-maps="true">). --}}
+    @if($attributes->get('google-maps'))
+        <!-- MedFind Custom JS -->
+        <script src="{{ asset('js/medfind-google.js?v=39') }}"></script>
+
+        <!-- Google Maps Initialization Callback -->
+        <script>
+            function initGoogleMaps() {
+                if (typeof window.initializeMap === 'function') {
+                    window.initializeMap();
+                }
+            }
+        </script>
+
+        <!-- Google Maps API -->
+        <script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&libraries=places&callback=initGoogleMaps"></script>
+    @endif
 </body>
 </html>

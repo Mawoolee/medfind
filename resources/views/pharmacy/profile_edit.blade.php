@@ -3,7 +3,7 @@
 @section('title', 'Pharmacy Profile')
 
 @section('content')
-<div class="min-h-screen" style="background:#f0f0ff;">
+<div class="min-h-screen" style="background:var(--bg-page);">
 <div class="container mx-auto px-4 py-10 max-w-2xl">
 
     {{-- Page header --}}
@@ -60,7 +60,7 @@
                         id="logoPreview">
                 @else
                     <div class="w-24 h-24 rounded-full flex items-center justify-center border-4 flex-shrink-0"
-                        style="background:#f0f0ff;border-color:rgba(148,0,211,0.2);"
+                        style="background:var(--bg-page);border-color:rgba(148,0,211,0.2);"
                         id="logoPlaceholder">
                         <i class="fas fa-store text-3xl" style="color:#9400D3;opacity:0.5;"></i>
                     </div>

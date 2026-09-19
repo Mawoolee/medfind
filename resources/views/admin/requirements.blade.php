@@ -5,14 +5,14 @@
 @section('title', 'Requirements Review')
 
 @section('content')
-<div class="min-h-screen" style="background:#f0f0ff;">
+<div class="min-h-screen" style="background:var(--bg-page);">
  <div class="max-w-7xl mx-auto px-4 py-8">
 
  {{-- Page Header --}}
  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
  <div>
  <h1 class="text-2xl font-bold text-gray-800">Requirements Review</h1>
- <p class="text-sm text-gray-500 mt-0.5">Review pharmacy documents and approve or reject registrations</p>
+ <p class="text-sm text-gray-500 dark:text-slate-400 mt-0.5">Review pharmacy documents and approve or reject registrations</p>
  </div>
  <a href="{{ route('admin.dashboard') }}" class="text-[#9400D3] hover:text-[#7a00b0] whitespace-nowrap">
  <i class="fas fa-arrow-left mr-2"></i>Back
@@ -98,7 +98,7 @@
  <div class="px-6 py-4 flex flex-wrap items-center justify-between gap-4">
  <div class="flex items-start gap-4">
  <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
- style="background:#f0f0ff;">
+ style="background:rgba(148,0,211,0.10);">
  <i class="fas fa-hospital text-[#9400D3]"></i>
  </div>
  <div>
@@ -109,7 +109,7 @@
  <i class="fas fa-user mr-1"></i>
  {{ $pharmacy->user?->name ?? 'Unknown owner' }}
  @if($pharmacy->user?->email)
- &middot; <span class="text-gray-400">{{ $pharmacy->user->email }}</span>
+ &middot; <span class="text-gray-400 dark:text-slate-300">{{ $pharmacy->user->email }}</span>
  @endif
  </p>
  </div>
@@ -117,7 +117,7 @@
 
  <div class="flex flex-wrap items-center gap-3">
  {{-- Submitted date --}}
- <span class="text-xs text-gray-400">
+ <span class="text-xs text-gray-400 dark:text-slate-300">
  <i class="fas fa-calendar-alt mr-1"></i>
  Submitted {{ $pharmacy->created_at->format('M d, Y') }}
  </span>
@@ -142,7 +142,7 @@
  {{-- Review toggle button --}}
  <button type="button"
  @click="open = !open"
- class="text-sm font-semibold px-4 py-1.5 rounded-xl border transition"
+ class="req-review-toggle text-sm font-semibold px-4 py-1.5 rounded-xl border transition"
  :class="open
  ? 'bg-[#191970] text-white border-[#191970]'
  : 'bg-white text-[#191970] border-[#191970] hover:bg-[#191970] hover:text-white'">
@@ -163,7 +163,7 @@
  class="border-t border-gray-100"
  style="display:none;">
 
- <div class="px-6 py-5" style="background:#faf9ff;">
+ <div class="px-6 py-5" style="background:var(--bg-card-hover);">
 
  <h4 class="text-sm font-bold text-[#191970] uppercase tracking-wide mb-4">
  <i class="fas fa-folder-open mr-2 text-[#9400D3]"></i>Submitted Documents
@@ -180,7 +180,7 @@
  <i class="fas fa-check text-xs"></i>
  </span>
  <div class="min-w-0 flex-1">
- <p class="text-xs font-semibold text-green-700 truncate">{{ $label }}</p>
+ <p class="text-xs font-semibold text-green-700 dark:text-green-300 truncate">{{ $label }}</p>
  @php $fileUrl = route('admin.requirement.file', ['pharmacy' => $pharmacy->id, 'key' => $key]); @endphp
  <button type="button"
  onclick="openFileModal('{{ $fileUrl }}')"
@@ -189,12 +189,12 @@
  </button>
  </div>
  @else
- <span class="w-6 h-6 flex items-center justify-center rounded-full bg-gray-200 text-gray-400 flex-shrink-0">
+ <span class="w-6 h-6 flex items-center justify-center rounded-full bg-gray-200 text-gray-400 dark:bg-slate-700 dark:text-slate-200 flex-shrink-0">
  <i class="fas fa-times text-xs"></i>
  </span>
  <div class="min-w-0">
- <p class="text-xs font-semibold text-gray-500 truncate">{{ $label }}</p>
- <p class="text-xs text-gray-400">Not submitted</p>
+ <p class="text-xs font-semibold text-gray-500 dark:text-slate-200 truncate">{{ $label }}</p>
+ <p class="text-xs text-gray-400 dark:text-slate-400">Not submitted</p>
  </div>
  @endif
  </div>
@@ -243,9 +243,9 @@
  </div>
  @empty
  <div class="bg-white rounded-xl shadow-sm border border-gray-100 px-8 py-16 text-center">
- <i class="fas fa-folder-open text-5xl text-gray-200 mb-4"></i>
- <h3 class="text-lg font-semibold text-gray-500">No pharmacies found</h3>
- <p class="text-sm text-gray-400 mt-1">
+ <i class="fas fa-folder-open text-5xl text-gray-200 dark:text-slate-500 mb-4"></i>
+ <h3 class="text-lg font-semibold text-gray-500 dark:text-slate-200">No pharmacies found</h3>
+ <p class="text-sm text-gray-400 dark:text-slate-400 mt-1">
  There are no pharmacies with submitted requirements matching the current filter.
  </p>
  @if(request('status') && request('status') !== 'pending')
@@ -294,10 +294,10 @@
  </iframe>
  <div id="fileLoadingSpinner"
  class="absolute inset-0 flex items-center justify-center"
- style="background:#f0f0ff;">
+ style="background:var(--bg-page);">
  <div class="flex flex-col items-center gap-3">
  <div class="w-10 h-10 border-4 border-[#9400D3] border-t-transparent rounded-full animate-spin"></div>
- <p class="text-sm font-semibold text-[#191970]">Loading document...</p>
+ <p class="text-sm font-semibold text-[#191970] dark:text-slate-200">Loading document...</p>
  </div>
  </div>
  </div>

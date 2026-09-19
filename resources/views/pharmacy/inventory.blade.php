@@ -121,7 +121,7 @@
                                 <div class="flex flex-wrap gap-2">
                                     <a href="{{ route('pharmacy.inventory.batches', ['inventory_item_id' => $item->id]) }}" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-800 px-3 py-1 rounded-xl text-xs">View Batches</a>
                                     <a href="{{ route('pharmacy.receiving.create', ['inventory_item_id' => $item->id]) }}" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-xl text-xs">Add Stock</a>
-                                    <a href="{{ route('pharmacy.inventory.edit', $item->id) }}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded-xl text-xs">Edit Medicine</a>
+                                    <a href="{{ route('pharmacy.inventory.edit', $item->id) }}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-[#2b2b47] dark:hover:bg-[#3a3a5c] dark:text-gray-100 px-3 py-1 rounded-xl text-xs">Edit Medicine</a>
                                 </div>
                             </td>
                         </tr>

@@ -125,21 +125,51 @@ html.dark .bg-gray-100 {
     background-color: #1e1e32 !important;
 }
 
-html.dark .text-gray-800,
-html.dark .text-gray-900 {
+/* Blanket dark-mode remap of the gray text utilities.
+   The `:not([class*="dark:text-"])` guard is important: these rules use
+   !important, so without it they also repaint elements that declare their own
+   `dark:text-*` variant. That is what made secondary buttons unreadable —
+   the text was forced near-white while the gray background utilities below
+   were left at their light values. Elements that opt in to an explicit dark
+   variant now keep it; everything else still gets the blanket remap. */
+html.dark .text-gray-800:not([class*="dark:text-"]),
+html.dark .text-gray-900:not([class*="dark:text-"]) {
     color: #e2e8f0 !important;
 }
 
-html.dark .text-gray-700 {
+html.dark .text-gray-700:not([class*="dark:text-"]) {
     color: #cbd5e1 !important;
 }
 
-html.dark .text-gray-600 {
+html.dark .text-gray-600:not([class*="dark:text-"]) {
     color: #94a3b8 !important;
 }
 
-html.dark .text-gray-500 {
+html.dark .text-gray-500:not([class*="dark:text-"]) {
     color: #64748b !important;
+}
+
+/* Gray surfaces above gray-100 had no dark counterpart, so bg-gray-200/300
+   stayed light while the text above went near-white. Give them matching dark
+   surfaces, with the same opt-out for elements that declare `dark:bg-*`. */
+html.dark .bg-gray-200:not([class*="dark:bg-"]) {
+    background-color: #262640 !important;
+}
+
+html.dark .bg-gray-300:not([class*="dark:bg-"]) {
+    background-color: #32324f !important;
+}
+
+html.dark .hover\:bg-gray-200:not([class*="dark:hover:bg-"]):hover {
+    background-color: #32324f !important;
+}
+
+html.dark .hover\:bg-gray-300:not([class*="dark:hover:bg-"]):hover {
+    background-color: #3d3d5f !important;
+}
+
+html.dark .hover\:bg-gray-400:not([class*="dark:hover:bg-"]):hover {
+    background-color: #474770 !important;
 }
 
 html.dark .border-gray-200,
@@ -149,6 +179,21 @@ html.dark .border-gray-100 {
 
 html.dark .border-gray-300 {
     border-color: rgba(255,255,255,0.12) !important;
+}
+
+/* Tailwind does not paint `divide-*` on the parent element — it generates
+   `.divide-gray-100 > :not([hidden]) ~ :not([hidden])` and sets border-color on
+   the *children*. The border-gray overrides above therefore never reached the
+   separators, so `divide-y divide-gray-100` lists kept #f3f4f6 and read as harsh
+   white lines on the dark panels (admin dashboard recent-users / recent-pharmacies
+   lists, admin inventory tbody, pharmacy audit-log tbody). Target the real child
+   selector and reuse the same subtle tone as the borders. The
+   `:not([class*="dark:divide-"])` guard matches the gray text/background rules:
+   anything declaring its own `dark:divide-*` variant still wins. */
+html.dark .divide-gray-100:not([class*="dark:divide-"]) > :not([hidden]) ~ :not([hidden]),
+html.dark .divide-gray-200:not([class*="dark:divide-"]) > :not([hidden]) ~ :not([hidden]),
+html.dark .divide-gray-300:not([class*="dark:divide-"]) > :not([hidden]) ~ :not([hidden]) {
+    border-color: rgba(255,255,255,0.08) !important;
 }
 
 html.dark .shadow-lg,
@@ -285,83 +330,6 @@ html.dark #routeInfoBar {
 
 html.dark #routeSummary {
     color: #e2e8f0 !important;
-}
-
-html.dark .leaflet-routing-container {
-    background: rgba(26, 26, 46, 0.97) !important;
-    border-color: rgba(148, 0, 211, 0.25) !important;
-}
-
-html.dark .leaflet-routing-alt:not(.leaflet-routing-alt-minimized) {
-    background: rgba(15, 15, 35, 0.97) !important;
-}
-
-html.dark .leaflet-routing-alt h2,
-html.dark .leaflet-routing-alt h3 {
-    color: #e2e8f0 !important;
-}
-
-html.dark .leaflet-routing-alt table tr td {
-    color: #cbd5e1 !important;
-}
-
-html.dark .leaflet-routing-alt table tr td:last-child {
-    color: #c084fc !important;
-}
-
-
-/* Style alternative/inactive routes - make them clearly labeled as alternatives */
-.leaflet-routing-alt-minimized {
-    display: block !important;
-    max-height: 80px !important;
-    padding: 14px 16px !important;
-    background: rgba(148, 0, 211, 0.08) !important;
-    border: 1px solid rgba(148, 0, 211, 0.2) !important;
-    border-radius: 10px !important;
-    margin-bottom: 8px !important;
-    opacity: 1 !important;
-    cursor: pointer !important;
-    transition: all 0.2s ease !important;
-}
-
-.leaflet-routing-alt-minimized:hover {
-    background: rgba(148, 0, 211, 0.12) !important;
-    border-color: rgba(148, 0, 211, 0.35) !important;
-    transform: translateY(-1px) !important;
-}
-
-.leaflet-routing-alt-minimized h2,
-.leaflet-routing-alt-minimized h3 {
-    font-size: 12px !important;
-    color: #9400D3 !important;
-    font-weight: 600 !important;
-    margin: 0 !important;
-}
-
-.leaflet-routing-alt-minimized h2::before {
-    content: "Alternative: " !important;
-    font-weight: 700 !important;
-    color: #64748b !important;
-}
-
-/* Dark mode alternative routes */
-html.dark .leaflet-routing-alt-minimized {
-    background: rgba(148, 0, 211, 0.15) !important;
-    border-color: rgba(148, 0, 211, 0.3) !important;
-}
-
-html.dark .leaflet-routing-alt-minimized:hover {
-    background: rgba(148, 0, 211, 0.22) !important;
-    border-color: rgba(148, 0, 211, 0.45) !important;
-}
-
-html.dark .leaflet-routing-alt-minimized h2,
-html.dark .leaflet-routing-alt-minimized h3 {
-    color: #c084fc !important;
-}
-
-html.dark .leaflet-routing-alt-minimized h2::before {
-    color: #94a3b8 !important;
 }
 
 html.dark .chat-modal-fixed {
@@ -617,4 +585,84 @@ html.dark .input-wrapper input:not(:placeholder-shown) + .floating-label {
 /* Force black text for footer in light mode */
 html:not(.dark) .auth-logo-container + .auth-card + p {
     color: #374151 !important;
+}
+
+/* --- Searchable combobox (pharmacy medicine pickers) --------------
+   Shared, theme-aware styling for the JS-built <ul>/<li> dropdowns. These
+   used to carry hardcoded inline styles (background:white plus an inherited
+   text color), which made the option text invisible in dark mode. */
+.medfind-combobox-list {
+    display: none;
+    position: absolute;
+    z-index: 50;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 2px;
+    margin-left: 0;
+    padding: 0;
+    list-style: none;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #ffffff;
+}
+
+.medfind-combobox-option {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: #374151;
+}
+
+.medfind-combobox-option:hover,
+.medfind-combobox-option:focus,
+.medfind-combobox-option.is-active {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+.medfind-combobox-empty {
+    padding: 8px 12px;
+    font-size: 0.875rem;
+    font-style: italic;
+    color: #6b7280;
+}
+
+html.dark .medfind-combobox-list {
+    border-color: rgba(148, 0, 211, 0.3);
+    background: #1a1a2e;
+}
+
+html.dark .medfind-combobox-option {
+    color: #e2e8f0;
+}
+
+html.dark .medfind-combobox-option:hover,
+html.dark .medfind-combobox-option:focus,
+html.dark .medfind-combobox-option.is-active {
+    background: rgba(148, 0, 211, 0.22);
+    color: #ffffff;
+}
+
+html.dark .medfind-combobox-empty {
+    color: #94a3b8;
+}
+
+/* --- Admin requirements review toggle -----------------------------
+   The Alpine binding swaps between `bg-[#191970] text-white ...` (open) and
+   `bg-white text-[#191970] ...` (closed). In dark mode the global `.bg-white`
+   override darkened the closed state to #1a1a2e while the label stayed navy
+   #191970, leaving the button effectively unreadable. Repaint only the closed
+   state (the `.bg-white` half of the toggle) — the Alpine class logic and the
+   light-mode appearance are untouched. */
+html.dark .req-review-toggle.bg-white {
+    background-color: #2a2a4a !important;
+    color: #e2e8f0 !important;
+    border-color: rgba(226,232,240,0.6) !important;
+}
+
+html.dark .req-review-toggle.bg-white:hover {
+    background-color: #191970 !important;
+    color: #ffffff !important;
+    border-color: #c7d2fe !important;
 }

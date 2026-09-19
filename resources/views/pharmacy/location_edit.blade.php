@@ -3,7 +3,7 @@
 @section('title', 'Set Pharmacy Location')
 
 @section('content')
-<div class="min-h-screen" style="background:#f0f0ff;">
+<div class="min-h-screen" style="background:var(--bg-page);">
 <div class="container mx-auto px-4 py-10 max-w-2xl">
 
     {{-- Page header --}}
@@ -20,8 +20,43 @@
         <x-back-button :href="route('pharmacy.dashboard')" label="Back to Dashboard" />
     </div>
 
+    {{-- Flash messages --}}
+    @if(session('success'))
+        <div class="bg-green-50 border border-green-300 text-green-800 px-4 py-3 rounded-xl mb-5 flex items-center gap-2 text-sm">
+            <i class="fas fa-check-circle text-green-500"></i>
+            {{ session('success') }}
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="bg-red-50 border border-red-300 text-red-800 px-4 py-3 rounded-xl mb-5 flex items-center gap-2 text-sm">
+            <i class="fas fa-exclamation-circle text-red-500"></i>
+            {{ session('error') }}
+        </div>
+    @endif
+
     <form method="POST" action="{{ route('pharmacy.profile.location.store') }}">
         @csrf
+
+        {{-- Validation feedback for the submitted location --}}
+        @if($errors->hasAny(['latitude', 'longitude', 'address']))
+            <div class="bg-red-50 border border-red-300 text-red-800 px-4 py-3 rounded-xl mb-5 text-sm">
+                <p class="flex items-center gap-2 font-semibold">
+                    <i class="fas fa-exclamation-circle text-red-500"></i>
+                    We could not save this location.
+                </p>
+                <ul class="mt-1 ml-6 list-disc">
+                    @foreach($errors->get('latitude') as $message)
+                        <li>{{ $message }}</li>
+                    @endforeach
+                    @foreach($errors->get('longitude') as $message)
+                        <li>{{ $message }}</li>
+                    @endforeach
+                    @foreach($errors->get('address') as $message)
+                        <li>{{ $message }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
         <div class="bg-white rounded-[20px] shadow-sm p-6 mb-6 border border-gray-100">
 
@@ -63,13 +98,6 @@
             <input type="hidden" name="latitude" id="latitude" value="{{ $location['latitude'] ?? '' }}">
             <input type="hidden" name="longitude" id="longitude" value="{{ $location['longitude'] ?? '' }}">
             <input type="hidden" name="address" id="address" value="{{ $location['address'] ?? '' }}">
-
-            @error('latitude')
-                <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
-            @enderror
-            @error('longitude')
-                <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
-            @enderror
 
         </div>
 

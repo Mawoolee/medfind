@@ -3,7 +3,7 @@
 @section('title', 'Upload Business Requirements')
 
 @section('content')
-<div class="min-h-screen" style="background:#f0f0ff;"> 
+<div class="min-h-screen" style="background:var(--bg-page);">
 <div class="container mx-auto px-4 max-w-3xl" style="padding-top:60px;padding-bottom:40px;">
 
  <div class="mb-4">

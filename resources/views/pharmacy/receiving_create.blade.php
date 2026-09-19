@@ -54,7 +54,7 @@
                             id="medicine_hidden"
                             value="{{ old('items.0.inventory_item_id', $selectedInventoryId ?? '') }}"
                         >
-                        <ul id="medicine_list" style="display:none;position:absolute;z-index:50;background:white;border:1px solid #d1d5db;border-radius:6px;max-height:200px;overflow-y:auto;width:100%;margin-top:2px;list-style:none;padding:0;margin-left:0;"></ul>
+                        <ul id="medicine_list" class="medfind-combobox-list"></ul>
                     </div>
                     <p id="medicine-combo-error" class="mt-1 text-sm text-red-600" style="display:none;">Please select a medicine from the list.</p>
                 </div>
@@ -238,7 +238,7 @@
                     </button>
                     <a
                         href="{{ route('pharmacy.inventory') }}"
-                        class="w-full sm:w-auto inline-flex items-center justify-center bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-xl min-h-11"
+                        class="w-full sm:w-auto inline-flex items-center justify-center bg-gray-200 hover:bg-gray-300 text-gray-700 dark:bg-[#2b2b47] dark:hover:bg-[#3a3a5c] dark:text-gray-100 px-6 py-3 rounded-xl min-h-11"
                     >
                         Cancel
                     </a>
@@ -313,7 +313,7 @@
             if (m.dosage) label += ' (' + m.dosage + ')';
             li.textContent       = label;
             li.dataset.id        = m.id;
-            li.style.cssText     = 'padding:8px 12px;cursor:pointer;font-size:0.875rem;';
+            li.className         = 'medfind-combobox-option';
             li.addEventListener('mousedown', e => {
                 e.preventDefault();
                 textInput.value   = label;
@@ -323,8 +323,6 @@
                 errEl.style.display = 'none';
                 textInput.classList.remove('border-red-500');
             });
-            li.addEventListener('mouseover', () => li.style.background = '#f3f4f6');
-            li.addEventListener('mouseout',  () => li.style.background = '');
             dropList.appendChild(li);
         });
         dropList.style.display = 'block';

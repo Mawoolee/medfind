@@ -55,9 +55,9 @@ class PharmacyProfileController extends Controller
 
     /**
      * Handle "Save Location" from the map page: validate the coordinate ranges,
-     * store the picked location in the session, and redirect back to the
-     * profile edit form. This does NOT persist to the pharmacy record; the
-     * profile form submission does that via update().
+     * persist them onto the owner's pharmacy record, and redirect back to the
+     * profile edit form. The session copy is still written so the profile form
+     * pre-fills with the freshly picked coordinates.
      */
     public function storeLocation(Request $request)
     {
@@ -74,13 +74,30 @@ class PharmacyProfileController extends Controller
             'address' => ['nullable', 'string', 'max:500'],
         ]);
 
+        $latitude = (float) $validated['latitude'];
+        $longitude = (float) $validated['longitude'];
+        $address = isset($validated['address']) ? trim((string) $validated['address']) : '';
+
+        // Persist immediately: users press "Save Location" and expect it saved,
+        // without having to submit the whole profile form afterwards.
+        $pharmacy->latitude = $latitude;
+        $pharmacy->longitude = $longitude;
+
+        // Only fill an empty address; never overwrite what the pharmacy already has.
+        if ($address !== '' && trim((string) $pharmacy->pharmacyAddress) === '') {
+            $pharmacy->pharmacyAddress = $address;
+        }
+
+        $pharmacy->save();
+
         $request->session()->put(self::LOCATION_KEY, [
-            'latitude' => (float) $validated['latitude'],
-            'longitude' => (float) $validated['longitude'],
+            'latitude' => $latitude,
+            'longitude' => $longitude,
             'address' => $validated['address'] ?? null,
         ]);
 
-        return redirect()->route('pharmacy.profile.edit');
+        return redirect()->route('pharmacy.profile.edit')
+            ->with('success', 'Pharmacy location saved.');
     }
 
     public function update(Request $request)

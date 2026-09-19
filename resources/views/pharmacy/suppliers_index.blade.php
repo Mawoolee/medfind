@@ -41,7 +41,7 @@
                         <td class="px-4 py-3">{{ $s->address }}</td>
                         <td class="px-4 py-3 text-right whitespace-nowrap">
                             <div class="inline-flex items-center gap-2">
-                                <a href="{{ route('pharmacy.suppliers.edit', $s->id) }}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1.5 rounded text-xs">Edit</a>
+                                <a href="{{ route('pharmacy.suppliers.edit', $s->id) }}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-[#2b2b47] dark:hover:bg-[#3a3a5c] dark:text-gray-100 px-3 py-1.5 rounded text-xs">Edit</a>
                                 <form action="{{ route('pharmacy.suppliers.destroy', $s->id) }}" method="POST" class="inline" onsubmit="return confirm('Delete supplier?');">
                                     @csrf
                                     @method('DELETE')

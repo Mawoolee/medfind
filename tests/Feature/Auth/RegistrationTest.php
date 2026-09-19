@@ -17,6 +17,9 @@ class RegistrationTest extends TestCase
         $response = $this->get('/register');
 
         $response->assertStatus(200);
+
+        // Guest pages without a map container must not load the Google Maps API.
+        $response->assertDontSee('maps.googleapis.com', false);
     }
 
     public function test_registration_screen_does_not_contain_role_toggle(): void
@@ -146,8 +149,15 @@ class RegistrationTest extends TestCase
         $response->assertSee('id="addressSearch"', false);
         $response->assertSee('Save Location', false);
         $response->assertSee('Use my current location', false);
-        $response->assertSee('unpkg.com/leaflet@1.9.4', false);
-        $response->assertSee('tile.openstreetmap.org', false);
+
+        // The picker now uses the shared Google Maps editor loaded by the guest layout.
+        $response->assertSee('js/medfind-google.js', false);
+        $response->assertSee('maps.googleapis.com/maps/api/js', false);
+        $response->assertSee('libraries=places', false);
+        $response->assertSee('callback=initGoogleMaps', false);
+        $response->assertDontSee('unpkg.com/leaflet', false);
+        $response->assertDontSee('tile.openstreetmap.org', false);
+        $response->assertDontSee('nominatim.openstreetmap.org', false);
     }
 
     public function test_pharmacy_location_store_saves_coords_and_shows_confirmed_state(): void

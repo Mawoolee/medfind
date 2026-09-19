@@ -27,7 +27,7 @@
                         class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-base"
                     >
                     <input type="hidden" name="inventory_item_id" id="inventory_item_id_hidden" value="{{ old('inventory_item_id') }}">
-                    <ul id="inventory_item_id_list" style="display:none;position:absolute;z-index:50;background:white;border:1px solid #d1d5db;border-radius:6px;max-height:200px;overflow-y:auto;width:100%;margin-top:2px;list-style:none;padding:0;margin-left:0;"></ul>
+                    <ul id="inventory_item_id_list" class="medfind-combobox-list"></ul>
                 </div>
             </div>
             <div class="mb-5">
@@ -88,7 +88,7 @@
             if (medOptions.length === 0) {
                 const li = document.createElement('li');
                 li.textContent = 'No medicines in stock.';
-                li.style.cssText = 'padding:8px 12px;font-size:0.875rem;color:#6b7280;font-style:italic;';
+                li.className = 'medfind-combobox-empty';
                 dropList.appendChild(li);
                 dropList.style.display = 'block';
             } else {
@@ -100,15 +100,13 @@
             const li = document.createElement('li');
             li.textContent = m.name;
             li.dataset.id  = m.id;
-            li.style.cssText = 'padding:8px 12px;cursor:pointer;font-size:0.875rem;';
+            li.className   = 'medfind-combobox-option';
             li.addEventListener('mousedown', e => {
                 e.preventDefault();
                 textInput.value   = m.name;
                 hiddenInput.value = m.id;
                 dropList.style.display = 'none';
             });
-            li.addEventListener('mouseover', () => li.style.background = '#f3f4f6');
-            li.addEventListener('mouseout',  () => li.style.background = '');
             dropList.appendChild(li);
         });
         dropList.style.display = 'block';
