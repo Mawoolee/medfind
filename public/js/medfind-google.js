@@ -1280,7 +1280,9 @@ window.viewPharmacy = function(pharmacyId) {
 };
 
 /**
- * Open the existing dashboard chat, falling back to the pharmacy contact section.
+ * Open the full chat page for a pharmacy.
+ * The floating dashboard chat widget is retired, so this navigates directly
+ * to the consumer chat route instead of injecting a conversation stub.
  * @param {*} pharmacyId - Pharmacy ID
  */
 window.openContactPharmacy = function(pharmacyId) {
@@ -1288,34 +1290,7 @@ window.openContactPharmacy = function(pharmacyId) {
     if (safeId === null) return;
 
     window.closePharmacyInfoWindow();
-
-    if (typeof openChatWindow === 'function' &&
-        typeof conversationsData !== 'undefined' &&
-        Array.isArray(conversationsData)) {
-        const existingConversation = conversationsData.find((conversation) => conversation.pharmacy_id == safeId);
-        if (existingConversation) {
-            openChatWindow(safeId);
-            return;
-        }
-
-        const pharmacy = typeof pharmaciesData !== 'undefined' && Array.isArray(pharmaciesData)
-            ? pharmaciesData.find((item) => item.id == safeId)
-            : null;
-        const pharmacyName = pharmacy
-            ? (pharmacy.pharmacy_name || pharmacy.name || 'Pharmacy')
-            : 'Pharmacy';
-
-        conversationsData.push({
-            pharmacy_id: safeId,
-            pharmacy_name: pharmacyName,
-            unread: 0,
-            messages: []
-        });
-        openChatWindow(safeId);
-        return;
-    }
-
-    window.location.href = `/consumer/pharmacy/${encodeURIComponent(String(safeId))}#contact`;
+    window.location.href = `/consumer/messages/${encodeURIComponent(String(safeId))}`;
 };
 
 // Preserve the existing public callback while using the application's actual contact flow.

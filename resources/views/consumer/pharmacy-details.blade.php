@@ -1,7 +1,7 @@
 ﻿@extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen bg-[#f0f0ff] pt-3 pb-6 px-4 font-sans">
+<div class="min-h-screen bg-[#f0f0ff] pt-6 sm:pt-10 pb-6 px-4 font-sans">
     <div class="w-full max-w-7xl mx-auto px-0 sm:px-6">
 
         @if(isset($pharmacy))

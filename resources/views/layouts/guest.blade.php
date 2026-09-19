@@ -120,7 +120,7 @@
          (opt in with <x-guest-layout :google-maps="true">). --}}
     @if($attributes->get('google-maps'))
         <!-- MedFind Custom JS -->
-        <script src="{{ asset('js/medfind-google.js?v=39') }}"></script>
+        <script src="{{ asset('js/medfind-google.js?v=40') }}"></script>
 
         <!-- Google Maps Initialization Callback -->
         <script>

@@ -39,7 +39,7 @@
     <div id="chatHeadsContainer" style="position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;align-items:flex-end;gap:10px;"></div>
 
     <!-- Active Chat Window -->
-    <div id="activeChatWindow" style="display:none;position:fixed;bottom:24px;right:24px;z-index:10000;width:320px;background:#fff;border-radius:18px;box-shadow:0 8px 40px rgba(25,25,112,0.15);border:1px solid rgba(148,0,211,0.12);overflow:hidden;font-family:system-ui,-apple-system,sans-serif;">
+    <div id="activeChatWindow" hidden style="display:none;position:fixed;bottom:24px;right:24px;z-index:10000;width:320px;background:#fff;border-radius:18px;box-shadow:0 8px 40px rgba(25,25,112,0.15);border:1px solid rgba(148,0,211,0.12);overflow:hidden;font-family:system-ui,-apple-system,sans-serif;">
         <!-- Chat Window Header -->
         <div style="background:#191970;padding:10px 14px;display:flex;align-items:center;gap:10px;">
             <div style="width:32px;height:32px;border-radius:50%;background:rgba(217,248,85,0.15);display:flex;align-items:center;justify-content:center;shrink:0;">
@@ -1452,25 +1452,13 @@ function renderChatHeads() {
 }
 
 function openChatWindow(pharmacyId) {
-    const conv = conversationsData.find(c => c.pharmacy_id == pharmacyId);
-    if (!conv) return;
-
-    activeChatPharmacyId = pharmacyId;
-    chatWindowMinimized = false;
-
-    const win = document.getElementById('activeChatWindow');
-    document.getElementById('activeChatName').textContent = conv.pharmacy_name;
-    renderActiveChatMessages(conv);
-    win.style.display = 'block';
-
-    // Hide chat heads while window is open
-    document.getElementById('chatHeadsContainer').innerHTML = '';
-
-    // Scroll to bottom
-    setTimeout(function() {
-        const msgs = document.getElementById('activeChatMessages');
-        if (msgs) msgs.scrollTop = msgs.scrollHeight;
-    }, 50);
+    // The floating dashboard chat widget is retired. All chat entry points
+    // (chat heads and the map InfoWindow "Message" button) now open the
+    // full chat page, which renders into #chatMessages.
+    if (pharmacyId === null || pharmacyId === undefined || pharmacyId === '') return;
+    const safeId = parseInt(pharmacyId, 10);
+    if (!Number.isFinite(safeId) || safeId <= 0) return;
+    window.location.href = '/consumer/messages/' + encodeURIComponent(String(safeId));
 }
 
 function renderActiveChatMessages(conv) {
