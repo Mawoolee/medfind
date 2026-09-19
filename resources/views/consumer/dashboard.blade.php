@@ -1044,10 +1044,12 @@
         .search-card-minimal {
             padding: 5px 5px 5px 14px !important;
         }
-        /* 16px input keeps iOS from auto-zooming the map view on focus */
+        /* 16px input keeps iOS from auto-zooming the map view on focus.
+           Horizontal padding must stay non-zero so typed text and the caret
+           don't sit flush against the pill's edge. */
         .search-card-minimal input {
             font-size: 16px !important;
-            padding: 9px 0 !important;
+            padding: 9px 12px !important;
         }
         .search-card-minimal button {
             padding: 8px 14px !important;
@@ -1174,6 +1176,15 @@
     html.dark .search-card-minimal input {
         color: #e2e8f0 !important;
         background: transparent !important;
+    }
+    /* The global `html.dark input:not([type="checkbox"])...:not([type="hidden"])`
+       rule in resources/css/app.css has higher specificity than the rule above,
+       so it wins and paints a nested dark rectangle inside the search pill.
+       The id selector here outranks it, scoped to this input only. */
+    html.dark .search-panel .search-card-minimal input#medicineSearch {
+        background: transparent !important;
+        background-color: transparent !important;
+        color: #e2e8f0 !important;
     }
     html.dark .search-card-minimal input::placeholder {
         color: #475569 !important;

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\AdminAccountNotifier;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -28,7 +29,7 @@ class RegisteredUserController extends Controller
      *
      * @throws ValidationException
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, AdminAccountNotifier $adminNotifier): RedirectResponse
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -42,6 +43,14 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
             'role' => 'consumer',
         ]);
+
+        // Admins are always told about new accounts. Failures are handled and
+        // logged inside the notifier so registration itself cannot break.
+        $adminNotifier->notifyNewAccount(
+            accountName: $user->name,
+            accountEmail: $user->email,
+            accountRole: $user->role,
+        );
 
         event(new Registered($user));
 

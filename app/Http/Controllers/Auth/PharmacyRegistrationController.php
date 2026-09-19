@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Pharmacy;
 use App\Models\User;
+use App\Services\AdminAccountNotifier;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -122,7 +123,7 @@ class PharmacyRegistrationController extends Controller
      *
      * @throws ValidationException
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, AdminAccountNotifier $adminNotifier): RedirectResponse
     {
         $account = $request->session()->get(self::SESSION_KEY);
 
@@ -156,6 +157,15 @@ class PharmacyRegistrationController extends Controller
         ]);
 
         $request->session()->forget([self::SESSION_KEY, self::LOCATION_KEY]);
+
+        // Pharmacy sign-ups land in `pending` and need requirements review, so
+        // every admin is notified. Failures are caught/logged by the notifier.
+        $adminNotifier->notifyNewAccount(
+            accountName: $user->name,
+            accountEmail: $user->email,
+            accountRole: $user->role,
+            pharmacyName: $validated['pharmacy_name'],
+        );
 
         event(new Registered($user));
 

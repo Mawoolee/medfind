@@ -97,7 +97,10 @@
                         </div>
                     @endif
 
-                    <span class="hidden sm:inline text-sm text-[#191970] font-medium">{{ Auth::user()->name }}</span>
+                    {{-- Plain span: the `html.dark nav a/button` overrides in app.css do not reach it.
+                         Color comes solely from the `.account-name` component class (app.css), which
+                         sets explicit light/dark values — no `text-*`/`dark:text-*` utilities here. --}}
+                    <span class="hidden sm:inline text-sm font-medium account-name">{{ Auth::user()->name }}</span>
 
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf

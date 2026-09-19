@@ -7,6 +7,7 @@ use App\Models\Medicine;
 use App\Models\Pharmacy;
 use App\Models\User;
 use App\Notifications\PharmacyStatusNotification;
+use App\Services\AdminAccountNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -157,7 +158,7 @@ class AdminDashboardController extends Controller
         return view('admin.logs', compact('logs'));
     }
 
-    public function storePharmacy(Request $request)
+    public function storePharmacy(Request $request, AdminAccountNotifier $adminNotifier)
     {
         $request->validate([
             'pharmacy_name' => 'required|string|max:255',
@@ -181,6 +182,18 @@ class AdminDashboardController extends Controller
         ]);
 
         $this->logActivity('created', 'Pharmacy', $pharmacy->id, "Created pharmacy {$pharmacy->pharmacy_name}");
+
+        // Tell the other admins about the new pharmacy account, but never the
+        // admin who just created it.
+        $owner = $pharmacy->user_id ? User::find($pharmacy->user_id) : null;
+        $adminNotifier->notifyNewAccount(
+            accountName: $owner?->name ?? 'An admin',
+            accountEmail: $owner?->email,
+            accountRole: 'pharmacy',
+            pharmacyName: $pharmacy->pharmacy_name,
+            excludeAdminId: auth()->id(),
+        );
+
         session()->forget('admin_add_pharmacy.location');
 
         return redirect()->route('admin.pharmacies')->with('success', 'Pharmacy added successfully.');

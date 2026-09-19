@@ -6,7 +6,9 @@
 <div class="container mx-auto px-4 py-8">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-6">
         <h1 class="text-2xl font-bold text-gray-800">Pharmacy Dashboard</h1>
-        <span class="text-sm text-gray-500">{{ $pharmacy->pharmacy_name ?? 'No pharmacy assigned' }}</span>
+        {{-- Color comes solely from `.account-name-secondary` (app.css): text-gray-500 was washed
+             out in light mode and the blanket dark remap sent it to a weak #64748b. --}}
+        <span class="text-sm account-name-secondary">{{ $pharmacy->pharmacy_name ?? 'No pharmacy assigned' }}</span>
     </div>
 
     @if($pharmacy->status === 'pending')
@@ -84,7 +86,7 @@
                 <thead><tr class="bg-gray-50 text-left text-gray-600"><th class="px-4 py-2 whitespace-nowrap">Medicine</th><th class="px-4 py-2 whitespace-nowrap">Dosage</th><th class="px-4 py-2 whitespace-nowrap">Available Stock</th><th class="px-4 py-2 whitespace-nowrap">Price</th><th class="px-4 py-2 whitespace-nowrap">Status</th></tr></thead>
                 <tbody>
                     @forelse($recentInventory as $item)
-                        <tr class="border-t border-gray-200"><td class="px-4 py-2 whitespace-nowrap">{{ $item->medicine->medicine_name }}</td><td class="px-4 py-2 whitespace-nowrap">{{ $item->medicine->dosage }}</td><td class="px-4 py-2 whitespace-nowrap">{{ $item->available_stock }}</td><td class="px-4 py-2 whitespace-nowrap">?{{ number_format((float) $item->representative_price, 2) }}</td><td class="px-4 py-2 whitespace-nowrap"><span class="px-2 py-1 rounded text-xs {{ $item->available_stock > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">{{ $item->available_stock > 0 ? 'In Stock' : 'Out of Stock' }}</span></td></tr>
+                        <tr class="border-t border-gray-200"><td class="px-4 py-2 whitespace-nowrap">{{ $item->medicine->medicine_name }}</td><td class="px-4 py-2 whitespace-nowrap">{{ $item->medicine->dosage }}</td><td class="px-4 py-2 whitespace-nowrap">{{ $item->available_stock }}</td><td class="px-4 py-2 whitespace-nowrap">&#8369;{{ number_format((float) $item->representative_price, 2) }}</td><td class="px-4 py-2 whitespace-nowrap"><span class="px-2 py-1 rounded text-xs {{ $item->available_stock > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">{{ $item->available_stock > 0 ? 'In Stock' : 'Out of Stock' }}</span></td></tr>
                     @empty
                         <tr><td colspan="5" class="px-4 py-4 text-center text-gray-500">No inventory items found.</td></tr>
                     @endforelse

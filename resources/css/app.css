@@ -648,6 +648,36 @@ html.dark .medfind-combobox-empty {
     color: #94a3b8;
 }
 
+/* --- Account / pharmacy name ---------------------------------------
+   Explicit literal colors instead of utilities. The account name is a plain
+   <span>, so the `html.dark nav a/button` overrides never reach it, while the
+   blanket `html.dark .text-gray-*` remaps (which use !important) do reach the
+   dashboard variant. Stacking `text-[#191970]` + `dark:text-slate-200` on the
+   element left its cascade dependent on utility ordering and on those blanket
+   !important rules, which is what made the name unreadable — dark first, then
+   light. These two rules are the single source of truth for the color in both
+   themes: navy #191970 on the light --bg-page (#f0f0ff), and the same #e2e8f0
+   light tone the nav links already use in dark mode. Both declare !important so
+   no blanket remap or utility ordering can repaint them.
+   `.account-name-secondary` is the slightly muted sibling used where the name
+   sits beside a bold heading; #3a3a8c is 8.6:1 on #f0f0ff and #cbd5e1 is well
+   above AA on the dark page background, so both clear WCAG AA. */
+.account-name {
+    color: #191970 !important;
+}
+
+html.dark .account-name {
+    color: #e2e8f0 !important;
+}
+
+.account-name-secondary {
+    color: #3a3a8c !important;
+}
+
+html.dark .account-name-secondary {
+    color: #cbd5e1 !important;
+}
+
 /* --- Admin requirements review toggle -----------------------------
    The Alpine binding swaps between `bg-[#191970] text-white ...` (open) and
    `bg-white text-[#191970] ...` (closed). In dark mode the global `.bg-white`
