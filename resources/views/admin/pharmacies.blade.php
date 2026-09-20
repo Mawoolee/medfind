@@ -25,25 +25,31 @@
     @endif
 
     <!-- Search & Filter -->
-    <form method="GET" action="{{ route('admin.pharmacies') }}" class="bg-white rounded-xl shadow-lg p-4 mb-6 flex flex-col sm:flex-row flex-wrap gap-3 sm:items-end">
-        <div class="flex-1 min-w-[200px]">
+    <form method="GET" action="{{ route('admin.pharmacies') }}" class="bg-white rounded-xl shadow-lg p-4 mb-6 flex flex-wrap gap-3 items-end">
+        <div class="w-full md:flex-[0_0_20rem] md:max-w-[20rem]">
             <label class="block text-sm font-semibold text-gray-600 mb-1">Search</label>
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by name or address..."
                    class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-base sm:text-sm focus:ring-2 focus:ring-purple-300 focus:border-purple-400">
         </div>
-        <div>
+        <div class="w-full sm:flex-[0_0_11rem] sm:max-w-[11rem]">
             <label class="block text-sm font-semibold text-gray-600 mb-1">Status</label>
-            <select name="status" class="w-full sm:w-auto sm:min-w-[130px] border border-gray-300 rounded-xl px-3 py-2.5 text-base sm:text-sm focus:ring-2 focus:ring-purple-300 focus:border-purple-400">
-                <option value="all">All Statuses</option>
-                @foreach(['approved', 'pending', 'rejected'] as $status)
-                    <option value="{{ $status }}" {{ request('status') === $status ? 'selected' : '' }}>{{ ucfirst($status) }}</option>
-                @endforeach
-            </select>
+            {{-- appearance-none + bg-none suppress the @tailwindcss/forms arrow so the SVG below is the only indicator; pr-10 reserves its 2.5rem region. --}}
+            <div class="relative w-full min-w-[11rem]">
+                <select name="status" class="w-full appearance-none bg-none border border-gray-300 rounded-xl pl-3 pr-10 py-2.5 text-base sm:text-sm focus:ring-2 focus:ring-purple-300 focus:border-purple-400">
+                    <option value="all">All Statuses</option>
+                    @foreach(['approved', 'pending', 'rejected'] as $status)
+                        <option value="{{ $status }}" {{ request('status') === $status ? 'selected' : '' }}>{{ ucfirst($status) }}</option>
+                    @endforeach
+                </select>
+                <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7" />
+                </svg>
+            </div>
         </div>
-        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold">
+        <button type="submit" class="flex-none whitespace-nowrap bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold">
             <i class="fas fa-search mr-1"></i>Search
         </button>
-        <a href="{{ route('admin.pharmacies') }}" class="text-gray-500 hover:text-gray-700 text-sm px-2 py-2 text-center">Reset</a>
+        <a href="{{ route('admin.pharmacies') }}" class="flex-none whitespace-nowrap text-gray-500 hover:text-gray-700 text-sm px-2 py-2 text-center">Reset</a>
     </form>
 
     <div class="bg-white rounded-xl shadow-lg overflow-hidden">
