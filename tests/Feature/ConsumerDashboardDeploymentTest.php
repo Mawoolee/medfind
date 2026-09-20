@@ -32,11 +32,14 @@ class ConsumerDashboardDeploymentTest extends TestCase
         $html = $response->getContent();
 
         $this->assertStringContainsString('https://medfind.example/build/assets/', $html);
-        $this->assertStringContainsString('https://medfind.example/js/medfind.js', $html);
+        // The map bundle is medfind-google.js since the Leaflet-to-Google-Maps migration.
+        $this->assertStringContainsString('https://medfind.example/js/medfind-google.js', $html);
         $this->assertStringContainsString('https://medfind.example/images/Final Logo MedFind.png', $html);
         $this->assertStringContainsString('id="medfindMap"', $html);
         $this->assertStringNotContainsString('unpkg.com/leaflet', $html);
         $this->assertStringNotContainsString('unpkg.com/leaflet-routing-machine', $html);
+        // Guard against regressing to the retired Leaflet bundle.
+        $this->assertStringNotContainsString('/js/medfind.js', $html);
 
         $this->assertHeaderLogoIsServedOverForwardedHttps($html);
         $this->assertHeaderLogoCannotRenderUnbounded($html);

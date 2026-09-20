@@ -46,7 +46,7 @@ final class RecordSaleFeatureTest extends TestCase
         $response = $this->actingAs($owner)->get(route('pharmacy.dashboard'));
         $html = (string) $response->getContent();
         $dashboardSource = file_get_contents(resource_path('views/pharmacy/dashboard.blade.php'));
-        $sharedActionClasses = 'inline-flex items-center justify-center gap-2 text-center font-semibold px-6 py-3 rounded-lg transition duration-200 w-full min-h-12 whitespace-normal break-words leading-tight';
+        $sharedActionClasses = 'inline-flex items-center justify-center gap-2 text-center font-semibold px-6 py-3 rounded-xl transition duration-200 w-full min-h-12 whitespace-normal break-words leading-tight';
 
         $response->assertOk()
             ->assertSee('grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5', false)
