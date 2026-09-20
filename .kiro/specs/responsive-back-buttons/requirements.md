@@ -93,6 +93,34 @@ A secondary, related defect is included in scope: the shared `x-back-button` com
 - Adding a mobile bottom navigation bar or a browser-history-based back control
 - Dark mode remediation of the hardcoded `bg-[#f0f0ff]` page background on `consumer/pharmacy-details.blade.php` and `consumer/profile.blade.php`
 
-## Open Questions
+## Resolved Decisions
 
-1. The `sm` breakpoint (640px) is proposed because the codebase already uses `sm:` for its existing mobile/desktop split in the messages views. `md` (768px) would also hide the link on small tablets and on phones held in landscape. Confirm `sm` is the intended boundary.
+### D1: The breakpoint boundary is `sm` (640px) — RESOLVED, implemented
+
+The original open question asked whether `sm` (640px) or `md` (768px) should separate Phone_Viewport from Desktop_Viewport. **`sm` is confirmed.** Three findings settled it:
+
+**1. This document already commits to `sm`.** The Glossary defines Phone_Viewport as below 640px and Desktop_Viewport as 640px and above, and eleven acceptance criteria are written in those terms: 1.1, 1.2, 2.1, 3.1, 3.2, 3.4, 4.1, 4.2, 4.3, 4.4, and 5.5. Adopting `md` would require rewriting the Glossary and every criterion that references either term, not just changing a utility class.
+
+**2. `md` would open a 128px band with no back control in the messages view.** The entire messages split view is anchored at 640px, in CSS and in JavaScript:
+
+| `consumer/messages.blade.php` | Utility / condition |
+|---|---|
+| `#conversationListPanel` | `w-full sm:w-96` |
+| `#chatPanel` | `hidden sm:flex` |
+| Panel_Back_Control | `sm:hidden` |
+| `isMobileView()` | `matchMedia('(max-width: 639px)')` |
+
+At 640–767px the view is already in desktop split mode and the Panel_Back_Control is hidden by `sm:hidden`. Under `md` the Page_Back_Link would still be hidden too, leaving that band with no back control in the header at all. Under `sm` the two controls hand off at exactly the same 640px threshold, with no gap.
+
+**3. The stated rationale does not extend past 640px.** The Introduction justifies hiding the links because they "crowd the header" and "duplicate navigation" on phone-sized screens. At 700–767px the header is not crowded, so hiding there applies the fix where no problem exists.
+
+**Accepted trade-off:** on older small phones in landscape — iPhone SE and iPhone 8 are 667px wide — the Page_Back_Link remains visible, where `md` would hide it. This is a redundant but harmless control on a viewport with room for it. Note that current phones in landscape (iPhone 14 at 852px) exceed both breakpoints and show the link either way, so this is not a general "phones in landscape" concern.
+
+**Implemented as:** `hidden sm:flex` on `consumer/pharmacy-details.blade.php` (applied to the wrapper, per Requirement 2.2) and `consumer/profile.blade.php`; `hidden sm:inline` on `consumer/search.blade.php` and `consumer/messages.blade.php`. Guarded by `tests/Feature/ConsumerBackNavigationTest.php`.
+
+## Verification Status
+
+- Requirement 5 (component label) and Requirements 1–4, 6 are implemented and covered by `tests/Feature/ConsumerBackNavigationTest.php` and `tests/Feature/PharmacyBackNavigationTest.php`.
+- Requirement 6.4 confirmed: `npm run build` emits `.hidden{display:none}`, `sm:flex`, `sm:inline`, and `sm:hidden` into the compiled stylesheet.
+- Requirement 6.5 confirmed: full suite at 337 passed, 1 skipped, 0 failed. The one skip is `PostgreSqlMigrationRehearsalTest`, gated behind `MEDFIND_REHEARSAL_DISPOSABLE=1` and unrelated to this change.
+- Requirement 4.4 (44×44 CSS pixel touch targets on controls that stay visible) was verified only from the emitted utilities, not from rendered geometry. The shared component carries `min-h-11` (2.75rem = 44px); the chat and panel controls were not measured in a browser.
