@@ -142,27 +142,25 @@
                 {{-- Row 5: Supplier + Reference / PO No. --}}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
-                        <label for="supplier_name" class="block text-sm font-medium text-gray-700 mb-1">Supplier <span class="text-red-500">*</span></label>
+                        <label for="supplier_name" class="block text-sm font-medium text-gray-700 mb-1">Supplier <span class="text-gray-400 font-normal">(optional)</span></label>
                         <input
                             type="text"
                             id="supplier_name"
                             name="supplier_name"
                             value="{{ old('supplier_name', '') }}"
                             maxlength="255"
-                            required
                             class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-base"
                             placeholder="e.g. ABC Pharma Distributors"
                         >
                     </div>
                     <div>
-                        <label for="purchase_order" class="block text-sm font-medium text-gray-700 mb-1">Reference / PO No. <span class="text-red-500">*</span></label>
+                        <label for="purchase_order" class="block text-sm font-medium text-gray-700 mb-1">Reference / PO No. <span class="text-gray-400 font-normal">(optional)</span></label>
                         <input
                             type="text"
                             id="purchase_order"
                             name="purchase_order"
                             value="{{ old('purchase_order', '') }}"
                             maxlength="255"
-                            required
                             class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-base"
                             placeholder="e.g. PO-2025-001"
                         >
@@ -172,12 +170,11 @@
                 {{-- Row 6: Expiry Date + Date Received --}}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
-                        <label for="expiry_date" class="block text-sm font-medium text-gray-700 mb-1">Expiry Date <span class="text-red-500">*</span></label>
+                        <label for="expiry_date" class="block text-sm font-medium text-gray-700 mb-1">Expiry Date <span class="text-gray-400 font-normal">(optional)</span></label>
                         <input
                             type="date"
                             id="expiry_date"
                             name="items[0][expiry_date]"
-                            required
                             value="{{ old('items.0.expiry_date', '') }}"
                             class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-base"
                         >

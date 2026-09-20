@@ -19,8 +19,11 @@ final class ReceiveInventoryRequest extends PharmacyInventoryRequest
 
         return [
             'supplier_id' => ['nullable', 'integer', Rule::exists('suppliers', 'id')],
-            'supplier_name' => ['required', 'string', 'max:255'],
-            'purchase_order' => ['required', 'string', 'max:255'],
+            // Requirement 3.5: supplier identity and Received_Reference are accepted, not required.
+            // A delivery may be recorded with no supplier linkage at all (Requirement 3.7/3.8 only
+            // act on a non-empty Supplier_Name), so a blank value must not fail validation.
+            'supplier_name' => ['nullable', 'string', 'max:255'],
+            'purchase_order' => ['nullable', 'string', 'max:255'],
             'items' => ['required', 'array', 'min:1'],
             'items.*' => ['required', 'array'],
             'items.*.inventory_item_id' => [
@@ -35,9 +38,13 @@ final class ReceiveInventoryRequest extends PharmacyInventoryRequest
             'items.*.price' => ['required', 'numeric', 'min:0', 'decimal:0,2'],
             'items.*.supplier_id' => ['nullable', 'integer', Rule::exists('suppliers', 'id')],
             'items.*.supplier_name' => ['nullable', 'string', 'max:255'],
-            'items.*.expiry_date' => ['required', 'date_format:Y-m-d'],
+            // Requirement 3.5 plus the FEFO_Order definition: batches without an expiry date are
+            // supported and sort last, so expiry date is optional.
+            'items.*.expiry_date' => ['nullable', 'date_format:Y-m-d'],
             'items.*.cold_chain' => ['sometimes', 'boolean'],
-            'items.*.received_date' => ['required', 'date_format:Y-m-d'],
+            // Requirement 3.6: an omitted received date defaults to the current application date
+            // inside BatchStockService::receive().
+            'items.*.received_date' => ['nullable', 'date_format:Y-m-d'],
             'items.*.received_reference' => ['nullable', 'string', 'max:255'],
         ];
     }
