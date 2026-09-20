@@ -248,8 +248,6 @@ class GoogleMapManager {
                     const userLocation = { lat: userLat, lng: userLng };
                     this.map.setCenter(userLocation);
                     
-                    console.log(`User location: ${userLat}, ${userLng}`);
-                    
                     // Create and show user location marker
                     const userLocationMarker = new UserLocationMarker(this.map);
                     userLocationMarker.setPosition(userLat, userLng);
@@ -783,8 +781,6 @@ class PharmacyMarkerManager {
             // Check if pharmacy has logo
             const hasLogo = pharmacy.logo && pharmacy.logo.trim() !== '';
             
-            console.log(`Creating marker for ${pharmacy.name} - Logo: ${pharmacy.logo || 'null'}`);
-            
             let marker;
             
             if (hasLogo) {
@@ -862,8 +858,6 @@ class PharmacyMarkerManager {
             
             // Add click event listener to open InfoWindow
             marker.addListener('click', () => {
-                console.log('Pharmacy marker clicked:', pharmacy.name);
-                
                 // Open InfoWindow if manager is available
                 if (this.infoWindowManager) {
                     this.infoWindowManager.open(pharmacy, marker);
@@ -874,7 +868,6 @@ class PharmacyMarkerManager {
             this.markers.push(marker);
         }
         
-        console.log(`Created ${this.markers.length} pharmacy markers`);
     }
     
     /**
@@ -1031,7 +1024,6 @@ class PharmacyInfoWindowManager {
             }
         });
 
-        console.log('InfoWindow opened for:', pharmacy.name);
     }
 
     /**
