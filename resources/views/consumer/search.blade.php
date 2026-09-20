@@ -5,7 +5,7 @@
     <div class="max-w-4xl mx-auto">
         <div class="flex items-center justify-between mb-4">
             <h1 class="text-xl sm:text-2xl font-bold text-[#191970]">Search Results</h1>
-            <a href="{{ route('consumer.dashboard') }}" class="text-[#9400D3] hover:text-[#191970] text-sm font-medium transition">
+            <a href="{{ route('consumer.dashboard') }}" class="hidden sm:inline text-[#9400D3] hover:text-[#191970] text-sm font-medium transition">
                 <i class="fas fa-arrow-left mr-1"></i> Back
             </a>
         </div>

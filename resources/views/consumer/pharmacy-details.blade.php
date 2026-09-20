@@ -5,8 +5,10 @@
     <div class="w-full max-w-7xl mx-auto px-0 sm:px-6">
 
         @if(isset($pharmacy))
-            <!-- Back to Map (top-right navigation) -->
-            <div class="flex justify-end mb-3">
+            <!-- Back to Map (top-right navigation). Hidden on phones: the navbar Menu
+                 already reaches the Map, and display:none also drops it from the
+                 accessibility tree and tab order. -->
+            <div class="hidden sm:flex justify-end mb-3">
                 <a href="{{ route('consumer.dashboard') }}"
                    class="inline-flex items-center gap-1.5 text-[#9400D3] hover:text-[#191970] font-semibold text-sm transition
                           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9400D3] focus-visible:ring-offset-2 rounded">

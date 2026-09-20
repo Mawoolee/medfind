@@ -10,7 +10,7 @@
                 <i class="fas fa-user-circle mr-2 text-[#9400D3]"></i>Profile Settings
             </h1>
             <a href="{{ route('consumer.dashboard') }}"
-               class="text-sm text-[#9400D3] hover:text-[#191970] font-semibold transition flex items-center gap-1">
+               class="text-sm text-[#9400D3] hover:text-[#191970] font-semibold transition hidden sm:flex items-center gap-1">
                 <i class="fas fa-arrow-left"></i> Back
             </a>
         </div>

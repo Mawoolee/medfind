@@ -94,7 +94,28 @@ final class PharmacyBackNavigationTest extends TestCase
         self::assertStringContainsString('min-h-11', $html);
         self::assertStringContainsString('rounded-lg', $html);
         self::assertStringContainsString('focus-visible:ring-[#9400D3]', $html);
-        self::assertMatchesRegularExpression('/<span>\s*Back\s*<\/span>/', $html);
+        // The supplied label is the visible caption and resolves to the same text as the
+        // accessible name, so the caption is never a generic "Back" next to a specific
+        // aria-label. See .kiro/specs/responsive-back-buttons requirement 5.
+        self::assertMatchesRegularExpression('/<span>\s*Back to Inventory\s*<\/span>/', $html);
+        self::assertStringContainsString('whitespace-nowrap', $html);
         self::assertStringNotContainsString('history.back', $html);
+    }
+
+    public function test_shared_back_component_falls_back_to_the_default_back_caption(): void
+    {
+        $html = Blade::render('<x-back-button href="/deterministic-parent" />');
+
+        self::assertMatchesRegularExpression('/<span>\s*Back\s*<\/span>/', $html);
+        self::assertStringContainsString('aria-label="Back"', $html);
+    }
+
+    public function test_every_pharmacy_back_button_caption_names_its_destination(): void
+    {
+        $html = Blade::render('<x-back-button href="/pharmacy/dashboard" label="Back to Dashboard" />');
+
+        // All 22 pharmacy call sites pass label="Back to Dashboard"; before the component
+        // fix they all rendered a bare "Back".
+        self::assertStringContainsString('<span>Back to Dashboard</span>', $html);
     }
 }

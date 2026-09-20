@@ -10,7 +10,7 @@
         {{-- Header --}}
         <div class="px-5 py-4 border-b flex items-center justify-between" style="border-color:rgba(148,0,211,0.3);">
             <h2 class="text-white font-bold text-lg">My Messages</h2>
-            <a href="{{ route('consumer.dashboard') }}" class="text-gray-400 hover:text-[#D9F855] text-sm transition">
+            <a href="{{ route('consumer.dashboard') }}" class="hidden sm:inline text-gray-400 hover:text-[#D9F855] text-sm transition">
                 <i class="fas fa-arrow-left mr-1"></i> Back
             </a>
         </div>
