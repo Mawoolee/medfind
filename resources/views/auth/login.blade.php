@@ -55,7 +55,7 @@
                     <!-- Remember Me -->
                     <div class="flex items-center justify-between mb-6">
                         <label class="flex items-center gap-2 text-sm text-gray-600 dark:text-white/80 cursor-pointer">
-                            <input type="checkbox" name="remember" class="w-4 h-4 rounded border-gray-300 dark:border-white/30 text-[#191970] focus:ring-blue-500 dark:focus:ring-white/30">
+                            <input type="checkbox" name="remember" class="w-4 h-4 border-gray-300 dark:border-white/30 text-[#191970] focus:ring-blue-500 dark:focus:ring-white/30">
                             <span class="font-light">Remember me</span>
                         </label>
                         @if (Route::has('password.request'))

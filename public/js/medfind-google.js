@@ -1369,7 +1369,7 @@ class DirectionsService {
                     return;
                 }
 
-                const routeIndex = this.findShortestRouteIndex(result.routes);
+                const routeIndex = this.findFastestRouteIndex(result.routes);
                 if (routeIndex === -1) {
                     const error = new Error('Directions response contained no valid route');
                     error.directionsStatus = 'ZERO_RESULTS';
@@ -1545,6 +1545,18 @@ class DirectionsService {
             .map((route, index) => ({ route, index, totals: this.getRouteTotals(route) }))
             .filter(({ route }) => route && Array.isArray(route.legs) && route.legs.length > 0);
 
+        const minDuration = Math.min(...validRoutes.map(({ totals }) => totals.duration));
+        const minDistance = Math.min(...validRoutes.map(({ totals }) => totals.distance));
+        validRoutes.sort((a, b) => {
+            const aFastest = a.totals.duration === minDuration;
+            const bFastest = b.totals.duration === minDuration;
+            const aShortest = a.totals.distance === minDistance;
+            const bShortest = b.totals.distance === minDistance;
+            if (aFastest !== bFastest) return aFastest ? -1 : 1;
+            if (aShortest !== bShortest) return aShortest ? -1 : 1;
+            return a.index - b.index;
+        });
+
         if (validRoutes.length <= 1) {
             toggleButton.hidden = true;
             toggleButton.disabled = true;
@@ -1568,7 +1580,7 @@ class DirectionsService {
         const title = document.createElement('strong');
         title.textContent = 'Choose a route';
         const hint = document.createElement('span');
-        hint.textContent = 'The shortest route is selected by default.';
+        hint.textContent = 'The fastest route is selected by default.';
         header.append(title, hint);
         panel.appendChild(header);
 
@@ -1691,20 +1703,20 @@ class DirectionsService {
         return { lat, lng };
     }
 
-    findShortestRouteIndex(routes) {
-        let shortestIndex = -1;
-        let shortestDistance = Infinity;
+    findFastestRouteIndex(routes) {
+        let fastestIndex = -1;
+        let fastestDuration = Infinity;
 
         routes.forEach((route, index) => {
             const hasLegs = route && Array.isArray(route.legs) && route.legs.length > 0;
-            const distance = this.getRouteTotals(route).distance;
-            if (hasLegs && Number.isFinite(distance) && distance < shortestDistance) {
-                shortestDistance = distance;
-                shortestIndex = index;
+            const duration = this.getRouteTotals(route).duration;
+            if (hasLegs && Number.isFinite(duration) && duration < fastestDuration) {
+                fastestDuration = duration;
+                fastestIndex = index;
             }
         });
 
-        return shortestIndex;
+        return fastestIndex;
     }
 
     getRouteTotals(route) {

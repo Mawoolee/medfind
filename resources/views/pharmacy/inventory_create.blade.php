@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('title', 'Add New Medicine')
 
@@ -91,25 +91,36 @@
                 <div>
                     <label for="par_level" class="block text-sm font-medium text-gray-700">Par Level</label>
                     <input id="par_level" type="number" name="par_level" min="0" value="{{ old('par_level', 0) }}" class="mt-1 block w-full border border-gray-300 rounded-xl px-3 py-2.5 text-base @error('par_level') border-red-500 @enderror">
-                    <p class="mt-1 text-xs text-gray-500">Compared with the combined available quantity of all batches.</p>
                     @error('par_level')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>
 
-                <div class="flex items-center pt-6">
-                    <input type="hidden" name="requiresPrescription" value="0">
-                    <label for="requiresPrescription" class="flex items-center text-sm font-medium text-gray-700">
-                        <input id="requiresPrescription" type="checkbox" name="requiresPrescription" value="1" {{ old('requiresPrescription') ? 'checked' : '' }} class="mr-2">
-                        Requires prescription
-                    </label>
-                </div>
-
-                <div class="flex items-center pt-6">
-                    <input type="hidden" name="cold_chain_required" value="0">
-                    <label for="cold_chain_required" class="flex items-center text-sm font-medium text-gray-700">
-                        <input id="cold_chain_required" type="checkbox" name="cold_chain_required" value="1" {{ old('cold_chain_required') ? 'checked' : '' }} class="mr-2">
-                        Cold-chain required for every batch
-                    </label>
-                    @error('cold_chain_required')<p class="ml-2 text-sm text-red-600">{{ $message }}</p>@enderror
+                <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                    <div class="flex items-center gap-3 pt-1">
+                        <input type="hidden" name="cold_chain_required" value="0">
+                        <input
+                            type="checkbox"
+                            id="cold_chain_required"
+                            name="cold_chain_required" value="1" {{ old('cold_chain_required') ? 'checked' : '' }}
+                            class="h-4 w-4 rounded-sm border-gray-300 text-blue-600"
+                        >
+                        <label for="cold_chain_required" class="text-sm font-medium text-gray-700">Cold Chain Required</label>
+                        @error('cold_chain_required')<p class="ml-2 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                    <div class="flex items-center gap-3 pt-1">
+                        <input type="hidden" name="requiresPrescription" value="0">
+                        <input
+                            type="checkbox"
+                            id="requiresPrescription"
+                            name="requiresPrescription"
+                            value="1"
+                            {{ old('requiresPrescription') ? 'checked' : '' }}
+                            class="h-4 w-4 rounded-sm border-gray-300 text-blue-600"
+                        >
+                        <label for="requiresPrescription" class="text-sm font-medium text-gray-700">
+                            Requires Prescription
+                            <span class="text-gray-400 font-normal text-xs ml-1">(from medicine)</span>
+                        </label>
+                    </div>
                 </div>
             </div>
 
@@ -153,9 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
     selector.addEventListener('change', () => applyValues(medicineAutofill[selector.value] ?? initialValues));
 
     if (selector.value && medicineAutofill[selector.value]) {
-        applyValues({...medicineAutofill[selector.value], ...Object.fromEntries(
-            Object.entries(fields).map(([key, field]) => [key, field.type === 'checkbox' ? field.checked : field.value])
-        )});
+        applyValues(medicineAutofill[selector.value]);
     }
 });
 </script>

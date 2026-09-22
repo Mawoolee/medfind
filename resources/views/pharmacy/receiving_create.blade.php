@@ -204,19 +204,21 @@
                             name="items[0][cold_chain]"
                             value="1"
                             {{ old('items.0.cold_chain') ? 'checked' : '' }}
-                            class="h-4 w-4 rounded-xl border-gray-300 text-blue-600"
+                            class="h-4 w-4 rounded-sm border-gray-300 text-blue-600"
                         >
                         <label for="cold_chain" class="text-sm font-medium text-gray-700">Cold Chain Required</label>
                     </div>
                     <div class="flex items-center gap-3 pt-1">
+                        <input type="hidden" name="items[0][requires_prescription]" value="0">
                         <input
                             type="checkbox"
-                            id="display_requires_prescription"
-                            disabled
-                            tabindex="-1"
-                            class="h-4 w-4 rounded-xl border-gray-300 text-blue-600 cursor-default"
+                            id="requires_prescription_check"
+                            name="items[0][requires_prescription]"
+                            value="1"
+                            {{ old('items.0.requires_prescription') ? 'checked' : '' }}
+                            class="h-4 w-4 rounded-sm border-gray-300 text-blue-600"
                         >
-                        <label for="display_requires_prescription" class="text-sm font-medium text-gray-700 cursor-default">
+                        <label for="requires_prescription_check" class="text-sm font-medium text-gray-700">
                             Requires Prescription <span class="text-gray-400 font-normal text-xs">(from medicine)</span>
                         </label>
                     </div>
@@ -269,7 +271,7 @@
     const displayGeneric  = document.getElementById('display_generic_name');
     const displayBrand    = document.getElementById('display_brand_name');
     const displayDosage   = document.getElementById('display_dosage');
-    const displayRxCheck  = document.getElementById('display_requires_prescription');
+    const displayRxCheck  = document.getElementById('requires_prescription_check');
     const coldChainBox    = document.getElementById('cold_chain');
 
     function fillDisplayFields(option) {
@@ -278,7 +280,7 @@
             displayBrand.value        = option.brand;
             displayDosage.value       = option.dosage;
             displayRxCheck.checked    = option.requires_prescription === 1;
-            if (option.cold_chain_required === 1) coldChainBox.checked = true;
+            coldChainBox.checked = option.cold_chain_required === 1;
         } else {
             displayGeneric.value   = '';
             displayBrand.value     = '';

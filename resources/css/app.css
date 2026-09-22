@@ -457,6 +457,7 @@ a:hover {
 
 /* Checkbox/remember me interaction */
 input[type="checkbox"] {
+    border-radius: 4px;
     transition: all 0.2s ease;
     cursor: pointer;
 }
