@@ -141,6 +141,26 @@ function checkItem(key) {
  if (lbl) { lbl.style.color = "#191970"; lbl.style.fontWeight = "600"; }
 }
 
+function clearUploadError(key) {
+ var card = document.getElementById("document-card-" + key);
+ var error = document.getElementById("upload-error-" + key);
+ if (card) card.style.borderColor = "rgba(148,0,211,0.12)";
+ if (error) {
+  error.textContent = "";
+  error.classList.add("hidden");
+ }
+}
+
+function showUploadError(key, message) {
+ var card = document.getElementById("document-card-" + key);
+ var error = document.getElementById("upload-error-" + key);
+ if (card) card.style.borderColor = "#dc2626";
+ if (error) {
+  error.textContent = message;
+  error.classList.remove("hidden");
+ }
+}
+
 function showFileName(key, input) {
  clearUploadError(key);
  var label = document.getElementById("fname_" + key);
@@ -156,25 +176,6 @@ function showFileName(key, input) {
  box.style.cssText = "background:transparent;border-color:#dc2626;width:20px;height:20px;border-radius:4px;border:2px solid;display:flex;align-items:center;justify-content:center;flex-shrink:0;";
  }
 
- function clearUploadError(key) {
-  var card = document.getElementById("document-card-" + key);
-  var error = document.getElementById("upload-error-" + key);
-  if (card) card.style.borderColor = "rgba(148,0,211,0.12)";
-  if (error) {
-   error.textContent = "";
-   error.classList.add("hidden");
-  }
- }
-
- function showUploadError(key, message) {
-  var card = document.getElementById("document-card-" + key);
-  var error = document.getElementById("upload-error-" + key);
-  if (card) card.style.borderColor = "#dc2626";
-  if (error) {
-   error.textContent = message;
-   error.classList.remove("hidden");
-  }
- }
  return;
  }
  if (label) label.innerHTML = '<i class="fas fa-file" style="color:#9400D3;margin-right:4px;"></i><span style="color:#191970;font-weight:600;">' + file.name + '</span>';
