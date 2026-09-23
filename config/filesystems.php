@@ -38,6 +38,7 @@ return [
     | authorization-checked MessageController routes.
     */
     'prescriptions_disk' => env('FILESYSTEM_PRESCRIPTIONS_DISK', 'prescriptions'),
+    'requirements_disk' => env('FILESYSTEM_REQUIREMENTS_DISK', 'local'),
 
     /*
     |--------------------------------------------------------------------------

@@ -150,6 +150,30 @@ class PharmacyRequirementsTest extends TestCase
         Storage::disk('local')->assertExists($requirements['fda']);
     }
 
+    public function test_each_document_can_be_uploaded_separately_without_losing_previous_documents(): void
+    {
+        Storage::fake('local');
+
+        $user = User::factory()->create(['role' => 'pharmacy']);
+        $pharmacy = Pharmacy::factory()->pending()->withOwner($user)->create();
+
+        foreach (['bir', 'business', 'fda', 'pharmacist'] as $document) {
+            $this->actingAs($user)
+                ->postJson(route('pharmacy.requirements.document.store', $document), [
+                    "doc_{$document}" => UploadedFile::fake()->create("{$document}.pdf", 100, 'application/pdf'),
+                ])
+                ->assertOk()
+                ->assertJsonPath('document', $document);
+        }
+
+        $requirements = $pharmacy->fresh()->requirements;
+        $this->assertSame(['bir', 'business', 'fda', 'pharmacist'], array_keys($requirements));
+
+        foreach ($requirements as $path) {
+            Storage::disk('local')->assertExists($path);
+        }
+    }
+
     private function requiredDocuments(): array
     {
         return [

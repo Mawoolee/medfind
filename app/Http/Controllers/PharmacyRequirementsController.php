@@ -64,10 +64,10 @@ class PharmacyRequirementsController extends Controller
             if ($request->hasFile("doc_{$key}")) {
                 // Delete old file for this slot if it exists
                 if (!empty($uploaded[$key])) {
-                    \Illuminate\Support\Facades\Storage::disk('local')->delete($uploaded[$key]);
+                    \Illuminate\Support\Facades\Storage::disk(config('filesystems.requirements_disk'))->delete($uploaded[$key]);
                 }
                 $path = $request->file("doc_{$key}")->store(
-                    'pharmacy-requirements/' . $pharmacy->id, 'local'
+                    'pharmacy-requirements/' . $pharmacy->id, config('filesystems.requirements_disk')
                 );
                 $uploaded[$key] = $path;
                 $saved = true;
@@ -86,5 +86,47 @@ class PharmacyRequirementsController extends Controller
         }
 
         return redirect()->route('pharmacy.requirements')->with('success', 'Documents uploaded successfully!');
+    }
+
+    /**
+     * Upload exactly one document. Keeping this request limited to one file
+     * avoids PHP/Railway multipart request limits dropping the last file in a
+     * large multi-document submission.
+     */
+    public function uploadDocument(Request $request, string $document)
+    {
+        if (! array_key_exists($document, self::DOCS)) {
+            abort(404);
+        }
+
+        $pharmacy = Pharmacy::where('user_id', auth()->id())->firstOrFail();
+        $field = "doc_{$document}";
+        $label = self::DOCS[$document]['label'];
+
+        $validated = $request->validate([
+            $field => ['required', 'file', 'mimes:jpeg,jpg,png,pdf', 'max:10240'],
+        ], [
+            "{$field}.required" => "Please select the {$label}.",
+            "{$field}.file" => "The {$label} could not be uploaded.",
+            "{$field}.mimes" => "The {$label} must be a PDF, JPG, JPEG, or PNG.",
+            "{$field}.max" => "The {$label} must not be larger than 10 MB.",
+        ]);
+
+        $uploaded = $pharmacy->requirements ?? [];
+        if (! empty($uploaded[$document])) {
+            \Illuminate\Support\Facades\Storage::disk(config('filesystems.requirements_disk'))->delete($uploaded[$document]);
+        }
+
+        $uploaded[$document] = $request->file($field)->store(
+            'pharmacy-requirements/'.$pharmacy->id,
+            config('filesystems.requirements_disk')
+        );
+        $pharmacy->requirements = $uploaded;
+        $pharmacy->save();
+
+        return response()->json([
+            'message' => "{$label} uploaded successfully.",
+            'document' => $document,
+        ]);
     }
 }

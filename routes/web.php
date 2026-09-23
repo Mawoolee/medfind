@@ -178,6 +178,7 @@ Route::middleware(['auth', 'role:pharmacy,pharmacy_operator', 'pharmacy.pending'
     // Requirements upload
     Route::get('/requirements', [PharmacyRequirementsController::class, 'show'])->name('requirements');
     Route::post('/requirements', [PharmacyRequirementsController::class, 'store'])->name('requirements.store');
+    Route::post('/requirements/{document}', [PharmacyRequirementsController::class, 'uploadDocument'])->name('requirements.document.store');
 
     // Inventory CSV export
     Route::get('/inventory/export', [InventoryController::class, 'export'])->name('inventory.export');

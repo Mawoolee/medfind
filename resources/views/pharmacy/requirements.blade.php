@@ -226,13 +226,15 @@ document.addEventListener("DOMContentLoaded", function() {
  var payload = new FormData();
  payload.append("_token", csrf);
  payload.append("doc_" + key, input.files[0]);
- var response = await fetch(form.action, {
+ var response = await fetch(form.action + "/" + encodeURIComponent(key), {
  method: "POST",
  body: payload,
  headers: { "Accept": "application/json", "X-Requested-With": "XMLHttpRequest" },
  credentials: "same-origin"
  });
- var result = await response.json();
+ var result = await response.json().catch(function () {
+     return { message: 'The server returned an invalid upload response.' };
+ });
  if (!response.ok) {
  throw new Error(result.message || "The " + key + " document could not be uploaded.");
  }
@@ -242,7 +244,7 @@ document.addEventListener("DOMContentLoaded", function() {
  sessionStorage.removeItem(SESSION_PREFIX + key + "_data");
  sessionStorage.removeItem(SESSION_PREFIX + key + "_type");
  });
- window.location.href = form.action;
+ window.location.href = @js(route('pharmacy.requirements'));
  } catch (error) {
  if (submitButton) {
  submitButton.disabled = false;

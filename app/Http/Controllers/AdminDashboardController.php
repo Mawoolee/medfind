@@ -467,17 +467,25 @@ class AdminDashboardController extends Controller
         }
 
         $path = $docs[$key];
-        if (! Storage::disk('local')->exists($path)) {
-            abort(404, 'File not found on disk.');
+        if (is_array($path)) {
+            $path = $path['path'] ?? $path['file'] ?? null;
+        }
+        if (! is_string($path) || $path === '') {
+            abort(404, 'Document path is invalid.');
         }
 
-        $fullPath = Storage::disk('local')->path($path);
-        $mime = mime_content_type($fullPath) ?: 'application/octet-stream';
-        $filename = basename($path);
+        $disk = Storage::disk(config('filesystems.requirements_disk'));
+        if (! $disk->exists($path)) {
+            $legacyDisk = Storage::disk('local');
+            if (! $legacyDisk->exists($path)) {
+                abort(404, 'File not found on disk.');
+            }
+            $disk = $legacyDisk;
+        }
 
-        return response()->file($fullPath, [
-            'Content-Type' => $mime,
-            'Content-Disposition' => 'inline; filename="'.$filename.'"',
+        return response($disk->get($path), 200, [
+            'Content-Type' => $disk->mimeType($path) ?: 'application/octet-stream',
+            'Content-Disposition' => 'inline; filename="'.basename($path).'"',
         ]);
     }
 }

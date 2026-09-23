@@ -25,6 +25,7 @@ class PharmacyPendingMiddleware
             'pharmacy.profile.location.store',
             'pharmacy.requirements',
             'pharmacy.requirements.store',
+            'pharmacy.requirements.document.store',
             'logout',
         ];
 
