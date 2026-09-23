@@ -36,7 +36,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', sans-serif;
-            background: #f0f0ff;
+            background: var(--bg-page, #f0f0ff);
             overflow: hidden;
             height: 100vh;
         }

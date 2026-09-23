@@ -112,6 +112,39 @@ html.dark body {
     color: #e2e8f0;
 }
 
+html.dark .app-shell,
+html.dark .app-main {
+    background-color: var(--bg-page) !important;
+    color: var(--text-primary);
+}
+
+/* Several consumer-facing pages use branded arbitrary Tailwind colors rather
+   than neutral utilities. Remap those surfaces and text when dark mode is on. */
+html.dark .bg-\[\#f0f0ff\] {
+    background-color: var(--bg-page) !important;
+}
+
+html.dark .bg-\[\#f8f4ff\] {
+    background-color: var(--bg-card) !important;
+}
+
+html.dark .bg-\[\#191970\] {
+    background-color: #252552 !important;
+}
+
+html.dark .text-\[\#191970\] {
+    color: #e2e8f0 !important;
+}
+
+html.dark .text-\[\#9400D3\] {
+    color: #c084fc !important;
+}
+
+html.dark .border-\[\#9400D3\]\/10,
+html.dark .border-\[\#9400D3\]\/20 {
+    border-color: rgba(192,132,252,0.22) !important;
+}
+
 /* Exclude auth pages from bg-white override - they need their own colors */
 html.dark body:not(.auth-page) .bg-white:not(.auth-logo-container):not(.auth-card):not(.auth-logo-container + .auth-card + p) {
     background-color: #1a1a2e !important;
