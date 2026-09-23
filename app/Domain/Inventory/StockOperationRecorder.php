@@ -10,8 +10,10 @@ use App\Models\InventoryAudit;
 use App\Models\InventoryItem;
 use App\Models\StockMovement;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use LogicException;
+use Throwable;
 
 final class StockOperationRecorder
 {
@@ -180,7 +182,19 @@ final class StockOperationRecorder
         ];
 
         $aggregate->getConnection()->afterCommit(
-            static fn () => InventoryUpdated::dispatch(...$eventPayload)
+            static function () use ($eventPayload): void {
+                try {
+                    InventoryUpdated::dispatch(...$eventPayload);
+                } catch (Throwable $exception) {
+                    // Broadcasting is a realtime enhancement. It must not turn a
+                    // committed stock operation into a failed HTTP response.
+                    Log::warning('Inventory update broadcast failed after stock operation committed.', [
+                        'pharmacy_id' => $eventPayload[0],
+                        'medicine_id' => $eventPayload[1],
+                        'exception' => $exception,
+                    ]);
+                }
+            }
         );
     }
 

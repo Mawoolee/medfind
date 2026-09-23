@@ -14,6 +14,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -152,6 +153,40 @@ class StockOperationRecorderTest extends TestCase
         self::assertSame(5, $batch->fresh()->current_quantity);
         self::assertSame(5, $aggregate->fresh()->stockQuantity);
         Event::assertNotDispatched(InventoryUpdated::class);
+    }
+
+    public function test_broadcast_failure_does_not_fail_a_committed_stock_operation(): void
+    {
+        Log::spy();
+        Event::listen(InventoryUpdated::class, static function (): void {
+            throw new RuntimeException('Broadcast service unavailable.');
+        });
+
+        $aggregate = InventoryItem::factory()->create([
+            'stockQuantity' => 5,
+            'price' => '10.00',
+        ]);
+        $batch = $this->batch($aggregate, 'BROADCAST-FAILURE', 5);
+
+        DB::transaction(function () use ($aggregate, $batch): void {
+            $batch->update(['current_quantity' => 8]);
+            $aggregate->update(['stockQuantity' => 8]);
+
+            app(StockOperationRecorder::class)->record(
+                $aggregate,
+                [new BatchQuantityChange($batch, 5, 8)],
+                beforeAvailableQuantity: 5,
+                beforeRepresentativePrice: '10.00',
+                context: new StockOperationContext('receipt', operationId: 'broadcast-failure'),
+            );
+        });
+
+        self::assertSame(8, $batch->fresh()->current_quantity);
+        self::assertSame(1, StockMovement::query()->count());
+        self::assertSame(1, InventoryAudit::query()->count());
+        Log::shouldHaveReceived('warning')
+            ->once()
+            ->withArgs(static fn (string $message): bool => str_contains($message, 'broadcast failed'));
     }
 
     private function batch(InventoryItem $aggregate, string $batchNumber, int $quantity): InventoryBatch
