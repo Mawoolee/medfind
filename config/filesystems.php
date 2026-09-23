@@ -30,6 +30,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Private message attachment disk
+    |--------------------------------------------------------------------------
+    |
+    | Use the local disk during development and a persistent private object
+    | storage disk in production. Files are still served only through the
+    | authorization-checked MessageController routes.
+    */
+    'prescriptions_disk' => env('FILESYSTEM_PRESCRIPTIONS_DISK', 'prescriptions'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Filesystem Disks
     |--------------------------------------------------------------------------
     |
@@ -100,6 +111,18 @@ return [
             'use_path_style_endpoint' => true,
             'visibility' => 'public',
             'throw' => false,
+        ],
+
+        'r2_private' => [
+            'driver' => 's3',
+            'key' => env('CLOUDFLARE_R2_ACCESS_KEY_ID'),
+            'secret' => env('CLOUDFLARE_R2_SECRET_ACCESS_KEY'),
+            'region' => 'auto',
+            'bucket' => env('CLOUDFLARE_R2_BUCKET'),
+            'endpoint' => env('CLOUDFLARE_R2_ENDPOINT'),
+            'use_path_style_endpoint' => true,
+            'visibility' => 'private',
+            'throw' => true,
         ],
 
     ],

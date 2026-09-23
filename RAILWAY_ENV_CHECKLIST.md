@@ -26,10 +26,11 @@ Set these in your Railway service → Variables tab:
 
 ## Cloudflare R2 Storage (Pharmacy Logos)
 - [ ] FILESYSTEM_LOGO_DISK=r2
+- [ ] FILESYSTEM_PRESCRIPTIONS_DISK=r2_private
 - [ ] CLOUDFLARE_R2_ACCESS_KEY_ID=`<your R2 access key id>`
 - [ ] CLOUDFLARE_R2_SECRET_ACCESS_KEY=`<your R2 secret access key>`
 - [ ] CLOUDFLARE_R2_BUCKET=`<your bucket name>`
 - [ ] CLOUDFLARE_R2_ENDPOINT=`https://<account_id>.r2.cloudflarestorage.com`
 - [ ] CLOUDFLARE_R2_PUBLIC_URL=`https://pub-<token>.r2.dev`
 
-> **Note:** `FILESYSTEM_LOGO_DISK=public` is the local default (uses the storage symlink). Set it to `r2` on Railway to activate Cloudflare R2. The `local` and `prescriptions` disks are unaffected — pharmacy requirements and prescriptions stay on the server's private disk.
+> **Note:** `FILESYSTEM_LOGO_DISK=public` and `FILESYSTEM_PRESCRIPTIONS_DISK=prescriptions` are local defaults. Set `FILESYSTEM_LOGO_DISK=r2` and `FILESYSTEM_PRESCRIPTIONS_DISK=r2_private` on Railway. The `r2_private` disk keeps message files private; they are served only through the authorization-checked message routes.

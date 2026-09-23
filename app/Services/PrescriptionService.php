@@ -19,7 +19,10 @@ use Illuminate\Support\Str;
  */
 class PrescriptionService
 {
-    protected string $disk = 'prescriptions';
+    protected function disk(): string
+    {
+        return (string) config('filesystems.prescriptions_disk', 'prescriptions');
+    }
 
     /**
      * Encrypt and store an uploaded prescription image.
@@ -36,7 +39,7 @@ class PrescriptionService
 
         $filename = Str::uuid() . '.enc';
 
-        Storage::disk($this->disk)->put($filename, $encrypted);
+        Storage::disk($this->disk())->put($filename, $encrypted);
 
         return $filename;
     }
@@ -48,11 +51,11 @@ class PrescriptionService
      */
     public function retrieve(string $filename): string
     {
-        if (!Storage::disk($this->disk)->exists($filename)) {
+        if (!Storage::disk($this->disk())->exists($filename)) {
             abort(404, 'Prescription file not found.');
         }
 
-        $encrypted = Storage::disk($this->disk)->get($filename);
+        $encrypted = Storage::disk($this->disk())->get($filename);
         $base64    = Crypt::decryptString($encrypted);
 
         return base64_decode($base64);
@@ -98,6 +101,6 @@ class PrescriptionService
      */
     public function delete(string $filename): void
     {
-        Storage::disk($this->disk)->delete($filename);
+        Storage::disk($this->disk())->delete($filename);
     }
 }
