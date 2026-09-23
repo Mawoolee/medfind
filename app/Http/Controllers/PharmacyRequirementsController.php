@@ -50,7 +50,7 @@ class PharmacyRequirementsController extends Controller
 
         $rules = [];
         foreach (array_keys(self::DOCS) as $key) {
-            $rules["doc_{$key}"] = 'nullable|file|mimes:jpeg,jpg,png,pdf|max:10240';
+            $rules["doc_{$key}"] = 'nullable|file|mimes:jpeg,jpg,png,pdf,doc,docx|max:10240';
         }
 
         $request->validate($rules, [
@@ -105,11 +105,11 @@ class PharmacyRequirementsController extends Controller
 
         try {
             $validated = $request->validate([
-                $field => ['required', 'file', 'mimes:jpeg,jpg,png,pdf', 'max:10240'],
+                $field => ['required', 'file', 'mimes:jpeg,jpg,png,pdf,doc,docx', 'max:10240'],
             ], [
                 "{$field}.required" => "The {$field} is required.",
                 "{$field}.file" => "The {$field} failed to upload.",
-                "{$field}.mimes" => "The {$field} must be a PDF, JPG, JPEG, or PNG.",
+                "{$field}.mimes" => "The {$field} must be a PDF, DOC, DOCX, JPG, JPEG, or PNG.",
                 "{$field}.max" => "The {$field} must not be larger than 10 MB.",
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {

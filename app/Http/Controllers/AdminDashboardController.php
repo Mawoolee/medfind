@@ -474,18 +474,39 @@ class AdminDashboardController extends Controller
             abort(404, 'Document path is invalid.');
         }
 
-        $disk = Storage::disk(config('filesystems.requirements_disk'));
-        if (! $disk->exists($path)) {
-            $legacyDisk = Storage::disk('local');
-            if (! $legacyDisk->exists($path)) {
-                abort(404, 'File not found on disk.');
+        $diskNames = array_unique([
+            config('filesystems.requirements_disk'),
+            'local',
+            'prescriptions',
+            'r2_private',
+        ]);
+        $disk = null;
+        foreach ($diskNames as $diskName) {
+            $candidate = Storage::disk($diskName);
+            if ($candidate->exists($path)) {
+                $disk = $candidate;
+                break;
             }
-            $disk = $legacyDisk;
+        }
+        if ($disk === null) {
+            abort(404, 'File not found on disk.');
         }
 
         return response($disk->get($path), 200, [
-            'Content-Type' => $disk->mimeType($path) ?: 'application/octet-stream',
+            'Content-Type' => $disk->mimeType($path) ?: $this->requirementMimeType($path),
             'Content-Disposition' => 'inline; filename="'.basename($path).'"',
         ]);
+    }
+
+    private function requirementMimeType(string $path): string
+    {
+        return match (strtolower(pathinfo($path, PATHINFO_EXTENSION))) {
+            'pdf' => 'application/pdf',
+            'doc' => 'application/msword',
+            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'jpg', 'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            default => 'application/octet-stream',
+        };
     }
 }

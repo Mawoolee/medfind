@@ -98,7 +98,7 @@
  @endif
  </div>
  <div class="px-4 py-3 flex items-center gap-3">
- <input type="file" name="doc_{{ $key }}" id="file_{{ $key }}" accept=".jpg,.jpeg,.png,.pdf" class="hidden" onchange="showFileName('{{ $key }}', this)">
+ <input type="file" name="doc_{{ $key }}" id="file_{{ $key }}" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx" class="hidden" onchange="showFileName('{{ $key }}', this)">
  <button type="button" onclick="document.getElementById('file_{{ $key }}').click()"
  class="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 min-h-11 rounded-full text-sm font-semibold text-white hover:opacity-90 transition"
  style="background:#9400D3;">
