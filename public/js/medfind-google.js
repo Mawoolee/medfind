@@ -438,6 +438,11 @@ class PharmacyLocationEditor {
             return;
         }
 
+        if (!this.geocoder) {
+            this.showNotice('Address search is unavailable. Please select a suggestion or place the pin manually.', true);
+            return;
+        }
+
         this.showNotice('Searching for that address…', false);
         this.geocoder.geocode({
             address: query,
@@ -457,6 +462,11 @@ class PharmacyLocationEditor {
 
             if (status === 'ZERO_RESULTS') {
                 this.showNotice('Address not found. Try a more specific Philippine address.', true);
+            } else if (status === 'REQUEST_DENIED') {
+                console.error('Google geocoding was denied. Enable the Geocoding API and allow this site in the Google Maps API key restrictions.');
+                this.showNotice('Address search is unavailable. Select a Google suggestion or place the pin manually.', true);
+            } else if (status === 'OVER_QUERY_LIMIT') {
+                this.showNotice('Address search is temporarily unavailable. Please try again later or place the pin manually.', true);
             } else {
                 console.error('Google geocoding failed with status:', status);
                 this.showNotice('Could not find that location. Please try again or place the pin manually.', true);
@@ -648,6 +658,17 @@ function initializeLocationEditor(containerId) {
     window.pharmacyLocationEditor = editor;
     return editor;
 }
+
+// Google calls this when the browser key is invalid, blocked, or missing the
+// required Maps JavaScript API. Keep the page usable so the user can still
+// return without saving instead of leaving an unresponsive location form.
+window.gm_authFailure = function () {
+    const notice = document.getElementById('geoNotice');
+    if (!notice) return;
+    notice.textContent = 'Google Maps is unavailable. Check the production API key and allowed website referrers.';
+    notice.classList.remove('hidden', 'text-green-600');
+    notice.classList.add('text-red-500');
+};
 
 // ============================================
 // UserLocationMarker Class
