@@ -35,9 +35,6 @@
     <!-- Nearest Pharmacy Suggestion (appears after search) -->
     <div id="nearestSuggestion" class="nearest-suggestion-panel" style="display: none;"></div>
 
-<!-- Messenger-style Chat Heads -->
-    <div id="chatHeadsContainer" style="position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;align-items:flex-end;gap:10px;"></div>
-
     <!-- Active Chat Window -->
     <div id="activeChatWindow" hidden style="display:none;position:fixed;bottom:24px;right:24px;z-index:10000;width:320px;background:#fff;border-radius:18px;box-shadow:0 8px 40px rgba(25,25,112,0.15);border:1px solid rgba(148,0,211,0.12);overflow:hidden;font-family:system-ui,-apple-system,sans-serif;">
         <!-- Chat Window Header -->
