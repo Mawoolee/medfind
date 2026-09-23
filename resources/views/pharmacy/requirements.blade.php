@@ -236,7 +236,12 @@ document.addEventListener("DOMContentLoaded", function() {
      return { message: 'The server returned an invalid upload response.' };
  });
  if (!response.ok) {
- throw new Error(result.message || "The " + key + " document could not be uploaded.");
+ var errorMsg = result.message;
+ if (!errorMsg && result.errors && typeof result.errors === 'object') {
+     var firstError = Object.values(result.errors)[0];
+     errorMsg = Array.isArray(firstError) ? firstError[0] : firstError;
+ }
+ throw new Error(errorMsg || "The " + key + " document could not be uploaded.");
  }
  }
  DOC_KEYS.forEach(function(key) {

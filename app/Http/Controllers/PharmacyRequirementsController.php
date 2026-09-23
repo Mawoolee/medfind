@@ -103,26 +103,40 @@ class PharmacyRequirementsController extends Controller
         $field = "doc_{$document}";
         $label = self::DOCS[$document]['label'];
 
-        $validated = $request->validate([
-            $field => ['required', 'file', 'mimes:jpeg,jpg,png,pdf', 'max:10240'],
-        ], [
-            "{$field}.required" => "Please select the {$label}.",
-            "{$field}.file" => "The {$label} could not be uploaded.",
-            "{$field}.mimes" => "The {$label} must be a PDF, JPG, JPEG, or PNG.",
-            "{$field}.max" => "The {$label} must not be larger than 10 MB.",
-        ]);
+        try {
+            $validated = $request->validate([
+                $field => ['required', 'file', 'mimes:jpeg,jpg,png,pdf', 'max:10240'],
+            ], [
+                "{$field}.required" => "Please select the {$label}.",
+                "{$field}.file" => "The {$label} could not be uploaded.",
+                "{$field}.mimes" => "The {$label} must be a PDF, JPG, JPEG, or PNG.",
+                "{$field}.max" => "The {$label} must not be larger than 10 MB.",
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'The doc ' . $document . ' failed to upload.',
+                'errors' => $e->errors(),
+            ], 422);
+        }
 
         $uploaded = $pharmacy->requirements ?? [];
         if (! empty($uploaded[$document])) {
             \Illuminate\Support\Facades\Storage::disk(config('filesystems.requirements_disk'))->delete($uploaded[$document]);
         }
 
-        $uploaded[$document] = $request->file($field)->store(
-            'pharmacy-requirements/'.$pharmacy->id,
-            config('filesystems.requirements_disk')
-        );
-        $pharmacy->requirements = $uploaded;
-        $pharmacy->save();
+        try {
+            $uploaded[$document] = $request->file($field)->store(
+                'pharmacy-requirements/'.$pharmacy->id,
+                config('filesystems.requirements_disk')
+            );
+            $pharmacy->requirements = $uploaded;
+            $pharmacy->save();
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to store the ' . $label . '. ' . $e->getMessage(),
+                'errors' => ['storage' => [$e->getMessage()]],
+            ], 500);
+        }
 
         return response()->json([
             'message' => "{$label} uploaded successfully.",
