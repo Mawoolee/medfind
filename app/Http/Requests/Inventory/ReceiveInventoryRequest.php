@@ -46,6 +46,7 @@ final class ReceiveInventoryRequest extends PharmacyInventoryRequest
             // inside BatchStockService::receive().
             'items.*.received_date' => ['nullable', 'date_format:Y-m-d'],
             'items.*.received_reference' => ['nullable', 'string', 'max:255'],
+            'items.*.requires_prescription' => ['sometimes', 'boolean'],
         ];
     }
 
