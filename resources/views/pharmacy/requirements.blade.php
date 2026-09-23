@@ -78,7 +78,7 @@
  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
  @foreach($docs as $key => $doc)
  @php $isUploaded = !empty($uploaded[$key]); @endphp
- <div class="bg-white rounded-[16px] shadow-sm border overflow-hidden"
+ <div id="document-card-{{ $key }}" class="bg-white rounded-[16px] shadow-sm border overflow-hidden"
  style="border-color:{{ $isUploaded ? 'rgba(25,25,112,0.2)' : 'rgba(148,0,211,0.12)' }};">
  <div class="flex items-center gap-2 px-4 py-2.5 border-b"
  style="background:{{ $isUploaded ? 'rgba(25,25,112,0.05)' : 'rgba(148,0,211,0.03)' }};border-color:{{ $isUploaded ? 'rgba(25,25,112,0.1)' : 'rgba(148,0,211,0.08)' }};">
@@ -112,7 +112,8 @@
  @endif
  </p>
  </div>
- @error("doc_{{ $key }}")<p class="px-4 pb-2 text-red-500 text-xs">{{ $message }}</p>@enderror
+ <p id="upload-error-{{ $key }}" class="hidden px-4 pb-2 text-red-600 text-xs font-semibold"></p>
+ @error("doc_{{ $key }}")<p class="px-4 pb-2 text-red-600 text-xs font-semibold">{{ $message }}</p>@enderror
  </div>
  @endforeach
  </div>
@@ -141,16 +142,38 @@ function checkItem(key) {
 }
 
 function showFileName(key, input) {
+ clearUploadError(key);
  var label = document.getElementById("fname_" + key);
  if (!input.files || !input.files[0]) return;
  var file = input.files[0];
  if (file.size > 10 * 1024 * 1024) {
  input.value = "";
- if (label) label.innerHTML = '<span style="color:#dc2626;font-weight:600;">File is larger than 10 MB</span>';
+ if (label) label.innerHTML = '<span style="color:#dc2626;font-weight:600;">The doc_' + key + ' must not be larger than 10 MB.</span>';
+ showUploadError(key, "The doc_" + key + " must not be larger than 10 MB.");
  var box = document.getElementById("check_" + key);
  if (box) {
  box.innerHTML = "";
  box.style.cssText = "background:transparent;border-color:#dc2626;width:20px;height:20px;border-radius:4px;border:2px solid;display:flex;align-items:center;justify-content:center;flex-shrink:0;";
+ }
+
+ function clearUploadError(key) {
+  var card = document.getElementById("document-card-" + key);
+  var error = document.getElementById("upload-error-" + key);
+  if (card) card.style.borderColor = "rgba(148,0,211,0.12)";
+  if (error) {
+   error.textContent = "";
+   error.classList.add("hidden");
+  }
+ }
+
+ function showUploadError(key, message) {
+  var card = document.getElementById("document-card-" + key);
+  var error = document.getElementById("upload-error-" + key);
+  if (card) card.style.borderColor = "#dc2626";
+  if (error) {
+   error.textContent = message;
+   error.classList.remove("hidden");
+  }
  }
  return;
  }
@@ -204,7 +227,11 @@ document.addEventListener("DOMContentLoaded", function() {
  });
  if (selectedFiles === 0) {
  event.preventDefault();
- alert("Please select at least one document.");
+ DOC_KEYS.forEach(function(key) {
+  if (!document.getElementById("file_" + key).files.length) {
+   showUploadError(key, "Please select at least one document.");
+  }
+ });
  return;
  }
  event.preventDefault();
@@ -219,9 +246,12 @@ document.addEventListener("DOMContentLoaded", function() {
  return input && input.files && input.files[0];
  });
  (async function() {
+ var failedKey = null;
  try {
  for (var i = 0; i < uploadKeys.length; i++) {
  var key = uploadKeys[i];
+ failedKey = key;
+ clearUploadError(key);
  var input = document.getElementById("file_" + key);
  var payload = new FormData();
  payload.append("_token", csrf);
@@ -236,11 +266,12 @@ document.addEventListener("DOMContentLoaded", function() {
      return { message: 'The server returned an invalid upload response.' };
  });
  if (!response.ok) {
- var errorMsg = result.message;
- if (!errorMsg && result.errors && typeof result.errors === 'object') {
+ var errorMsg;
+ if (result.errors && typeof result.errors === 'object') {
      var firstError = Object.values(result.errors)[0];
      errorMsg = Array.isArray(firstError) ? firstError[0] : firstError;
  }
+ if (!errorMsg) errorMsg = result.message;
  throw new Error(errorMsg || "The " + key + " document could not be uploaded.");
  }
  }
@@ -255,7 +286,7 @@ document.addEventListener("DOMContentLoaded", function() {
  submitButton.disabled = false;
  submitButton.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Requirements';
  }
- alert(error.message || "The documents could not be uploaded. Please try again.");
+ showUploadError(failedKey || uploadKeys[0], error.message || "The documents could not be uploaded. Please try again.");
  }
  })();
  return;

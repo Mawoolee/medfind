@@ -107,10 +107,10 @@ class PharmacyRequirementsController extends Controller
             $validated = $request->validate([
                 $field => ['required', 'file', 'mimes:jpeg,jpg,png,pdf', 'max:10240'],
             ], [
-                "{$field}.required" => "Please select the {$label}.",
-                "{$field}.file" => "The {$label} could not be uploaded.",
-                "{$field}.mimes" => "The {$label} must be a PDF, JPG, JPEG, or PNG.",
-                "{$field}.max" => "The {$label} must not be larger than 10 MB.",
+                "{$field}.required" => "The {$field} is required.",
+                "{$field}.file" => "The {$field} failed to upload.",
+                "{$field}.mimes" => "The {$field} must be a PDF, JPG, JPEG, or PNG.",
+                "{$field}.max" => "The {$field} must not be larger than 10 MB.",
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
