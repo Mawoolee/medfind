@@ -67,7 +67,7 @@
  </div>
 
  {{-- Upload form --}}
- <form method="POST" action="{{ route('pharmacy.requirements.store') }}" enctype="multipart/form-data">
+ <form id="requirementsUploadForm" method="POST" action="{{ route('pharmacy.requirements.store') }}" enctype="multipart/form-data">
  @csrf
  @if($errors->any())
  <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4 text-sm">
@@ -144,6 +144,16 @@ function showFileName(key, input) {
  var label = document.getElementById("fname_" + key);
  if (!input.files || !input.files[0]) return;
  var file = input.files[0];
+ if (file.size > 10 * 1024 * 1024) {
+ input.value = "";
+ if (label) label.innerHTML = '<span style="color:#dc2626;font-weight:600;">File is larger than 10 MB</span>';
+ var box = document.getElementById("check_" + key);
+ if (box) {
+ box.innerHTML = "";
+ box.style.cssText = "background:transparent;border-color:#dc2626;width:20px;height:20px;border-radius:4px;border:2px solid;display:flex;align-items:center;justify-content:center;flex-shrink:0;";
+ }
+ return;
+ }
  if (label) label.innerHTML = '<i class="fas fa-file" style="color:#9400D3;margin-right:4px;"></i><span style="color:#191970;font-weight:600;">' + file.name + '</span>';
  checkItem(key);
  var reader = new FileReader();
@@ -184,8 +194,64 @@ function restoreFiles() {
 
 document.addEventListener("DOMContentLoaded", function() {
  restoreFiles();
- var form = document.querySelector("form");
- if (form) form.addEventListener("submit", function() {
+ var form = document.getElementById("requirementsUploadForm");
+ if (form) form.addEventListener("submit", function(event) {
+ var selectedFiles = 0;
+ DOC_KEYS.forEach(function(key) {
+ var input = document.getElementById("file_" + key);
+ if (!input || !input.files || !input.files[0]) return;
+ selectedFiles++;
+ });
+ if (selectedFiles === 0) {
+ event.preventDefault();
+ alert("Please select at least one document.");
+ return;
+ }
+ event.preventDefault();
+ var submitButton = form.querySelector('button[type="submit"]');
+ if (submitButton) {
+ submitButton.disabled = true;
+ submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading documents...';
+ }
+ var csrf = form.querySelector('input[name="_token"]').value;
+ var uploadKeys = DOC_KEYS.filter(function(key) {
+ var input = document.getElementById("file_" + key);
+ return input && input.files && input.files[0];
+ });
+ (async function() {
+ try {
+ for (var i = 0; i < uploadKeys.length; i++) {
+ var key = uploadKeys[i];
+ var input = document.getElementById("file_" + key);
+ var payload = new FormData();
+ payload.append("_token", csrf);
+ payload.append("doc_" + key, input.files[0]);
+ var response = await fetch(form.action, {
+ method: "POST",
+ body: payload,
+ headers: { "Accept": "application/json", "X-Requested-With": "XMLHttpRequest" },
+ credentials: "same-origin"
+ });
+ var result = await response.json();
+ if (!response.ok) {
+ throw new Error(result.message || "The " + key + " document could not be uploaded.");
+ }
+ }
+ DOC_KEYS.forEach(function(key) {
+ sessionStorage.removeItem(SESSION_PREFIX + key + "_name");
+ sessionStorage.removeItem(SESSION_PREFIX + key + "_data");
+ sessionStorage.removeItem(SESSION_PREFIX + key + "_type");
+ });
+ window.location.href = form.action;
+ } catch (error) {
+ if (submitButton) {
+ submitButton.disabled = false;
+ submitButton.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Requirements';
+ }
+ alert(error.message || "The documents could not be uploaded. Please try again.");
+ }
+ })();
+ return;
  DOC_KEYS.forEach(function(key) {
  sessionStorage.removeItem(SESSION_PREFIX + key + "_name");
  sessionStorage.removeItem(SESSION_PREFIX + key + "_data");
