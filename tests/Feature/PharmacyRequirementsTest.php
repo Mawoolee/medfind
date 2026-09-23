@@ -174,6 +174,23 @@ class PharmacyRequirementsTest extends TestCase
         }
     }
 
+    public function test_admin_can_serve_an_uploaded_requirement_file_from_the_requirements_disk(): void
+    {
+        Storage::fake('local');
+        Storage::disk('local')->put('pharmacy-requirements/1/bir.pdf', 'pdf contents');
+
+        $admin = User::factory()->create(['role' => 'admin']);
+        $pharmacy = Pharmacy::factory()->pending()->create([
+            'requirements' => ['bir' => 'pharmacy-requirements/1/bir.pdf'],
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.requirement.file', [$pharmacy, 'bir']))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/pdf')
+            ->assertSee('pdf contents');
+    }
+
     private function requiredDocuments(): array
     {
         return [

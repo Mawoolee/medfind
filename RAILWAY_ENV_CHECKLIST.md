@@ -27,6 +27,7 @@ Set these in your Railway service → Variables tab:
 ## Cloudflare R2 Storage (Pharmacy Logos)
 - [ ] FILESYSTEM_LOGO_DISK=r2
 - [ ] FILESYSTEM_PRESCRIPTIONS_DISK=r2_private
+- [ ] FILESYSTEM_REQUIREMENTS_DISK=r2_private
 - [ ] CLOUDFLARE_R2_ACCESS_KEY_ID=`<your R2 access key id>`
 - [ ] CLOUDFLARE_R2_SECRET_ACCESS_KEY=`<your R2 secret access key>`
 - [ ] CLOUDFLARE_R2_BUCKET=`<your bucket name>`

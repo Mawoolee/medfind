@@ -489,6 +489,12 @@ class AdminDashboardController extends Controller
             }
         }
         if ($disk === null) {
+            logger()->warning('Pharmacy requirement file is missing from all configured disks.', [
+                'pharmacy_id' => $pharmacy->id,
+                'document_key' => $key,
+                'path' => $path,
+                'configured_disk' => config('filesystems.requirements_disk'),
+            ]);
             abort(404, 'File not found on disk.');
         }
 
