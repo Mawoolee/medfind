@@ -1524,7 +1524,9 @@ class DirectionsService {
 
     /** Show or hide the compact alternative-routes selector. */
     toggleRouteAlternatives() {
-        if (!this.activeResult || this.activeResult.routes.length <= 1) return false;
+        if (!this.activeResult || !Array.isArray(this.activeResult.routes) || this.activeResult.routes.length === 0) {
+            return false;
+        }
         return this.setAlternativesVisible(!document.body.classList.contains('route-alternatives-open'));
     }
 

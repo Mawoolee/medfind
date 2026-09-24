@@ -115,7 +115,7 @@
          components and swallow the first click. --}}
 
     <!-- MedFind Custom JS -->
-    <script src="{{ asset('js/medfind-google.js?v=43') }}"></script>
+    <script src="{{ asset('js/medfind-google.js?v=45') }}"></script>
 
     <!-- Google Maps Initialization Callback -->
     <script>
