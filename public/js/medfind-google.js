@@ -1566,6 +1566,17 @@ class DirectionsService {
             .map((route, index) => ({ route, index, totals: this.getRouteTotals(route) }))
             .filter(({ route }) => route && Array.isArray(route.legs) && route.legs.length > 0);
 
+        if (validRoutes.length === 0) {
+            toggleButton.hidden = true;
+            toggleButton.disabled = true;
+            toggleButton.setAttribute('aria-expanded', 'false');
+            toggleLabel.textContent = 'Routes';
+            panel.hidden = true;
+            panel.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('route-alternatives-open');
+            return;
+        }
+
         const minDuration = Math.min(...validRoutes.map(({ totals }) => totals.duration));
         const minDistance = Math.min(...validRoutes.map(({ totals }) => totals.distance));
         validRoutes.sort((a, b) => {
@@ -1579,10 +1590,10 @@ class DirectionsService {
         });
 
         if (validRoutes.length <= 1) {
-            toggleButton.hidden = true;
-            toggleButton.disabled = true;
+            toggleButton.hidden = false;
+            toggleButton.disabled = false;
             toggleButton.setAttribute('aria-expanded', 'false');
-            toggleLabel.textContent = 'Routes';
+            toggleLabel.textContent = 'Routes (1)';
             panel.hidden = true;
             panel.setAttribute('aria-hidden', 'true');
             document.body.classList.remove('route-alternatives-open');
@@ -1657,10 +1668,17 @@ class DirectionsService {
         const toggleButton = document.getElementById('toggleRoutesBtn');
         const canShow = Boolean(
             visible && panel && toggleButton && this.activeResult &&
-            Array.isArray(this.activeResult.routes) && this.activeResult.routes.length > 1
+            Array.isArray(this.activeResult.routes) && this.activeResult.routes.length > 0
         );
 
         if (canShow) this.setStepsVisible(false);
+        if (canShow && this.activeResult.routes.length <= 1) {
+            panel.replaceChildren();
+            const message = document.createElement('div');
+            message.className = 'route-alternatives-header';
+            message.innerHTML = '<strong>Alternative routes unavailable</strong><span>Google Maps returned only one valid route for this destination.</span>';
+            panel.appendChild(message);
+        }
         document.body.classList.toggle('route-alternatives-open', canShow);
         if (panel) {
             panel.hidden = !canShow;
