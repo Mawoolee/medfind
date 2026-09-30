@@ -33,4 +33,23 @@ class NotificationSoundTest extends TestCase
             ->assertJsonPath('count', 1)
             ->assertJsonPath('notification_total', 2);
     }
+
+    public function test_notifications_page_lists_all_notifications_without_pagination_controls(): void
+    {
+        $user = User::factory()->create();
+        for ($index = 1; $index <= 21; $index++) {
+            $user->notifications()->create([
+                'id' => (string) Str::uuid(),
+                'type' => 'test.notification',
+                'data' => ['title' => 'Notification '.$index],
+            ]);
+        }
+
+        $this->actingAs($user)
+            ->get(route('notifications.index'))
+            ->assertOk()
+            ->assertSee('Notification 1')
+            ->assertSee('Notification 21')
+            ->assertDontSee('aria-label="Pagination Navigation"', false);
+    }
 }
