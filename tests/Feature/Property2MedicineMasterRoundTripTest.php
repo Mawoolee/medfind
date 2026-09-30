@@ -24,6 +24,7 @@ final class Property2MedicineMasterRoundTripTest extends PropertyTestCase
         // Feature: pharmacy-medicine-batch-stock-management, Property 2: Medicine master round trip
         $pharmacy = Pharmacy::factory()->create();
         $service = app(MedicineMasterService::class);
+        $identitySequence = 0;
 
         $this->forAll(
             Generators::elements([
@@ -47,9 +48,10 @@ final class Property2MedicineMasterRoundTripTest extends PropertyTestCase
             string $manufacturer,
             bool $requiresPrescription,
             bool $coldChainRequired,
-        ) use ($pharmacy, $service): void {
+        ) use ($pharmacy, $service, &$identitySequence): void {
+            $registeredName = $genericName.' '.(++$identitySequence);
             $aggregate = $service->createForPharmacy($pharmacy, [
-                'medicine_name' => $genericName,
+                'medicine_name' => $registeredName,
                 'brand_name' => $brandName,
                 'dosage' => $dosage,
                 'category' => $category,
@@ -60,7 +62,7 @@ final class Property2MedicineMasterRoundTripTest extends PropertyTestCase
 
             $medicine = Medicine::query()->findOrFail($aggregate->medicine_id);
 
-            self::assertSame($genericName, $medicine->medicine_name);
+            self::assertSame($registeredName, $medicine->medicine_name);
             self::assertSame($brandName, $medicine->brand_name);
             self::assertSame($dosage, $medicine->dosage);
             self::assertSame($category, $medicine->category);

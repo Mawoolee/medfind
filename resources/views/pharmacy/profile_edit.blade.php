@@ -23,7 +23,7 @@
                 <p class="text-sm text-gray-500">Manage your pharmacy information</p>
             </div>
         </div>
-        <x-back-button :href="route('pharmacy.dashboard')" label="Back to Dashboard" />
+        <x-back-button :href="route('pharmacy.dashboard')" />
     </div>
 
     {{-- Flash messages --}}

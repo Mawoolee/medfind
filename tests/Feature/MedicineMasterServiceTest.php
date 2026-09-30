@@ -61,6 +61,45 @@ final class MedicineMasterServiceTest extends TestCase
         self::assertSame(['Insulin'], $aggregate->medicine->category_names);
     }
 
+    public function test_same_medicine_registration_is_shared_between_pharmacies(): void
+    {
+        $firstPharmacy = Pharmacy::factory()->create();
+        $secondPharmacy = Pharmacy::factory()->create();
+
+        $firstInventory = $this->service->createForPharmacy($firstPharmacy, [
+            'medicine_name' => 'Bioflu',
+            'brand_name' => 'Bioflu',
+            'dosage' => '500 mg',
+            'categories_present' => true,
+            'categories' => ['Analgesic', 'Antipyretic'],
+        ], 5);
+
+        $secondInventory = $this->service->createForPharmacy($secondPharmacy, [
+            'medicine_name' => ' bioflu ',
+            'brand_name' => 'BIOFLU',
+            'dosage' => '500   mg',
+            'categories_present' => true,
+            'categories' => ['Analgesic'],
+        ], 8);
+
+        self::assertSame($firstInventory->medicine_id, $secondInventory->medicine_id);
+        self::assertSame(1, Medicine::query()
+            ->where('identity_key', $firstInventory->medicine->identity_key)
+            ->count());
+        self::assertSame(2, InventoryItem::query()
+            ->where('medicine_id', $firstInventory->medicine_id)
+            ->count());
+        self::assertSame(5, (int) $firstInventory->fresh()->par_level);
+        self::assertSame(8, (int) $secondInventory->fresh()->par_level);
+
+        $differentBrand = $this->service->createForPharmacy($secondPharmacy, [
+            'medicine_name' => 'Bioflu',
+            'brand_name' => 'Different brand',
+            'dosage' => '500 mg',
+        ], 8);
+        self::assertNotSame($firstInventory->medicine_id, $differentBrand->medicine_id);
+    }
+
     public function test_it_retains_one_aggregate_when_an_existing_master_is_added_again(): void
     {
         $pharmacy = Pharmacy::factory()->create();

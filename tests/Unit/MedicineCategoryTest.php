@@ -11,9 +11,10 @@ class MedicineCategoryTest extends TestCase
     {
         $this->assertSame([
             'analgesic' => 'Analgesic',
+            'antipyretic' => 'Antipyretic',
             'antibiotic' => 'Antibiotic',
             'antidiarrheal' => 'Antidiarrheal',
-            'antihistamine' => 'Antihistamine',
+            'antihistamine' => 'Antiallergics / Antihistamines',
             'nsaid' => 'NSAID',
             'controlled' => 'Controlled',
             'vitamin' => 'Vitamin',

@@ -6,7 +6,7 @@
 <div class="container mx-auto px-4 py-8">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <h1 class="text-2xl font-bold text-gray-800">{{ $count->name }}</h1>
-        <x-back-button :href="route('pharmacy.dashboard')" label="Back to Dashboard" />
+        <x-back-button :href="route('pharmacy.dashboard')" />
     </div>
 
     @if(session('success'))
@@ -58,7 +58,7 @@
         </div>
 
         @if($count->completed_at)
-            <div class="overflow-x-auto">
+            <div class="data-scroll-region overflow-x-auto">
             <table class="w-full text-sm min-w-[640px]">
                 <thead>
                     <tr class="bg-gray-50 text-left text-gray-600">
@@ -99,7 +99,7 @@
         @else
             <form method="POST" action="{{ route('pharmacy.cycle-counts.complete', $count->id) }}">
                 @csrf
-                <div class="overflow-x-auto">
+                <div class="data-scroll-region overflow-x-auto">
                 <table class="w-full text-sm min-w-[600px]">
                     <thead>
                         <tr class="bg-gray-50 text-left text-gray-600">

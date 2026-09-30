@@ -6,7 +6,7 @@
 <div class="container mx-auto px-4 py-8">
     <div class="flex items-center justify-between mb-6">
         <h1 class="text-2xl font-bold text-gray-800">ABC/VED Analysis</h1>
-        <x-back-button :href="route('pharmacy.dashboard')" label="Back to Dashboard" />
+        <x-back-button :href="route('pharmacy.dashboard')" />
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -58,7 +58,7 @@
     <div class="bg-white rounded-lg shadow-lg overflow-hidden">
         <div class="p-6">
             <h3 class="text-lg font-semibold text-gray-800 mb-4">Item Classification Details</h3>
-            <div class="overflow-x-auto -mx-6 px-6">
+            <div class="data-scroll-region overflow-x-auto -mx-6 px-6">
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="bg-gray-50 text-left text-gray-600">

@@ -15,7 +15,7 @@
         @endif
 
         @if(isset($results) && $results->count() > 0)
-            <div class="space-y-3">
+            <div class="data-list-scroll space-y-3">
                 @foreach($results as $item)
                     <div class="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition border border-[#9400D3]/10">
                         <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">

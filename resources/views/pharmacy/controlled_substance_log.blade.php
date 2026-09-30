@@ -6,7 +6,7 @@
 <div class="container mx-auto px-4 py-8 max-w-2xl">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div><h1 class="text-2xl font-bold text-gray-800">Log Stock Movement</h1><p class="text-sm text-gray-500 mt-1">Stock decreases are allocated to available batches in FEFO order.</p></div>
-        <x-back-button :href="route('pharmacy.dashboard')" label="Back to Dashboard" />
+        <x-back-button :href="route('pharmacy.dashboard')" />
     </div>
 
     @if($errors->any())

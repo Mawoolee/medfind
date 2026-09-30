@@ -9,6 +9,7 @@ use App\Models\Pharmacy;
 use App\Models\StockMovement;
 use App\Models\Supplier;
 use App\Models\User;
+use App\Services\MedicineMasterService;
 use App\Support\MedicineCategory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
@@ -62,7 +63,7 @@ class InventoryTest extends TestCase
             ->assertSee(route('pharmacy.inventory.batches'), false)
             ->assertSee(route('pharmacy.inventory.batches', ['inventory_item_id' => $item->id]), false)
             ->assertSee('href="'.route('pharmacy.dashboard').'"', false)
-            ->assertSee('aria-label="Back to Dashboard"', false)
+            ->assertSee('aria-label="Back"', false)
             ->assertDontSee('<th class="px-4 py-3">Batches</th>', false)
             ->assertDontSee('<span class="font-semibold">3</span>', false)
             ->assertViewHas('inventory', fn ($inventory): bool => ! array_key_exists(
@@ -173,6 +174,36 @@ class InventoryTest extends TestCase
             $medicine->category_names
         );
         $this->assertSame('Analgesic', $medicine->category);
+    }
+
+    public function test_medicine_registered_by_one_pharmacy_is_selectable_by_another(): void
+    {
+        [, $firstPharmacy] = $this->makePharmacyUser();
+        [$secondUser, $secondPharmacy] = $this->makePharmacyUser();
+        $medicine = app(MedicineMasterService::class)->createForPharmacy(
+            $firstPharmacy,
+            [
+                'medicine_name' => 'Shared Medicine',
+                'brand_name' => 'Shared Brand',
+                'dosage' => '10 mg',
+            ],
+            4
+        )->medicine;
+
+        $this->actingAs($secondUser)
+            ->get(route('pharmacy.inventory.create'))
+            ->assertOk()
+            ->assertSee('value="'.$medicine->id.'"', false)
+            ->assertSee($medicine->medicine_name);
+
+        $this->assertDatabaseMissing('inventory_items', [
+            'pharmacy_id' => $secondPharmacy->id,
+            'medicine_id' => $medicine->id,
+        ]);
+        $this->assertDatabaseHas('inventory_items', [
+            'pharmacy_id' => $firstPharmacy->id,
+            'medicine_id' => $medicine->id,
+        ]);
     }
 
     public function test_pharmacy_user_can_add_new_inventory_item(): void

@@ -81,7 +81,7 @@
 
     <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
         <h2 class="text-lg font-semibold text-gray-800 mb-4">Recent Inventory Overview</h2>
-        <div class="overflow-x-auto -mx-6 px-6">
+        <div class="data-scroll-region overflow-x-auto -mx-6 px-6">
             <table class="w-full text-sm">
                 <thead><tr class="bg-gray-50 text-left text-gray-600"><th class="px-4 py-2 whitespace-nowrap">Medicine</th><th class="px-4 py-2 whitespace-nowrap">Dosage</th><th class="px-4 py-2 whitespace-nowrap">Available Stock</th><th class="px-4 py-2 whitespace-nowrap">Price</th><th class="px-4 py-2 whitespace-nowrap">Status</th></tr></thead>
                 <tbody>

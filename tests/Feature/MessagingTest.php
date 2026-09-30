@@ -217,6 +217,17 @@ class MessagingTest extends TestCase
             ->assertRedirect()
             ->assertSessionHas('success');
 
+        $notification = $consumer->notifications()->firstOrFail();
+        $this->assertSame('New message from '.$pharmacy->pharmacy_name, $notification->data['title']);
+        $this->assertSame('message', $notification->data['type']);
+        $this->assertSame(route('consumer.messages'), $notification->data['url']);
+
+        $this->actingAs($consumer)
+            ->get(route('notifications.index'))
+            ->assertOk()
+            ->assertSee('New message from '.$pharmacy->pharmacy_name)
+            ->assertSee('Yes, we have it in stock!');
+
         // Controller creates a new message from pharmacy instead of updating reply field
         $this->assertDatabaseHas('messages', [
             'consumer_id' => $consumer->id,

@@ -37,30 +37,7 @@
         body {
             font-family: 'Inter', sans-serif;
             background: var(--bg-page, #f0f0ff);
-            overflow: hidden;
-            height: 100vh;
-        }
-        /* Mobile: relax the fixed app-shell so tall content scrolls naturally
-           (the fixed top nav + pt-16 offset are preserved by the markup). */
-        @media (max-width: 639px) {
-            body {
-                overflow: hidden;
-                overflow-y: auto;
-                height: auto;
-                min-height: 100vh;
-                min-height: 100dvh;
-            }
-            .app-shell {
-                height: auto !important;
-                min-height: 100vh;
-                min-height: 100dvh;
-                overflow: visible !important;
-            }
-            .app-main {
-                height: auto !important;
-                min-height: calc(100dvh - 4rem);
-                overflow: visible !important;
-            }
+            min-height: 100vh;
         }
         /* Scrollbar styling */
         ::-webkit-scrollbar {
@@ -99,13 +76,13 @@
     @endif
 </head>
 <body>
-<div class="app-shell h-screen overflow-hidden">
+<div class="app-shell min-h-screen">
         <!-- Navigation with fixed position -->
         <div class="navigation-wrapper">
             @include('layouts.navigation')
         </div>
 
-        <main class="app-main h-full pt-16 overflow-y-auto">
+        <main class="app-main min-h-screen pt-16">
             @yield('content')
         </main>
     </div>

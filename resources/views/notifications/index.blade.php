@@ -23,7 +23,7 @@
         @endif
     </div>
 
-    <div class="space-y-3">
+    <div class="data-list-scroll space-y-3">
         @forelse($notifications as $notification)
             @php
                 $data = $notification->data;
@@ -73,7 +73,7 @@
             <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-12 text-center">
                 <i class="fas fa-bell-slash text-4xl text-gray-300 mb-3 block"></i>
                 <p class="text-gray-500 font-medium">No notifications yet</p>
-                <p class="text-sm text-gray-400 mt-1">You'll see updates about your pharmacy status and system alerts here.</p>
+                <p class="text-sm text-gray-400 mt-1">You'll see pharmacy replies, pharmacy status updates, and system alerts here.</p>
             </div>
         @endforelse
     </div>

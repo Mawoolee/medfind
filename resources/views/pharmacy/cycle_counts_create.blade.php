@@ -6,7 +6,7 @@
 <div class="container mx-auto px-4 py-8">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <h1 class="text-2xl font-bold text-gray-800">New Cycle Count</h1>
-        <x-back-button :href="route('pharmacy.dashboard')" label="Back to Dashboard" />
+        <x-back-button :href="route('pharmacy.dashboard')" />
     </div>
 
     @if($errors->any())
@@ -37,7 +37,7 @@
 
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Select Items to Count</label>
-                <div class="max-h-72 overflow-y-auto overflow-x-auto border border-gray-200 rounded">
+                <div class="data-scroll-region overflow-x-auto border border-gray-200 rounded">
                     <table class="w-full text-sm">
                         <thead>
                             <tr class="bg-gray-50 text-left text-gray-600 text-sm">

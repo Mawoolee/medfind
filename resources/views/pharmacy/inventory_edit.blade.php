@@ -9,7 +9,7 @@
             <h1 class="text-2xl font-bold text-gray-800">Edit Medicine</h1>
             <p class="text-sm text-gray-500 mt-1">This page changes product identity and par level only. Existing batches are preserved.</p>
         </div>
-        <x-back-button :href="route('pharmacy.dashboard')" label="Back to Dashboard" />
+        <x-back-button :href="route('pharmacy.dashboard')" />
     </div>
 
     @if(session('error'))

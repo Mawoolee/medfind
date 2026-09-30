@@ -9,7 +9,7 @@
             <h1 class="text-2xl font-bold text-gray-800">Add Stock / Receive Delivery</h1>
             <p class="text-sm text-gray-500 mt-1">Creates a new, traceable stock batch for an existing medicine.</p>
         </div>
-        <x-back-button :href="route('pharmacy.dashboard')" label="Back to Dashboard" />
+        <x-back-button :href="route('pharmacy.dashboard')" />
     </div>
 
     @if($errors->any())

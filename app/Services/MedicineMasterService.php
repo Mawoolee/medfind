@@ -6,6 +6,7 @@ use App\Models\InventoryItem;
 use App\Models\Medicine;
 use App\Models\Pharmacy;
 use App\Support\MedicineCategory;
+use App\Support\MedicineIdentity;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -92,6 +93,7 @@ final class MedicineMasterService
                 ->lockForUpdate()
                 ->findOrFail($lockedAggregate->medicine_id);
 
+            $this->ensureMedicineIdentityIsAvailable($validated, $medicine);
             $medicine->fill($this->medicineValues($validated, $medicine));
             if ($medicine->isDirty()) {
                 $medicine->save();
@@ -112,6 +114,7 @@ final class MedicineMasterService
             $medicine = Medicine::query()
                 ->lockForUpdate()
                 ->findOrFail($validated['medicine_id']);
+            $this->ensureMedicineIdentityIsAvailable($validated, $medicine);
             $medicine->fill($this->medicineValues($validated, $medicine));
 
             if ($medicine->isDirty()) {
@@ -121,7 +124,47 @@ final class MedicineMasterService
             return $medicine;
         }
 
-        return Medicine::query()->create($this->medicineValues($validated));
+        $values = $this->medicineValues($validated);
+        $identityKey = MedicineIdentity::key(
+            $values['medicine_name'] ?? null,
+            $values['brand_name'] ?? null,
+            $values['dosage'] ?? null,
+        );
+
+        return Medicine::query()->firstOrCreate(
+            ['identity_key' => $identityKey],
+            $values,
+        );
+    }
+
+    private function ensureMedicineIdentityIsAvailable(array $validated, Medicine $medicine): void
+    {
+        $values = $this->medicineValues($validated, $medicine);
+        $identityKey = MedicineIdentity::key(
+            array_key_exists('medicine_name', $values) ? $values['medicine_name'] : $medicine->medicine_name,
+            array_key_exists('brand_name', $values) ? $values['brand_name'] : $medicine->brand_name,
+            array_key_exists('dosage', $values) ? $values['dosage'] : $medicine->dosage,
+        );
+        $currentIdentityKey = MedicineIdentity::key(
+            $medicine->medicine_name,
+            $medicine->brand_name,
+            $medicine->dosage
+        );
+
+        if ($identityKey === $currentIdentityKey) {
+            return;
+        }
+
+        $duplicateExists = Medicine::query()
+            ->where('identity_key', $identityKey)
+            ->whereKeyNot($medicine->getKey())
+            ->exists();
+
+        if ($duplicateExists) {
+            throw ValidationException::withMessages([
+                'medicine_name' => 'This medicine identity is already registered in the shared catalog.',
+            ]);
+        }
     }
 
     private function validateMedicineAttributes(array $attributes): array

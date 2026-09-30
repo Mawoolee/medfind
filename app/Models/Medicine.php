@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Support\MedicineCategory;
+use App\Support\MedicineIdentity;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -20,6 +21,7 @@ class Medicine extends Model
         'cold_chain_required',
         'category',
         'categories',
+        'identity_key',
     ];
 
     protected $casts = [
@@ -27,6 +29,26 @@ class Medicine extends Model
         'cold_chain_required' => 'boolean',
         'categories' => 'array',
     ];
+
+    protected static function booted(): void
+    {
+        static::saving(function (Medicine $medicine): void {
+            $identityKey = MedicineIdentity::key(
+                $medicine->medicine_name,
+                $medicine->brand_name,
+                $medicine->dosage
+            );
+
+            $legacyDuplicate = $medicine->exists
+                && $medicine->getOriginal('identity_key') === null
+                && self::query()
+                    ->where('identity_key', $identityKey)
+                    ->whereKeyNot($medicine->getKey())
+                    ->exists();
+
+            $medicine->identity_key = $legacyDuplicate ? null : $identityKey;
+        });
+    }
 
     /**
      * Return all assigned categories, falling back to the legacy single category.

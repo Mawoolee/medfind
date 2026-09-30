@@ -268,7 +268,7 @@ class MessageController extends Controller
         $consumer = \App\Models\User::find($message->consumer_id);
         if ($consumer) {
             $consumer->notify(new \App\Notifications\NewMessageNotification(
-                from: auth()->user()->name,
+                from: $pharmacy->pharmacy_name,
                 message: $request->reply,
                 url: route('consumer.messages')
             ));

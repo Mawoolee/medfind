@@ -9,7 +9,7 @@
             <h1 class="text-2xl font-bold text-gray-800">Inventory Audit Log</h1>
             <p class="text-sm text-gray-500 mt-1">Every available-stock change recorded — who changed what, when, and by how much.</p>
         </div>
-        <x-back-button :href="route('pharmacy.dashboard')" label="Back to Dashboard" />
+        <x-back-button :href="route('pharmacy.dashboard')" />
     </div>
 
     {{-- What the recorded quantities actually measure --}}
@@ -65,7 +65,7 @@
 
     {{-- Audit Table --}}
     <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div class="overflow-x-auto">
+        <div class="data-scroll-region overflow-x-auto">
             <table class="w-full min-w-[900px]">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200 text-left text-xs uppercase tracking-wide text-gray-500">

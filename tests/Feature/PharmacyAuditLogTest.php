@@ -92,6 +92,33 @@ class PharmacyAuditLogTest extends TestCase
         $this->assertSame($paginated, array_values(array_unique($paginated)), 'No row may appear on two pages.');
     }
 
+    public function test_audit_pagination_keeps_filters_and_renders_shared_controls(): void
+    {
+        [$owner, $pharmacy] = $this->makeOwnerAndPharmacy();
+        $item = $this->item($pharmacy, 'Paracetamol');
+        for ($i = 0; $i < 21; $i++) {
+            $this->audit($item, $i, $i + 1);
+        }
+
+        $response = $this->actingAs($owner)
+            ->get(route('pharmacy.audit-log', [
+                'q' => 'Paracetamol',
+                'change' => 'increase',
+                'page' => 2,
+            ]))
+            ->assertOk()
+            ->assertSee('class="data-scroll-region', false)
+            ->assertSee('aria-label="Pagination Navigation"', false)
+            ->assertSee('aria-current="page"', false)
+            ->assertSee('q=Paracetamol', false)
+            ->assertSee('change=increase', false);
+
+        $audits = $response->viewData('audits');
+        $this->assertSame(21, $audits->total());
+        $this->assertSame(1, $audits->count());
+        $this->assertSame(21, $audits->firstItem());
+    }
+
     public function test_increase_filter_returns_only_rows_where_available_stock_grew(): void
     {
         [$owner, $pharmacy] = $this->makeOwnerAndPharmacy();

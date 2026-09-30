@@ -17,7 +17,7 @@
         </div>
         <div class="flex flex-wrap items-center gap-2">
             <a href="{{ route('pharmacy.receiving.create', $selectedInventory ? ['inventory_item_id' => $selectedInventory->id] : []) }}" class="inline-flex items-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 min-h-11 rounded-xl text-sm"><i class="fas fa-plus mr-1"></i>Add Stock</a>
-            <x-back-button :href="route('pharmacy.dashboard')" label="Back to Dashboard" />
+            <x-back-button :href="route('pharmacy.dashboard')" />
         </div>
     </div>
 
@@ -41,7 +41,7 @@
             </form>
         </div>
 
-        <div class="overflow-x-auto">
+        <div class="data-scroll-region overflow-x-auto">
             <table class="w-full min-w-[1100px]">
                 <thead>
                     <tr class="bg-gray-50 text-left text-sm text-gray-600">

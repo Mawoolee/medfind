@@ -18,7 +18,7 @@
             @if (empty($logs))
                 <p class="text-gray-500 text-center py-8">No logs found.</p>
             @else
-                <div class="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0 max-h-[70vh] overflow-y-auto">
+                <div class="data-scroll-region overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
                     <table class="w-full min-w-[560px]">
                         <thead>
                             <tr class="bg-gray-50">

@@ -22,14 +22,16 @@
                     {{-- Notification Bell --}}
                     @php $notifCount = auth()->user()->unreadNotifications()->count(); @endphp
                     <a href="{{ route('notifications.index') }}"
+                       data-notification-sound
+                       data-count-url="{{ route('notifications.unread-count') }}"
+                       data-notification-total="{{ auth()->user()->notifications()->count() }}"
                        class="relative flex items-center justify-center w-11 h-11 -mr-1 text-gray-500 hover:text-[#9400D3] transition"
                        title="Notifications">
                         <i class="fas fa-bell text-xl"></i>
-                        @if($notifCount > 0)
-                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center leading-none">
-                                {{ $notifCount > 9 ? '9+' : $notifCount }}
-                            </span>
-                        @endif
+                        <span data-notification-badge
+                              class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 items-center justify-center leading-none {{ $notifCount > 0 ? 'flex' : 'hidden' }}">
+                            {{ $notifCount > 9 ? '9+' : $notifCount }}
+                        </span>
                     </a>
 
                     {{-- Consumer Dropdown --}}

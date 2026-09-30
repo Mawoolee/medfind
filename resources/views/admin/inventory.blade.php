@@ -10,7 +10,7 @@
             <p class="text-sm text-gray-500 mt-1">Real-time stock levels across all partner pharmacies.</p>
         </div>
         <a href="{{ route('admin.dashboard') }}" class="text-[#9400D3] hover:text-[#7a00b0] text-sm font-medium whitespace-nowrap">
-            <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+            <i class="fas fa-arrow-left mr-2"></i>Back
         </a>
     </div>
 
@@ -114,7 +114,7 @@
         <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
             <p class="text-sm text-gray-600">Showing <span class="font-semibold">{{ $items->total() }}</span> inventory records</p>
         </div>
-        <div class="overflow-x-auto">
+        <div class="data-scroll-region overflow-x-auto">
             <table class="w-full min-w-[820px]">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200 text-left text-xs uppercase tracking-wide text-gray-500">

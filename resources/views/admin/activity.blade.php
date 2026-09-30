@@ -41,7 +41,7 @@
 
     <div class="bg-white rounded-xl shadow-lg overflow-hidden">
         <div class="p-4 sm:p-6">
-            <div class="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+            <div class="data-scroll-region overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
                 <table class="w-full min-w-[720px]">
                     <thead>
                         <tr class="bg-gray-50">

@@ -7,7 +7,7 @@
 <div class="container mx-auto px-4 max-w-3xl" style="padding-top:60px;padding-bottom:40px;">
 
  <div class="mb-4">
- <x-back-button :href="route('pharmacy.dashboard')" label="Back to Dashboard" />
+ <x-back-button :href="route('pharmacy.dashboard')" />
  </div>
 
  <div class="flex items-center gap-3 mb-6">

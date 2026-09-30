@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Notifications\PharmacyStatusNotification;
 use App\Services\AdminAccountNotifier;
 use App\Support\MedicineCategory;
+use App\Support\MedicineIdentity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -300,7 +301,7 @@ class AdminDashboardController extends Controller
     // ── Medicines ─────────────────────────────────────────────────────────────
     public function medicinesPage(Request $request)
     {
-        $query = Medicine::query();
+        $query = Medicine::query()->whereNotNull('identity_key');
 
         if ($request->filled('search')) {
             $term = $request->search;
@@ -358,16 +359,23 @@ class AdminDashboardController extends Controller
         ]);
 
         $categories = $this->selectedMedicineCategories($validated, $categoryOptions);
-        $medicine = Medicine::create([
+        $values = [
             'medicine_name' => $request->medicine_name,
             'dosage' => $request->dosage,
             'manufacturer' => $request->manufacturer,
             'category' => $categories[0] ?? null,
             'categories' => $categories,
             'requiresPrescription' => $request->boolean('requiresPrescription'),
-        ]);
+        ];
+        $identityKey = MedicineIdentity::key(
+            $values['medicine_name'],
+            null,
+            $values['dosage']
+        );
+        $medicine = Medicine::query()->firstOrCreate(['identity_key' => $identityKey], $values);
 
-        $this->logActivity('created', 'Medicine', $medicine->id, "Created medicine {$medicine->medicine_name}");
+        $activity = $medicine->wasRecentlyCreated ? 'created' : 'reused';
+        $this->logActivity($activity, 'Medicine', $medicine->id, "Registered medicine {$medicine->medicine_name} in the shared catalog");
 
         return redirect()->route('admin.medicines')->with('success', 'Medicine added successfully.');
     }
@@ -385,6 +393,25 @@ class AdminDashboardController extends Controller
             'categories.*' => ['string', Rule::in(array_keys($categoryOptions))],
             'requiresPrescription' => 'boolean',
         ]);
+
+        $identityKey = MedicineIdentity::key(
+            $validated['medicine_name'],
+            $medicine->brand_name,
+            $validated['dosage'] ?? null
+        );
+        $currentIdentityKey = MedicineIdentity::key(
+            $medicine->medicine_name,
+            $medicine->brand_name,
+            $medicine->dosage
+        );
+        if ($identityKey !== $currentIdentityKey && Medicine::query()
+            ->where('identity_key', $identityKey)
+            ->whereKeyNot($medicine->getKey())
+            ->exists()) {
+            return back()->withErrors([
+                'medicine_name' => 'This medicine identity is already registered in the shared catalog.',
+            ])->withInput();
+        }
 
         $categories = $this->selectedMedicineCategories($validated, $categoryOptions);
         $medicine->update([

@@ -8,6 +8,7 @@ use App\Models\InventoryItem;
 use App\Models\Message;
 use App\Models\Pharmacy;
 use App\Models\SearchLog;
+use App\Notifications\NewMessageNotification;
 use App\Services\PrescriptionService;
 use Illuminate\Http\Request;
 
@@ -182,12 +183,18 @@ class PharmacyDashboardController extends Controller
         $message->is_read = true;
         $message->save();
 
+        $message->consumer()->firstOrFail()->notify(new NewMessageNotification(
+            from: $pharmacy->pharmacy_name,
+            message: $request->string('reply')->toString(),
+            url: route('consumer.messages'),
+        ));
+
         MessageSent::dispatch(
             $newMessage->id,
             $message->consumer_id,
             $pharmacy->id,
             $request->string('reply')->toString(),
-            auth()->user()->name,
+            $pharmacy->pharmacy_name,
             'pharmacy_to_consumer',
             $request->string('reply')->toString(),
         );

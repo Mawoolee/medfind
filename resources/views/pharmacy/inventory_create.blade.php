@@ -9,7 +9,7 @@
             <h1 class="text-2xl font-bold text-gray-800">Add New Medicine</h1>
             <p class="text-sm text-gray-500 mt-1">Create the product identity only. Receive batch stock separately after saving.</p>
         </div>
-        <x-back-button :href="route('pharmacy.dashboard')" label="Back to Dashboard" />
+        <x-back-button :href="route('pharmacy.dashboard')" />
     </div>
 
     @if($errors->any())

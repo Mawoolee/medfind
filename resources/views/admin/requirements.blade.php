@@ -70,6 +70,7 @@
  </p>
 
  {{-- Pharmacy Cards --}}
+ <div class="data-list-scroll pr-1">
  @forelse($pharmacies as $pharmacy)
  @php
  $docs = is_array($pharmacy->requirements) ? $pharmacy->requirements : (json_decode($pharmacy->requirements, true) ?? []);
@@ -256,6 +257,7 @@
  @endif
  </div>
  @endforelse
+ </div>
 
  {{-- Pagination --}}
  @if($pharmacies->hasPages())

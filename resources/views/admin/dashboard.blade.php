@@ -68,7 +68,7 @@
  <h2 class="text-lg font-semibold text-gray-800">Recent Users</h2>
  <a href="{{ route('admin.users') }}" class="text-sm text-[#9400D3] hover:text-[#7a00b0]">View all</a>
  </div>
- <div class="divide-y divide-gray-100">
+ <div class="data-list-scroll divide-y divide-gray-100">
  @forelse($recentUsers as $user)
  <div class="px-6 py-3 flex items-center justify-between">
  <div>
@@ -93,7 +93,7 @@
  <h2 class="text-lg font-semibold text-gray-800">Recent Pharmacies</h2>
  <a href="{{ route('admin.pharmacies') }}" class="text-sm text-[#9400D3] hover:text-[#7a00b0]">View all</a>
  </div>
- <div class="divide-y divide-gray-100">
+ <div class="data-list-scroll divide-y divide-gray-100">
  @forelse($recentPharmacies as $pharmacy)
  <div class="px-6 py-3 flex items-center justify-between">
  <div>

@@ -11,14 +11,14 @@
                class="inline-flex items-center bg-[#9400D3] text-white px-4 py-2 min-h-11 rounded-xl text-sm font-semibold hover:bg-[#7a00b0] transition">
                 <i class="fas fa-plus mr-2"></i>Log Entry
             </a>
-            <x-back-button :href="route('pharmacy.dashboard')" label="Back to Dashboard" />
+            <x-back-button :href="route('pharmacy.dashboard')" />
         </div>
     </div>
 
     <!-- Controlled items snapshot -->
     <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
         <h3 class="text-lg font-semibold text-gray-800 mb-3">Medicines in Stock</h3>
-        <div class="overflow-x-auto -mx-6 px-6">
+        <div class="data-scroll-region overflow-x-auto -mx-6 px-6">
             <table class="w-full text-sm min-w-[640px]">
                 <thead>
                     <tr class="bg-gray-50 text-left text-gray-600">
@@ -61,7 +61,7 @@
                 </select>
             </form>
         </div>
-        <div class="overflow-x-auto">
+        <div class="data-scroll-region overflow-x-auto">
         <table class="w-full text-sm min-w-[760px]">
             <thead>
                 <tr class="bg-gray-50 text-left text-gray-600">

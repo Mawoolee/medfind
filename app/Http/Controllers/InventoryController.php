@@ -105,6 +105,7 @@ class InventoryController extends Controller
         }
 
         $medicines = Medicine::query()
+            ->whereNotNull('identity_key')
             ->with(['inventory' => fn ($query) => $query->where('pharmacy_id', $pharmacy->id)])
             ->orderBy('medicine_name')
             ->get();

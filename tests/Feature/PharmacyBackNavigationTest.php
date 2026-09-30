@@ -110,12 +110,11 @@ final class PharmacyBackNavigationTest extends TestCase
         self::assertStringContainsString('aria-label="Back"', $html);
     }
 
-    public function test_every_pharmacy_back_button_caption_names_its_destination(): void
+    public function test_every_pharmacy_back_button_uses_the_short_back_caption(): void
     {
-        $html = Blade::render('<x-back-button href="/pharmacy/dashboard" label="Back to Dashboard" />');
+        $html = Blade::render('<x-back-button href="/pharmacy/dashboard" />');
 
-        // All 22 pharmacy call sites pass label="Back to Dashboard"; before the component
-        // fix they all rendered a bare "Back".
-        self::assertStringContainsString('<span>Back to Dashboard</span>', $html);
+        self::assertStringContainsString('<span>Back</span>', $html);
+        self::assertStringContainsString('aria-label="Back"', $html);
     }
 }

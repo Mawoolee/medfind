@@ -19,10 +19,12 @@ class MedicineFactory extends Factory
 
     private static array $categories = ['Analgesic', 'Antibiotic', 'Antihistamine', 'Antidiarrheal', 'NSAID'];
 
+    private static int $identitySequence = 0;
+
     public function definition(): array
     {
         return [
-            'medicine_name' => fake()->randomElement(self::$names).' '.fake()->numberBetween(1, 100).'mg',
+            'medicine_name' => fake()->randomElement(self::$names).' '.(++self::$identitySequence).'mg',
             'brand_name' => fake()->optional()->company(),
             'dosage' => fake()->randomElement(['500mg', '250mg', '100mg', '10mg', '5mg']),
             'manufacturer' => fake()->company(),
