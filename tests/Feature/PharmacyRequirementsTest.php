@@ -174,6 +174,38 @@ class PharmacyRequirementsTest extends TestCase
         }
     }
 
+    public function test_pharmacy_can_view_its_uploaded_requirement_inline_but_not_another_pharmacys_document(): void
+    {
+        Storage::fake('local');
+        config(['filesystems.requirements_disk' => 'local']);
+        Storage::disk('local')->put('pharmacy-requirements/1/bir.pdf', 'pdf contents');
+
+        $owner = User::factory()->create(['role' => 'pharmacy']);
+        Pharmacy::factory()->pending()->withOwner($owner)->create([
+            'requirements' => ['bir' => 'pharmacy-requirements/1/bir.pdf'],
+        ]);
+        $otherPharmacyOwner = User::factory()->create(['role' => 'pharmacy']);
+        Pharmacy::factory()->pending()->withOwner($otherPharmacyOwner)->create();
+
+        $this->actingAs($owner)
+            ->get(route('pharmacy.requirements'))
+            ->assertOk()
+            ->assertSee(route('pharmacy.requirements.document.view', 'bir'), false)
+            ->assertSee('View uploaded document');
+
+        $this->actingAs($owner)
+            ->get(route('pharmacy.requirements.document.view', 'bir'))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/pdf')
+            ->assertHeader('Content-Disposition', 'inline; filename="bir.pdf"')
+            ->assertHeader('X-Content-Type-Options', 'nosniff')
+            ->assertSee('pdf contents');
+
+        $this->actingAs($otherPharmacyOwner)
+            ->get(route('pharmacy.requirements.document.view', 'bir'))
+            ->assertNotFound();
+    }
+
     public function test_admin_can_serve_an_uploaded_requirement_file_from_the_requirements_disk(): void
     {
         Storage::fake('local');

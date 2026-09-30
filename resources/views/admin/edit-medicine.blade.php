@@ -46,10 +46,31 @@
                        class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
             </div>
 
+            @php
+                $selectedCategories = old('categories', old('category')
+                    ? [\App\Support\MedicineCategory::optionValue(old('category'))]
+                    : array_map([\App\Support\MedicineCategory::class, 'optionValue'], $medicine->category_names));
+                $selectedCategories = is_array($selectedCategories) ? $selectedCategories : [];
+                $selectedCategoryLabels = collect($selectedCategories)->map(fn ($value) => $categoryOptions[$value] ?? $value)->all();
+            @endphp
             <div class="mb-4">
-                <label for="category" class="block text-gray-700 text-sm font-medium mb-2">Category</label>
-                <input type="text" id="category" name="category" value="{{ old('category', $medicine->category) }}"
-                       class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                <label class="block text-gray-700 text-sm font-medium mb-2">Categories</label>
+                <input type="hidden" name="categories_present" value="1">
+                <details id="medicine-category-picker" class="relative">
+                    <summary id="medicine-category-summary" class="flex cursor-pointer list-none items-center justify-between gap-3 w-full border border-gray-300 rounded-xl px-4 py-2.5 text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                        <span>{{ $selectedCategoryLabels ? implode(', ', $selectedCategoryLabels) : 'Select one or more categories' }}</span>
+                        <i class="fas fa-chevron-down text-xs text-gray-500" aria-hidden="true"></i>
+                    </summary>
+                    <div class="absolute z-20 mt-1 w-full max-h-60 overflow-y-auto rounded-xl border border-gray-200 bg-white p-2 shadow-lg">
+                        @foreach ($categoryOptions as $value => $label)
+                            <label class="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-purple-50">
+                                <input type="checkbox" name="categories[]" value="{{ $value }}" class="medicine-category-option rounded border-gray-300 text-purple-600 focus:ring-purple-500" {{ in_array($value, $selectedCategories, true) ? 'checked' : '' }}>
+                                <span>{{ $label }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                </details>
+                <p class="mt-1 text-xs text-gray-500">Select every category that applies. For example, Bioflu can be Analgesic, Antipyretic, and Antiallergics / Antihistamines.</p>
             </div>
 
             <div class="mb-4">
@@ -70,4 +91,22 @@
         </form>
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var picker = document.getElementById('medicine-category-picker');
+    var summary = document.getElementById('medicine-category-summary');
+    var checkboxes = Array.from(document.querySelectorAll('.medicine-category-option'));
+    if (!picker || !summary) return;
+
+    function updateSummary() {
+        var selected = checkboxes.filter(function (checkbox) { return checkbox.checked; })
+            .map(function (checkbox) { return checkbox.parentElement.querySelector('span').textContent.trim(); });
+        var text = selected.length ? selected.join(', ') : 'Select one or more categories';
+        summary.querySelector('span').textContent = text;
+    }
+
+    checkboxes.forEach(function (checkbox) { checkbox.addEventListener('change', updateSummary); });
+    updateSummary();
+});
+</script>
 @endsection

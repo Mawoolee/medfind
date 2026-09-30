@@ -67,8 +67,12 @@
                                 <td class="px-4 py-3 text-sm">{{ $medicine->dosage }}</td>
                                 <td class="px-4 py-3 text-sm">{{ $medicine->manufacturer }}</td>
                                 <td class="px-4 py-3 text-sm">
-                                    @if($medicine->category)
-                                        <span class="px-2 py-1 rounded-xl text-xs bg-gray-100 text-gray-700">{{ $medicine->category }}</span>
+                                    @if($medicine->category_names)
+                                        <div class="flex flex-wrap gap-1">
+                                        @foreach($medicine->category_names as $category)
+                                            <span class="px-2 py-1 rounded-xl text-xs bg-gray-100 text-gray-700">{{ $category }}</span>
+                                        @endforeach
+                                        </div>
                                     @else
                                         <span class="text-gray-400">—</span>
                                     @endif

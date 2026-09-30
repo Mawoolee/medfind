@@ -48,7 +48,7 @@ class ConsumerController extends Controller
                         'name' => $item->medicine->medicine_name ?? 'Unknown',
                         'dosage' => $item->medicine->dosage ?? null,
                         'manufacturer' => $item->medicine->manufacturer ?? null,
-                        'category' => $item->medicine->category ?? null,
+                        'category' => $item->medicine->category_display ?: null,
                         'price' => (float) $item->representative_price,
                         'stock' => (int) $item->available_stock,
                         'prescription' => $item->medicine->requiresPrescription ?? false,

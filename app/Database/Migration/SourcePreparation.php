@@ -232,7 +232,7 @@ final class SourcePreparation
         $authoritative = [
             'users' => ['id', 'name', 'email', 'email_verified_at', 'password', 'role', 'pharmacy_id', 'remember_token', 'created_at', 'updated_at'],
             'pharmacies' => ['id', 'pharmacy_name', 'pharmacyAddress', 'latitude', 'longitude', 'contactNumber', 'status', 'user_id', 'created_at', 'updated_at', 'logo_path', 'requirements', 'operating_hours'],
-            'medicines' => ['id', 'medicine_name', 'brand_name', 'dosage', 'manufacturer', 'requiresPrescription', 'cold_chain_required', 'category', 'created_at', 'updated_at'],
+            'medicines' => ['id', 'medicine_name', 'brand_name', 'dosage', 'manufacturer', 'requiresPrescription', 'cold_chain_required', 'category', 'categories', 'created_at', 'updated_at'],
             'inventory_items' => ['id', 'pharmacy_id', 'medicine_id', 'stockQuantity', 'price', 'status', 'created_at', 'updated_at', 'expiry_date', 'batch_number', 'lot_number', 'cold_chain', 'par_level', 'supplier_id'],
             'inventory_batches' => ['id', 'inventory_item_id', 'legacy_source_inventory_item_id', 'batch_number', 'lot_number', 'identity_key', 'quantity_received', 'current_quantity', 'price', 'supplier_id', 'supplier_name', 'expiry_date', 'cold_chain', 'received_date', 'received_reference', 'created_by', 'created_at', 'updated_at'],
             'stock_movements' => ['id', 'operation_id', 'inventory_item_id', 'inventory_batch_id', 'type', 'before_quantity', 'after_quantity', 'quantity_delta', 'reason', 'reference_type', 'reference_id', 'received_reference', 'user_id', 'created_at'],

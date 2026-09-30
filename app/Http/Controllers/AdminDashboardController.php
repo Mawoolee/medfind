@@ -8,8 +8,10 @@ use App\Models\Pharmacy;
 use App\Models\User;
 use App\Notifications\PharmacyStatusNotification;
 use App\Services\AdminAccountNotifier;
+use App\Support\MedicineCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class AdminDashboardController extends Controller
@@ -302,49 +304,66 @@ class AdminDashboardController extends Controller
 
         if ($request->filled('search')) {
             $term = $request->search;
-            $query->where(function ($q) use ($term) {
+            $driver = $query->getConnection()->getDriverName();
+            $jsonColumn = $driver === 'pgsql' ? 'categories::text' : 'categories';
+            $likeOperator = $driver === 'pgsql' ? 'ILIKE' : 'LIKE';
+            $query->where(function ($q) use ($term, $jsonColumn, $likeOperator) {
                 $q->where('medicine_name', 'like', "%{$term}%")
                     ->orWhere('manufacturer', 'like', "%{$term}%")
-                    ->orWhere('category', 'like', "%{$term}%");
+                    ->orWhere('category', 'like', "%{$term}%")
+                    ->orWhereRaw($jsonColumn.' '.$likeOperator.' ?', ["%{$term}%"]);
             });
         }
 
         if ($request->filled('category') && $request->category !== 'all') {
-            $query->where('category', $request->category);
+            $query->whereCategory($request->category);
         }
 
         $medicines = $query->orderBy('medicine_name')->paginate(10)->withQueryString();
-
-        $categories = Medicine::distinct()->pluck('category')->filter()->values();
+        $categories = Medicine::query()->get(['category', 'categories'])
+            ->flatMap(fn (Medicine $medicine) => $medicine->category_names)
+            ->unique()
+            ->sort()
+            ->values();
 
         return view('admin.medicines', compact('medicines', 'categories'));
     }
 
     public function addMedicine(): View
     {
-        return view('admin.add-medicine');
+        $categoryOptions = $this->medicineCategoryOptions();
+
+        return view('admin.add-medicine', compact('categoryOptions'));
     }
 
     public function editMedicine(Medicine $medicine): View
     {
-        return view('admin.edit-medicine', compact('medicine'));
+        $categoryOptions = $this->medicineCategoryOptions();
+
+        return view('admin.edit-medicine', compact('medicine', 'categoryOptions'));
     }
 
     public function storeMedicine(Request $request)
     {
-        $request->validate([
+        $categoryOptions = $this->medicineCategoryOptions();
+        $validated = $request->validate([
             'medicine_name' => 'required|string|max:255',
             'dosage' => 'nullable|string|max:100',
             'manufacturer' => 'nullable|string|max:255',
-            'category' => 'nullable|string|max:100',
+            'category' => 'nullable|string|max:255',
+            'categories_present' => 'sometimes|boolean',
+            'categories' => 'nullable|array|max:20',
+            'categories.*' => ['string', Rule::in(array_keys($categoryOptions))],
             'requiresPrescription' => 'boolean',
         ]);
 
+        $categories = $this->selectedMedicineCategories($validated, $categoryOptions);
         $medicine = Medicine::create([
             'medicine_name' => $request->medicine_name,
             'dosage' => $request->dosage,
             'manufacturer' => $request->manufacturer,
-            'category' => $request->category,
+            'category' => $categories[0] ?? null,
+            'categories' => $categories,
             'requiresPrescription' => $request->boolean('requiresPrescription'),
         ]);
 
@@ -355,25 +374,57 @@ class AdminDashboardController extends Controller
 
     public function updateMedicine(Request $request, Medicine $medicine)
     {
-        $request->validate([
+        $categoryOptions = $this->medicineCategoryOptions();
+        $validated = $request->validate([
             'medicine_name' => 'required|string|max:255',
             'dosage' => 'nullable|string|max:100',
             'manufacturer' => 'nullable|string|max:255',
-            'category' => 'nullable|string|max:100',
+            'category' => 'nullable|string|max:255',
+            'categories_present' => 'sometimes|boolean',
+            'categories' => 'nullable|array|max:20',
+            'categories.*' => ['string', Rule::in(array_keys($categoryOptions))],
             'requiresPrescription' => 'boolean',
         ]);
 
+        $categories = $this->selectedMedicineCategories($validated, $categoryOptions);
         $medicine->update([
             'medicine_name' => $request->medicine_name,
             'dosage' => $request->dosage,
             'manufacturer' => $request->manufacturer,
-            'category' => $request->category,
+            'category' => $categories[0] ?? null,
+            'categories' => $categories,
             'requiresPrescription' => $request->boolean('requiresPrescription'),
         ]);
 
         $this->logActivity('updated', 'Medicine', $medicine->id, "Updated medicine {$medicine->medicine_name}");
 
         return redirect()->route('admin.medicines')->with('success', 'Medicine updated successfully.');
+    }
+
+    private function medicineCategoryOptions(): array
+    {
+        $storedCategories = Medicine::query()->get(['category', 'categories'])
+            ->flatMap(fn (Medicine $medicine) => $medicine->category_names);
+
+        return MedicineCategory::optionsWithCustom($storedCategories);
+    }
+
+    private function selectedMedicineCategories(array $validated, array $options): array
+    {
+        if (array_key_exists('categories_present', $validated)) {
+            $selection = $validated['categories'] ?? [];
+        } elseif (filled($validated['category'] ?? null)) {
+            $selection = [$validated['category']];
+        } else {
+            $selection = [];
+        }
+
+        return array_values(array_unique(array_filter(array_map(
+            static fn (string $value): ?string => $options[$value]
+                ?? $options[MedicineCategory::optionValue($value)]
+                ?? null,
+            $selection
+        ))));
     }
 
     public function destroyMedicine(Medicine $medicine)

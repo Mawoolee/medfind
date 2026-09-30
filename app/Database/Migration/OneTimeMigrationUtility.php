@@ -228,6 +228,7 @@ final class OneTimeMigrationUtility
                 'dosage' => $string, 'manufacturer' => $string,
                 'requiresPrescription' => ['type' => 'boolean', 'nullable' => false],
                 'cold_chain_required' => ['type' => 'boolean', 'nullable' => false], 'category' => $nullableString,
+                'categories' => ['type' => 'json', 'nullable' => true],
                 'created_at' => $timestamp, 'updated_at' => $timestamp,
             ]),
             'suppliers' => self::table('id', [

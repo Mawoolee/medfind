@@ -121,8 +121,8 @@
             </div>
 
             <div class="mb-4">
-                <label for="user_id" class="block text-gray-700 text-sm font-medium mb-2">Owner (optional)</label>
-                <select id="user_id" name="user_id" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                <label for="owner_search" class="block text-gray-700 text-sm font-medium mb-2">Owner (optional)</label>
+                <select id="user_id" name="user_id" aria-label="Owner (optional)" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
                     <option value="">-- No owner --</option>
                     @foreach ($users as $user)
                         <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>
@@ -130,6 +130,20 @@
                         </option>
                     @endforeach
                 </select>
+                <input type="search" id="owner_search" autocomplete="off" placeholder="Search pharmacy owners"
+                       class="hidden w-full border border-gray-300 rounded-xl px-4 py-2.5 text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                <div id="owner_search_results" role="listbox" aria-label="Matching pharmacy owners"
+                     class="hidden mt-1 max-h-56 overflow-y-auto rounded-xl border border-gray-200 bg-white p-1 shadow-lg">
+                    @foreach ($users as $user)
+                        <button type="button" role="option" data-value="{{ $user->id }}"
+                                data-search="{{ $user->name }}"
+                                data-label="{{ $user->name }} ({{ $user->email }})"
+                                class="owner-search-result hidden w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-purple-50">
+                            {{ $user->name }} ({{ $user->email }})
+                        </button>
+                    @endforeach
+                    <p id="owner_search_empty" class="hidden px-3 py-2 text-sm text-gray-500">No matching pharmacy owners found.</p>
+                </div>
             </div>
 
             <div class="flex flex-col sm:flex-row gap-3">
@@ -143,4 +157,52 @@
         </form>
     </div>
 </div>
-@endsection
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var nativeSelect = document.getElementById('user_id');
+        var search = document.getElementById('owner_search');
+        var results = document.getElementById('owner_search_results');
+        var options = Array.from(document.querySelectorAll('.owner-search-result'));
+        var emptyMessage = document.getElementById('owner_search_empty');
+        if (!nativeSelect || !search || !results) return;
+
+        function filterOptions() {
+            var query = search.value.trim().toLocaleLowerCase();
+            var visibleCount = 0;
+            options.forEach(function (option) {
+                var matches = query.length > 0 && option.dataset.search.toLocaleLowerCase().startsWith(query);
+                option.classList.toggle('hidden', !matches);
+                if (matches) visibleCount++;
+            });
+            if (emptyMessage) {
+                emptyMessage.classList.toggle('hidden', !query || visibleCount > 0);
+            }
+            results.classList.toggle('hidden', !query);
+        }
+
+        search.addEventListener('input', function () {
+            nativeSelect.value = '';
+            filterOptions();
+        });
+        search.addEventListener('focus', function () {
+            if (nativeSelect.value) search.select();
+        });
+        options.forEach(function (option) {
+            option.addEventListener('click', function () {
+                nativeSelect.value = option.dataset.value;
+                nativeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                search.value = option.dataset.label;
+                options.forEach(function (result) { result.classList.add('hidden'); });
+                results.classList.add('hidden');
+                if (emptyMessage) emptyMessage.classList.add('hidden');
+            });
+        });
+
+        var selectedOption = nativeSelect.options[nativeSelect.selectedIndex];
+        if (selectedOption && selectedOption.value) search.value = selectedOption.textContent.trim();
+        nativeSelect.classList.add('hidden');
+        search.classList.remove('hidden');
+    });
+    </script>
+    @endsection

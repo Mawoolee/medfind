@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\InventoryItem;
 use App\Models\Medicine;
 use App\Models\Pharmacy;
+use App\Support\MedicineCategory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -131,6 +132,9 @@ final class MedicineMasterService
             'brand_name' => ['sometimes', 'nullable', 'string', 'max:255'],
             'dosage' => ['sometimes', 'nullable', 'string', 'max:255'],
             'category' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'categories_present' => ['sometimes', 'boolean'],
+            'categories' => ['sometimes', 'array', 'max:20'],
+            'categories.*' => ['string', 'max:255'],
             'manufacturer' => ['sometimes', 'nullable', 'string', 'max:255'],
             'requiresPrescription' => ['sometimes', 'boolean'],
             'cold_chain_required' => ['sometimes', 'boolean'],
@@ -158,11 +162,26 @@ final class MedicineMasterService
             }
         }
 
+        if (array_key_exists('categories_present', $validated) || array_key_exists('categories', $validated)) {
+            $values['categories'] = $this->normalizeCategories($validated['categories'] ?? []);
+            $values['category'] = $values['categories'][0] ?? null;
+        } elseif (array_key_exists('category', $validated)) {
+            $categories = $this->normalizeCategories([$validated['category']]);
+            $optionValue = MedicineCategory::optionValue($validated['category']);
+            $category = $categories[0] ?? null;
+
+            if ($existing === null || $optionValue !== MedicineCategory::optionValue($existing->category)) {
+                $values['categories'] = $categories;
+                $values['category'] = $category;
+            }
+        }
+
         if ($existing === null) {
             $values += [
                 'brand_name' => null,
                 'dosage' => '',
                 'category' => null,
+                'categories' => [],
                 'manufacturer' => '',
                 'requiresPrescription' => false,
                 'cold_chain_required' => false,
@@ -176,6 +195,29 @@ final class MedicineMasterService
         }
 
         return $values;
+    }
+
+    /**
+     * @param  array<int, string>  $categories
+     * @return array<int, string>
+     */
+    private function normalizeCategories(array $categories): array
+    {
+        $canonicalOptions = MedicineCategory::canonicalOptions();
+        $normalized = [];
+
+        foreach ($categories as $category) {
+            $category = trim($category);
+            if ($category === '') {
+                continue;
+            }
+
+            $optionValue = MedicineCategory::optionValue($category);
+            $label = $canonicalOptions[$optionValue] ?? $category;
+            $normalized[mb_strtolower($label)] = $label;
+        }
+
+        return array_values($normalized);
     }
 
     private function validateParLevel(int $parLevel): void

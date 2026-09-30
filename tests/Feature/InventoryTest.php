@@ -146,7 +146,33 @@ class InventoryTest extends TestCase
         $this->actingAs($user)
             ->get(route('pharmacy.inventory.create'))
             ->assertOk()
-            ->assertSee('Create the product identity only.');
+            ->assertSee('Create the product identity only.')
+            ->assertSee('name="categories[]" value="analgesic"', false)
+            ->assertSee('name="categories[]" value="antipyretic"', false)
+            ->assertSee('Antiallergics / Antihistamines')
+            ->assertSee('name="categories_present" value="1"', false)
+            ->assertDontSee('<datalist id="category-options">', false);
+    }
+
+    public function test_pharmacy_can_add_a_medicine_with_multiple_categories(): void
+    {
+        [$user] = $this->makePharmacyUser();
+
+        $this->actingAs($user)
+            ->post(route('pharmacy.inventory.store'), [
+                'medicine_name' => 'Bioflu',
+                'categories_present' => '1',
+                'categories' => ['analgesic', 'antipyretic', 'antihistamine'],
+            ])
+            ->assertRedirect(route('pharmacy.inventory'))
+            ->assertSessionHas('success');
+
+        $medicine = Medicine::query()->where('medicine_name', 'Bioflu')->firstOrFail();
+        $this->assertSame(
+            ['Analgesic', 'Antipyretic', 'Antiallergics / Antihistamines'],
+            $medicine->category_names
+        );
+        $this->assertSame('Analgesic', $medicine->category);
     }
 
     public function test_pharmacy_user_can_add_new_inventory_item(): void
@@ -216,7 +242,8 @@ class InventoryTest extends TestCase
                 'medicine_name' => 'Updated Generic',
                 'brand_name' => 'Updated Brand',
                 'dosage' => '20 mg',
-                'category' => 'antibiotic',
+                'categories_present' => '1',
+                'categories' => ['antibiotic', 'antipyretic'],
                 'manufacturer' => 'Updated Manufacturer',
                 'par_level' => 7,
                 'requiresPrescription' => 1,
@@ -230,6 +257,7 @@ class InventoryTest extends TestCase
         $this->assertSame(10, (int) $item->stockQuantity);
         $this->assertSame((int) $batch->current_quantity, (int) $batch->fresh()->current_quantity);
         $this->assertSame('Updated Generic', $medicine->fresh()->medicine_name);
+        $this->assertSame(['Antibiotic', 'Antipyretic'], $medicine->fresh()->category_names);
     }
 
     public function test_direct_stock_and_price_edit_is_rejected(): void
@@ -493,6 +521,7 @@ class InventoryTest extends TestCase
             'dosage' => '100 units/mL',
             'manufacturer' => 'Safe Manufacturer',
             'category' => 'other',
+            'categories' => ['Other', 'Antipyretic'],
             'cold_chain_required' => true,
         ]);
         InventoryItem::factory()->create([
@@ -506,6 +535,7 @@ class InventoryTest extends TestCase
             $values = $payload->get((string) $medicine->id) ?? $payload->get($medicine->id);
 
             return $values['medicine_name'] === 'Insulin Human'
+                && $values['categories'] === ['other', 'antipyretic']
                 && $values['par_level'] === 5
                 && $values['cold_chain_required'] === true
                 && ! array_key_exists('batch_number', $values)
@@ -514,7 +544,7 @@ class InventoryTest extends TestCase
 
         $content = $response->getContent();
         $this->assertStringNotContainsString($unsafeBrand, $content);
-        foreach (['medicine_id', 'medicine_name', 'brand_name', 'dosage', 'category', 'manufacturer', 'par_level', 'requiresPrescription', 'cold_chain_required'] as $name) {
+        foreach (['medicine_id', 'medicine_name', 'brand_name', 'dosage', 'categories[]', 'categories_present', 'manufacturer', 'par_level', 'requiresPrescription', 'cold_chain_required'] as $name) {
             $this->assertStringContainsString('name="'.$name.'"', $content);
         }
         foreach (['batch_number', 'lot_number', 'price', 'stockQuantity', 'supplier_name', 'expiry_date', 'cold_chain'] as $name) {
@@ -584,7 +614,7 @@ class InventoryTest extends TestCase
                 $customMatches = collect($options)
                     ->filter(fn (string $label, string $value): bool => mb_strtolower($value) === 'legacy care');
 
-                return array_slice($options, 0, 9, true) === MedicineCategory::canonicalOptions()
+                return array_slice($options, 0, count(MedicineCategory::canonicalOptions()), true) === MedicineCategory::canonicalOptions()
                     && $customMatches->count() === 1
                     && ! collect(array_keys($options))->contains(
                         fn (string $value): bool => mb_strtolower($value) === 'other pharmacy secret'
@@ -641,6 +671,25 @@ class InventoryTest extends TestCase
             ->assertDontSee('Unmatched Antibiotic');
     }
 
+    public function test_inventory_category_filter_matches_any_category_on_a_medicine(): void
+    {
+        [$user, $pharmacy] = $this->makePharmacyUser();
+        $medicine = Medicine::factory()->create([
+            'medicine_name' => 'Multi-category catalog medicine',
+            'category' => 'Analgesic',
+            'categories' => ['Analgesic', 'Antibiotic'],
+        ]);
+        InventoryItem::factory()->create([
+            'pharmacy_id' => $pharmacy->id,
+            'medicine_id' => $medicine->id,
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('pharmacy.inventory', ['category' => 'antibiotic']))
+            ->assertOk()
+            ->assertSee('Multi-category catalog medicine');
+    }
+
     public function test_add_and_edit_forms_share_the_catalog_and_preserve_old_or_current_custom_selection(): void
     {
         [$user, $pharmacy] = $this->makePharmacyUser();
@@ -660,7 +709,7 @@ class InventoryTest extends TestCase
 
         foreach ([$createResponse, $editResponse] as $response) {
             $response->assertOk()
-                ->assertViewHas('categoryOptions', fn (array $options): bool => array_slice($options, 0, 9, true) === MedicineCategory::canonicalOptions()
+                ->assertViewHas('categoryOptions', fn (array $options): bool => array_slice($options, 0, count(MedicineCategory::canonicalOptions()), true) === MedicineCategory::canonicalOptions()
                 );
         }
 

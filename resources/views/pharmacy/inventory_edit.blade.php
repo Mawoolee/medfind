@@ -52,21 +52,33 @@
                     <input id="dosage" type="text" name="dosage" value="{{ old('dosage', $item->medicine->dosage) }}" class="mt-1 block w-full border border-gray-300 rounded-xl px-3 py-2.5 text-base">
                 </div>
                 <div>
-                    <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
-                    <input
-                        type="text"
-                        id="category"
-                        name="category"
-                        list="category-options"
-                        value="{{ old('category', $item->medicine->category ?? '') }}"
-                        placeholder="Select or type a category..."
-                        class="mt-1 block w-full border border-gray-300 rounded-xl px-3 py-2.5 text-base"
-                    >
-                    <datalist id="category-options">
-                        @foreach($categoryOptions as $value => $label)
-                            <option value="{{ $value }}">{{ $label }}</option>
-                        @endforeach
-                    </datalist>
+                    <label class="block text-sm font-medium text-gray-700">Categories</label>
+                    <input type="hidden" name="categories_present" value="1">
+                    <details id="medicine-category-picker" class="relative mt-1">
+                        <summary id="medicine-category-summary" class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-base">
+                            <span class="min-w-0 flex-1 break-words">Select all that apply</span>
+                            <i class="fas fa-chevron-down text-xs text-gray-500" aria-hidden="true"></i>
+                        </summary>
+                        <div class="absolute z-20 mt-1 max-h-64 w-full overflow-y-auto rounded-xl border border-gray-200 bg-white p-2 shadow-lg">
+                            <div id="medicine-category-options">
+                                @foreach($categoryOptions as $value => $label)
+                                    <label class="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-blue-50">
+                                        <input type="checkbox" name="categories[]" value="{{ $value }}" class="medicine-category-option rounded border-gray-300 text-blue-600 focus:ring-blue-500" {{ in_array($value, $selectedCategories, true) ? 'checked' : '' }}>
+                                        <span>{{ $label }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                            <div class="mt-2 border-t border-gray-100 p-2">
+                                <label for="custom-category-input" class="block text-xs font-medium text-gray-600">Add a custom category</label>
+                                <div class="mt-1 flex gap-2">
+                                    <input id="custom-category-input" type="text" maxlength="255" class="min-w-0 flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm" placeholder="Type a category">
+                                    <button id="add-custom-category" type="button" class="rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700">Add</button>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+                    @error('categories')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    @error('categories.*')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>
                 <div>
                     <label for="manufacturer" class="block text-sm font-medium text-gray-700">Manufacturer</label>
@@ -104,4 +116,59 @@
         </form>
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const options = document.getElementById('medicine-category-options');
+    const summary = document.getElementById('medicine-category-summary');
+    const customInput = document.getElementById('custom-category-input');
+    const addButton = document.getElementById('add-custom-category');
+    const checkboxes = () => Array.from(document.querySelectorAll('.medicine-category-option'));
+
+    function updateSummary() {
+        const labels = checkboxes()
+            .filter(checkbox => checkbox.checked)
+            .map(checkbox => checkbox.parentElement.querySelector('span').textContent.trim());
+        summary.querySelector('span').textContent = labels.length ? labels.join(', ') : 'Select all that apply';
+    }
+
+    function addCustomCategory() {
+        const value = customInput.value.trim();
+        if (!value) return;
+
+        const existing = checkboxes().find(checkbox =>
+            checkbox.value.toLocaleLowerCase() === value.toLocaleLowerCase()
+        );
+        if (existing) {
+            existing.checked = true;
+        } else {
+            const label = document.createElement('label');
+            label.className = 'flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-blue-50';
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.name = 'categories[]';
+            checkbox.value = value;
+            checkbox.checked = true;
+            checkbox.className = 'medicine-category-option rounded border-gray-300 text-blue-600 focus:ring-blue-500';
+            checkbox.addEventListener('change', updateSummary);
+            const text = document.createElement('span');
+            text.textContent = value;
+            label.append(checkbox, text);
+            options.append(label);
+        }
+
+        customInput.value = '';
+        updateSummary();
+    }
+
+    checkboxes().forEach(checkbox => checkbox.addEventListener('change', updateSummary));
+    addButton.addEventListener('click', addCustomCategory);
+    customInput.addEventListener('keydown', event => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            addCustomCategory();
+        }
+    });
+    updateSummary();
+});
+</script>
 @endsection

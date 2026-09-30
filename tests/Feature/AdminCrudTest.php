@@ -127,6 +127,62 @@ class AdminCrudTest extends TestCase
         $this->actingAs($admin)->get(route('admin.pharmacies'))->assertOk();
     }
 
+    public function test_admin_can_search_pharmacy_owners_when_adding_or_editing_a_pharmacy(): void
+    {
+        $admin = $this->makeAdmin();
+        $owner = User::factory()->create([
+            'role' => 'pharmacy',
+            'name' => 'Searchable Owner',
+            'email' => 'owner@example.com',
+        ]);
+        $pharmacy = Pharmacy::factory()->pending()->create();
+
+        $this->actingAs($admin)
+            ->get(route('admin.pharmacy.add'))
+            ->assertOk()
+            ->assertSee('id="owner_search"', false)
+            ->assertSee('type="search" id="owner_search"', false)
+            ->assertDontSee('fas fa-search', false)
+            ->assertSee('id="owner_search_results"', false)
+            ->assertSee('class="owner-search-result hidden', false)
+            ->assertDontSee('owner_picker_dropdown')
+            ->assertDontSee('data-search="no owner"', false)
+            ->assertSee('query.length > 0', false)
+            ->assertSee('No matching pharmacy owners found.')
+            ->assertDontSee('Type to search pharmacy owners.')
+            ->assertSee('placeholder="Search pharmacy owners"', false)
+            ->assertSee('Searchable Owner')
+            ->assertSee('owner@example.com');
+        $addPage = $this->actingAs($admin)->get(route('admin.pharmacy.add'))->getContent();
+        self::assertStringContainsString('startsWith(query)', $addPage);
+        self::assertStringNotContainsString('includes(query)', $addPage);
+        self::assertStringContainsString('nativeSelect.value = \'\';', $addPage);
+        self::assertStringContainsString("results.classList.add('hidden');", $addPage);
+
+        $this->actingAs($admin)
+            ->get(route('admin.pharmacy.edit', $pharmacy))
+            ->assertOk()
+            ->assertSee('id="owner_search"', false)
+            ->assertSee('type="search" id="owner_search"', false)
+            ->assertDontSee('fas fa-search', false)
+            ->assertSee('id="owner_search_results"', false)
+            ->assertSee('class="owner-search-result hidden', false)
+            ->assertDontSee('owner_picker_dropdown')
+            ->assertDontSee('data-search="no owner"', false)
+            ->assertSee('query.length > 0', false)
+            ->assertSee('No matching pharmacy owners found.')
+            ->assertDontSee('Type to search pharmacy owners.')
+            ->assertSee('placeholder="Search pharmacy owners"', false)
+            ->assertSee('Searchable Owner')
+            ->assertSee('owner@example.com');
+
+        $editPage = $this->actingAs($admin)->get(route('admin.pharmacy.edit', $pharmacy))->getContent();
+        self::assertStringContainsString('startsWith(query)', $editPage);
+        self::assertStringNotContainsString('includes(query)', $editPage);
+        self::assertStringContainsString('nativeSelect.value = \'\';', $editPage);
+        self::assertStringContainsString("results.classList.add('hidden');", $editPage);
+    }
+
     public function test_admin_can_add_pharmacy(): void
     {
         $admin = $this->makeAdmin();
@@ -206,6 +262,61 @@ class AdminCrudTest extends TestCase
             ->assertSessionHas('success');
 
         $this->assertDatabaseHas('medicines', ['medicine_name' => 'Paracetamol 500mg']);
+    }
+
+    public function test_admin_can_create_and_update_medicine_with_multiple_categories(): void
+    {
+        $admin = $this->makeAdmin();
+        $this->actingAs($admin)
+            ->get(route('admin.medicine.add'))
+            ->assertOk()
+            ->assertSee('Antipyretic')
+            ->assertSee('Antiallergics / Antihistamines');
+
+        $this->actingAs($admin)
+            ->post(route('admin.medicine.store'), [
+                'medicine_name' => 'Bioflu',
+                'dosage' => '250mg',
+                'manufacturer' => 'Generic Pharma',
+                'categories_present' => '1',
+                'categories' => ['analgesic', 'antipyretic', 'antihistamine'],
+            ])
+            ->assertRedirect(route('admin.medicines'))
+            ->assertSessionHas('success');
+
+        $medicine = Medicine::where('medicine_name', 'Bioflu')->firstOrFail();
+        $this->assertSame(['Analgesic', 'Antipyretic', 'Antiallergics / Antihistamines'], $medicine->category_names);
+        $this->assertSame('Analgesic', $medicine->category);
+
+        $this->actingAs($admin)
+            ->get(route('admin.medicines', ['category' => 'antipyretic']))
+            ->assertOk()
+            ->assertSee('Bioflu')
+            ->assertSee('Analgesic')
+            ->assertSee('Antipyretic')
+            ->assertSee('Antiallergics / Antihistamines');
+
+        $this->actingAs($admin)
+            ->get(route('admin.medicine.edit', $medicine))
+            ->assertOk()
+            ->assertSee('name="categories[]" value="analgesic" class="medicine-category-option', false)
+            ->assertSee('name="categories[]" value="antipyretic" class="medicine-category-option', false)
+            ->assertSee('name="categories[]" value="antihistamine" class="medicine-category-option', false);
+
+        $this->actingAs($admin)
+            ->put(route('admin.medicine.update', $medicine), [
+                'medicine_name' => $medicine->medicine_name,
+                'dosage' => '250mg',
+                'manufacturer' => 'Generic Pharma',
+                'categories_present' => '1',
+                'categories' => ['controlled', 'vitamin'],
+            ])
+            ->assertRedirect(route('admin.medicines'))
+            ->assertSessionHas('success');
+
+        $medicine->refresh();
+        $this->assertSame(['Controlled', 'Vitamin'], $medicine->category_names);
+        $this->assertSame('Controlled', $medicine->category);
     }
 
     public function test_admin_can_edit_medicine(): void

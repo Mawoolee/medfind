@@ -62,7 +62,7 @@
                                      '{{ addslashes($item->medicine->medicine_name ?? 'Unknown') }}',
                                      '{{ addslashes($item->medicine->dosage ?? '') }}',
                                      '{{ addslashes($item->medicine->manufacturer ?? '') }}',
-                                     '{{ addslashes($item->medicine->category ?? '') }}',
+                                     '{{ addslashes($item->medicine->category_display ?? '') }}',
                                      {{ $item->medicine->requiresPrescription ? 'true' : 'false' }},
                                      {{ (float) $item->representative_price }},
                                      {{ (int) $item->available_stock }}

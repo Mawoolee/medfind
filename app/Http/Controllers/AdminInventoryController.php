@@ -33,7 +33,7 @@ class AdminInventoryController extends Controller
         }
 
         if (! empty($category)) {
-            $query->whereHas('medicine', fn ($medicineQuery) => $medicineQuery->where('category', $category));
+            $query->whereHas('medicine', fn ($medicineQuery) => $medicineQuery->whereCategory($category));
         }
 
         match ($stock) {
@@ -84,7 +84,11 @@ class AdminInventoryController extends Controller
                 'pharmacy',
                 fn ($pharmacyQuery) => $pharmacyQuery->where('status', 'approved')
             )->pluck('medicine_id')
-        )->whereNotNull('category')->distinct()->pluck('category')->values();
+        )->get(['category', 'categories'])
+            ->flatMap(fn (Medicine $medicine) => $medicine->category_names)
+            ->unique()
+            ->sort()
+            ->values();
 
         return view('admin.inventory', compact(
             'items',

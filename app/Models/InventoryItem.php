@@ -160,11 +160,11 @@ class InventoryItem extends Model
      */
     public function getSegregationAttribute(): string
     {
-        $category = strtolower((string) optional($this->medicine)->category);
+        $categories = array_map('strtolower', optional($this->medicine)->category_names ?? []);
         $requiresRx = (bool) optional($this->medicine)->requiresPrescription;
 
         // Controlled substances override everything.
-        if (in_array($category, ['controlled', 'narcotic', 's2', 's3', 'controlled substance'])) {
+        if (array_intersect($categories, ['controlled', 'narcotic', 's2', 's3', 'controlled substance']) !== []) {
             return 'controlled';
         }
 
@@ -256,18 +256,18 @@ class InventoryItem extends Model
      */
     public function getVedClassAttribute(): string
     {
-        $category = strtolower((string) optional($this->medicine)->category);
+        $categories = array_map('strtolower', optional($this->medicine)->category_names ?? []);
         $vital = ['antibiotic', 'antidiarrheal', 'antihistamine', 'insulin', 'anti-infective', 'cardiac', 'corticosteroid', 'vital'];
         $essential = ['analgesic', 'nsaid', 'antipyretic', 'essential', 'anti-inflammatory', 'antifungal', 'antimalarial'];
         $desirable = ['vitamin', 'supplement', 'desirable', 'cold', 'cough', 'antacid', 'laxative', 'otc'];
 
-        if (in_array($category, $vital)) {
+        if (array_intersect($categories, $vital) !== []) {
             return 'V';
         }
-        if (in_array($category, $essential)) {
+        if (array_intersect($categories, $essential) !== []) {
             return 'E';
         }
-        if (in_array($category, $desirable)) {
+        if (array_intersect($categories, $desirable) !== []) {
             return 'D';
         }
 

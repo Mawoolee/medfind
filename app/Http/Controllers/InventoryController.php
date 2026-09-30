@@ -45,7 +45,7 @@ class InventoryController extends Controller
 
         if ($category !== '') {
             $query->whereHas('medicine', fn (Builder $medicine) => $medicine
-                ->whereRaw('LOWER(TRIM(category)) = LOWER(TRIM(?))', [$category]));
+                ->whereCategory($category));
         }
 
         match ($stock) {
@@ -80,9 +80,9 @@ class InventoryController extends Controller
 
         $storedCategories = Medicine::query()
             ->whereIn('id', InventoryItem::query()->where('pharmacy_id', $pharmacy->id)->select('medicine_id'))
-            ->whereNotNull('category')
             ->orderBy('category')
-            ->pluck('category');
+            ->get(['category', 'categories'])
+            ->flatMap(fn (Medicine $medicine) => $medicine->category_names);
         $categoryOptions = MedicineCategory::optionsWithCustom($storedCategories);
 
         return view('pharmacy.inventory', compact(
@@ -117,7 +117,10 @@ class InventoryController extends Controller
                     'medicine_name' => $medicine->medicine_name,
                     'brand_name' => $medicine->brand_name,
                     'dosage' => $medicine->dosage,
-                    'category' => MedicineCategory::optionValue($medicine->category),
+                    'categories' => array_map(
+                        [MedicineCategory::class, 'optionValue'],
+                        $medicine->category_names
+                    ),
                     'manufacturer' => $medicine->manufacturer,
                     'requires_prescription' => (bool) $medicine->requiresPrescription,
                     'cold_chain_required' => (bool) $medicine->cold_chain_required,
@@ -126,15 +129,25 @@ class InventoryController extends Controller
             ];
         });
 
-        $categoryOptions = MedicineCategory::optionsWithCustom([old('category')]);
-        $selectedCategory = MedicineCategory::optionValue(old('category'));
+        $storedCategories = Medicine::query()->get(['category', 'categories'])
+            ->flatMap(fn (Medicine $medicine) => $medicine->category_names);
+        $categoryOptions = MedicineCategory::optionsWithCustom([
+            ...$storedCategories,
+            ...(array) old('categories', []),
+            old('category'),
+        ]);
+        $selectedCategories = old('categories', old('category') ? [old('category')] : []);
+        $selectedCategories = array_map(
+            [MedicineCategory::class, 'optionValue'],
+            is_array($selectedCategories) ? $selectedCategories : []
+        );
 
         return view('pharmacy.inventory_create', compact(
             'pharmacy',
             'medicines',
             'medicineAutofill',
             'categoryOptions',
-            'selectedCategory'
+            'selectedCategories'
         ));
     }
 
@@ -164,9 +177,16 @@ class InventoryController extends Controller
             ->where('pharmacy_id', $pharmacy->id);
         $aggregateQuery->withProjections($query);
         $item = $query->firstOrFail();
-        $selectedCategory = MedicineCategory::optionValue(old('category', $item->medicine->category));
+        $selectedCategories = old('categories', old('category')
+            ? [old('category')]
+            : array_map([MedicineCategory::class, 'optionValue'], $item->medicine->category_names));
+        $selectedCategories = array_map(
+            [MedicineCategory::class, 'optionValue'],
+            is_array($selectedCategories) ? $selectedCategories : []
+        );
         $categoryOptions = MedicineCategory::optionsWithCustom([
-            $item->medicine->category,
+            ...$item->medicine->category_names,
+            ...(array) old('categories', []),
             old('category'),
         ]);
 
@@ -174,7 +194,7 @@ class InventoryController extends Controller
             'pharmacy',
             'item',
             'categoryOptions',
-            'selectedCategory'
+            'selectedCategories'
         ));
     }
 
@@ -264,7 +284,7 @@ class InventoryController extends Controller
                     $item->medicine?->brand_name,
                     $item->medicine?->dosage,
                     $item->medicine?->manufacturer,
-                    $item->medicine?->category,
+                    $item->medicine?->category_display,
                     $item->available_stock,
                     $item->physical_stock,
                     $item->representative_price,

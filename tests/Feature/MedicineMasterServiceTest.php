@@ -58,6 +58,7 @@ final class MedicineMasterServiceTest extends TestCase
         ]);
         self::assertTrue($aggregate->medicine->requiresPrescription);
         self::assertTrue($aggregate->medicine->cold_chain_required);
+        self::assertSame(['Insulin'], $aggregate->medicine->category_names);
     }
 
     public function test_it_retains_one_aggregate_when_an_existing_master_is_added_again(): void
@@ -125,7 +126,24 @@ final class MedicineMasterServiceTest extends TestCase
         self::assertSame(11, (int) $updated->par_level);
         self::assertSame(23, (int) $updated->stockQuantity);
         self::assertSame('18.75', (string) $updated->price);
+        self::assertSame(['Controlled'], $updated->medicine->category_names);
         self::assertSame($batchBefore, $updated->batches()->firstOrFail()->only(array_keys($batchBefore)));
+    }
+
+    public function test_updating_a_pharmacy_item_without_changing_its_primary_category_preserves_all_categories(): void
+    {
+        $medicine = Medicine::factory()->create([
+            'category' => 'Analgesic',
+            'categories' => ['Analgesic', 'Antibiotic'],
+        ]);
+        $aggregate = InventoryItem::factory()->create(['medicine_id' => $medicine->id]);
+
+        $updated = $this->service->updateForPharmacy($aggregate, [
+            'medicine_name' => $medicine->medicine_name,
+            'category' => 'analgesic',
+        ], 0);
+
+        self::assertSame(['Analgesic', 'Antibiotic'], $updated->medicine->category_names);
     }
 
     public function test_it_rejects_stock_fields_and_leaves_state_unchanged(): void

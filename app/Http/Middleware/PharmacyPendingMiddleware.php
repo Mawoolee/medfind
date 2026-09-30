@@ -26,6 +26,7 @@ class PharmacyPendingMiddleware
             'pharmacy.requirements',
             'pharmacy.requirements.store',
             'pharmacy.requirements.document.store',
+            'pharmacy.requirements.document.view',
             'logout',
         ];
 

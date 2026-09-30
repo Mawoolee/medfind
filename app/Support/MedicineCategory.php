@@ -11,9 +11,10 @@ final class MedicineCategory
     {
         return [
             'analgesic' => 'Analgesic',
+            'antipyretic' => 'Antipyretic',
             'antibiotic' => 'Antibiotic',
             'antidiarrheal' => 'Antidiarrheal',
-            'antihistamine' => 'Antihistamine',
+            'antihistamine' => 'Antiallergics / Antihistamines',
             'nsaid' => 'NSAID',
             'controlled' => 'Controlled',
             'vitamin' => 'Vitamin',

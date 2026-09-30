@@ -143,4 +143,57 @@ class PharmacyRequirementsController extends Controller
             'document' => $document,
         ]);
     }
+
+    public function viewDocument(string $document)
+    {
+        if (! array_key_exists($document, self::DOCS)) {
+            abort(404);
+        }
+
+        $pharmacy = Pharmacy::where('user_id', auth()->id())->firstOrFail();
+        $path = ($pharmacy->requirements ?? [])[$document] ?? null;
+        if (is_array($path)) {
+            $path = $path['path'] ?? $path['file'] ?? null;
+        }
+        if (! is_string($path) || $path === '') {
+            abort(404, 'Document not found.');
+        }
+
+        $diskNames = array_unique([
+            config('filesystems.requirements_disk'),
+            'local',
+            'prescriptions',
+            'r2_private',
+        ]);
+        $disk = null;
+        foreach ($diskNames as $diskName) {
+            $candidate = \Illuminate\Support\Facades\Storage::disk($diskName);
+            if ($candidate->exists($path)) {
+                $disk = $candidate;
+                break;
+            }
+        }
+
+        if ($disk === null) {
+            abort(404, 'Document not found.');
+        }
+
+        return response($disk->get($path), 200, [
+            'Content-Type' => $disk->mimeType($path) ?: $this->requirementMimeType($path),
+            'Content-Disposition' => 'inline; filename="'.basename($path).'"',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
+    private function requirementMimeType(string $path): string
+    {
+        return match (strtolower(pathinfo($path, PATHINFO_EXTENSION))) {
+            'pdf' => 'application/pdf',
+            'doc' => 'application/msword',
+            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'jpg', 'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            default => 'application/octet-stream',
+        };
+    }
 }

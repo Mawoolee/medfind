@@ -146,7 +146,7 @@
                                 <p class="text-sm font-medium text-gray-800">{{ $item->medicine?->medicine_name }}</p>
                                 <p class="text-xs text-gray-400">{{ $item->medicine?->dosage }}</p>
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-600">{{ $item->medicine?->category ?? '—' }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-600">{{ $item->medicine?->category_display ?: '—' }}</td>
                             <td class="px-4 py-3 text-sm font-mono font-medium {{ $isOut ? 'text-red-600' : ($isLow ? 'text-yellow-600' : 'text-gray-800') }}">
                                 {{ $available }}
                             </td>

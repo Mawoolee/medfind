@@ -104,9 +104,9 @@
  style="background:#9400D3;">
  <i class="fas fa-upload text-[10px]"></i> Select File
  </button>
- <p id="fname_{{ $key }}" class="text-sm truncate flex-1 min-w-0">
+ <p id="fname_{{ $key }}" class="text-sm truncate flex-1 min-w-0" @if($isUploaded) data-document-url="{{ route('pharmacy.requirements.document.view', $key) }}" @endif>
  @if($isUploaded)
- <span style="color:#191970;font-weight:600;"><i class="fas fa-file mr-1"></i>Uploaded</span>
+ <a href="{{ route('pharmacy.requirements.document.view', $key) }}" target="_blank" rel="noopener noreferrer" class="text-sm font-semibold hover:underline" style="color:#191970;"><i class="fas fa-file mr-1"></i>View uploaded document</a>
  @else
  <span class="text-gray-400">No file chosen</span>
  @endif
@@ -126,9 +126,100 @@
 </div>
 </div>
 
+<div id="documentPopup" class="document-popup" aria-hidden="true">
+ <div class="document-popup__backdrop"></div>
+ <section class="document-popup__dialog" role="alertdialog" aria-modal="true" aria-labelledby="documentPopupTitle" aria-describedby="documentPopupMessage">
+  <span id="documentPopupIcon" class="document-popup__icon" aria-hidden="true"></span>
+  <h2 id="documentPopupTitle" class="document-popup__title"></h2>
+  <p id="documentPopupMessage" class="document-popup__message"></p>
+  <button id="documentPopupClose" type="button" class="document-popup__button">OK</button>
+ </section>
+</div>
+
+<style>
+ .document-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 11000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+ }
+ .document-popup.is-open { display: flex; }
+ .document-popup__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(17, 24, 39, .55);
+ }
+ .document-popup__dialog {
+  position: relative;
+  width: min(100%, 25rem);
+  padding: 1.5rem;
+  border-radius: 1rem;
+  background: #fff;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(17, 24, 39, .25);
+ }
+ .document-popup__icon {
+  display: inline-flex;
+  width: 3rem;
+  height: 3rem;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: .75rem;
+  border-radius: 9999px;
+  font-size: 1.25rem;
+ }
+ .document-popup__icon.is-success { color: #15803d; background: #dcfce7; }
+ .document-popup__icon.is-error { color: #b91c1c; background: #fee2e2; }
+ .document-popup__title { color: #191970; font-size: 1.125rem; font-weight: 700; }
+ .document-popup__message { margin-top: .5rem; color: #4b5563; font-size: .875rem; overflow-wrap: anywhere; }
+ .document-popup__button {
+  min-width: 6rem;
+  margin-top: 1.25rem;
+  padding: .625rem 1.25rem;
+  border: 0;
+  border-radius: 9999px;
+  background: #191970;
+  color: #D9F855;
+  font-weight: 700;
+  cursor: pointer;
+ }
+</style>
+
 <script>
 var DOC_KEYS = ["bir","business","philhealth","fda","pharmacist"];
 var SESSION_PREFIX = "mf_req_";
+var documentPopupCloseAction = null;
+var documentPreviewUrls = {};
+
+function showDocumentPopup(type, title, message, onClose) {
+ var popup = document.getElementById("documentPopup");
+ var icon = document.getElementById("documentPopupIcon");
+ var closeButton = document.getElementById("documentPopupClose");
+ if (!popup || !icon || !closeButton) return;
+ icon.className = "document-popup__icon is-" + type;
+ icon.innerHTML = type === "success"
+  ? '<i class="fas fa-check" aria-hidden="true"></i>'
+  : '<i class="fas fa-exclamation" aria-hidden="true"></i>';
+ document.getElementById("documentPopupTitle").textContent = title;
+ document.getElementById("documentPopupMessage").textContent = message;
+ documentPopupCloseAction = typeof onClose === "function" ? onClose : null;
+ popup.classList.add("is-open");
+ popup.setAttribute("aria-hidden", "false");
+ closeButton.focus();
+}
+
+function closeDocumentPopup() {
+ var popup = document.getElementById("documentPopup");
+ if (!popup || !popup.classList.contains("is-open")) return;
+ popup.classList.remove("is-open");
+ popup.setAttribute("aria-hidden", "true");
+ var onClose = documentPopupCloseAction;
+ documentPopupCloseAction = null;
+ if (onClose) onClose();
+}
 
 function checkItem(key) {
  var box = document.getElementById("check_" + key);
@@ -161,25 +252,89 @@ function showUploadError(key, message) {
  }
 }
 
+function showChosenFile(label, file, key) {
+ if (!label) return;
+ if (documentPreviewUrls[key]) URL.revokeObjectURL(documentPreviewUrls[key]);
+ var previewUrl = URL.createObjectURL(file);
+ documentPreviewUrls[key] = previewUrl;
+ var icon = document.createElement("i");
+ icon.className = "fas fa-file";
+ icon.style.cssText = "color:#9400D3;margin-right:4px;";
+ var name = document.createElement("a");
+ name.href = previewUrl;
+ name.target = "_blank";
+ name.rel = "noopener noreferrer";
+ name.title = "Open " + file.name;
+ name.style.cssText = "color:#191970;font-weight:600;";
+ name.className = "hover:underline";
+ name.textContent = file.name;
+ label.replaceChildren(icon, name);
+}
+
+function showUploadedDocument(label) {
+ if (!label || !label.dataset.documentUrl) return false;
+ var link = document.createElement("a");
+ link.href = label.dataset.documentUrl;
+ link.target = "_blank";
+ link.rel = "noopener noreferrer";
+ link.className = "text-sm font-semibold hover:underline";
+ link.style.color = "#191970";
+ var icon = document.createElement("i");
+ icon.className = "fas fa-file mr-1";
+ link.append(icon, document.createTextNode("View uploaded document"));
+ label.replaceChildren(link);
+ return true;
+}
+
+function clearDocumentPreview(key) {
+ if (!documentPreviewUrls[key]) return;
+ URL.revokeObjectURL(documentPreviewUrls[key]);
+ delete documentPreviewUrls[key];
+}
+
 function showFileName(key, input) {
  clearUploadError(key);
  var label = document.getElementById("fname_" + key);
  if (!input.files || !input.files[0]) return;
  var file = input.files[0];
+ var allowedExtensions = ["jpg", "jpeg", "png", "pdf", "doc", "docx"];
+ var extension = file.name.split(".").pop().toLowerCase();
+ var errorMessage = "";
  if (file.size > 10 * 1024 * 1024) {
+ errorMessage = "The selected file must not be larger than 10 MB.";
+ } else if (allowedExtensions.indexOf(extension) === -1) {
+ errorMessage = "Choose a PDF, DOC, DOCX, JPG, JPEG, or PNG file.";
+ }
+ if (errorMessage) {
  input.value = "";
- if (label) label.innerHTML = '<span style="color:#dc2626;font-weight:600;">The doc_' + key + ' must not be larger than 10 MB.</span>';
- showUploadError(key, "The doc_" + key + " must not be larger than 10 MB.");
+ clearDocumentPreview(key);
+ sessionStorage.removeItem(SESSION_PREFIX + key + "_name");
+ sessionStorage.removeItem(SESSION_PREFIX + key + "_data");
+ sessionStorage.removeItem(SESSION_PREFIX + key + "_type");
+ var saved = document.getElementById("sv_" + key);
+ if (label && !showUploadedDocument(label)) {
+  label.textContent = "No file chosen";
+  label.className = "text-sm truncate flex-1 min-w-0 text-gray-400";
+  label.style.color = "";
+  label.style.fontWeight = "";
+ }
+ showUploadError(key, errorMessage);
+ showDocumentPopup("error", "Document not selected", errorMessage);
  var box = document.getElementById("check_" + key);
  if (box) {
- box.innerHTML = "";
- box.style.cssText = "background:transparent;border-color:#dc2626;width:20px;height:20px;border-radius:4px;border:2px solid;display:flex;align-items:center;justify-content:center;flex-shrink:0;";
+ if (saved && saved.value === "1") {
+  checkItem(key);
+ } else {
+  box.innerHTML = "";
+  box.style.cssText = "background:transparent;border-color:#dc2626;width:20px;height:20px;border-radius:4px;border:2px solid;display:flex;align-items:center;justify-content:center;flex-shrink:0;";
+ }
  }
 
  return;
  }
- if (label) label.innerHTML = '<i class="fas fa-file" style="color:#9400D3;margin-right:4px;"></i><span style="color:#191970;font-weight:600;">' + file.name + '</span>';
+ showChosenFile(label, file, key);
  checkItem(key);
+ showDocumentPopup("success", "Document selected", file.name + " is ready to upload.");
  var reader = new FileReader();
  reader.onload = function(e) {
  try {
@@ -206,7 +361,7 @@ function restoreFiles() {
  var inp = document.getElementById("file_" + key);
  if (inp) { var dt = new DataTransfer(); dt.items.add(f); inp.files = dt.files; }
  var lbl = document.getElementById("fname_" + key);
- if (lbl) lbl.innerHTML = '<i class="fas fa-file" style="color:#9400D3;margin-right:4px;"></i><span style="color:#191970;font-weight:600;">' + name + '</span>';
+ showChosenFile(lbl, f, key);
  checkItem(key);
  } catch(ex) {
  sessionStorage.removeItem(SESSION_PREFIX + key + "_name");
@@ -217,7 +372,19 @@ function restoreFiles() {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
+ var popupClose = document.getElementById("documentPopupClose");
+ var popupBackdrop = document.querySelector(".document-popup__backdrop");
+ if (popupClose) popupClose.addEventListener("click", closeDocumentPopup);
+ if (popupBackdrop) popupBackdrop.addEventListener("click", closeDocumentPopup);
+ document.addEventListener("keydown", function(event) {
+  if (event.key === "Escape") closeDocumentPopup();
+ });
  restoreFiles();
+ @if(session('success'))
+ showDocumentPopup("success", "Upload successful", @js(session('success')));
+ @elseif(session('error'))
+ showDocumentPopup("error", "Upload failed", @js(session('error')));
+ @endif
  var form = document.getElementById("requirementsUploadForm");
  if (form) form.addEventListener("submit", function(event) {
  var selectedFiles = 0;
@@ -233,6 +400,7 @@ document.addEventListener("DOMContentLoaded", function() {
    showUploadError(key, "Please select at least one document.");
   }
  });
+ showDocumentPopup("error", "No document selected", "Please select at least one document before submitting.");
  return;
  }
  event.preventDefault();
@@ -281,13 +449,17 @@ document.addEventListener("DOMContentLoaded", function() {
  sessionStorage.removeItem(SESSION_PREFIX + key + "_data");
  sessionStorage.removeItem(SESSION_PREFIX + key + "_type");
  });
- window.location.href = @js(route('pharmacy.requirements'));
+ showDocumentPopup("success", "Upload successful", "All selected documents were uploaded successfully.", function() {
+  window.location.href = @js(route('pharmacy.requirements'));
+ });
  } catch (error) {
  if (submitButton) {
  submitButton.disabled = false;
  submitButton.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Requirements';
  }
- showUploadError(failedKey || uploadKeys[0], error.message || "The documents could not be uploaded. Please try again.");
+ var uploadError = error.message || "The documents could not be uploaded. Please try again.";
+ showUploadError(failedKey || uploadKeys[0], uploadError);
+ showDocumentPopup("error", "Upload failed", uploadError);
  }
  })();
  return;
