@@ -172,6 +172,41 @@ class MedicineSearchTest extends TestCase
             ->assertSee('Metformin 500mg');
     }
 
+    public function test_pharmacy_detail_inventory_is_paginated_at_five_items(): void
+    {
+        $consumer = User::factory()->create(['role' => 'consumer']);
+        $pharmacy = Pharmacy::factory()->approved()->create();
+
+        foreach (range(1, 16) as $number) {
+            $medicine = Medicine::factory()->named("Detail Medicine {$number}")->create();
+            InventoryItem::factory()->create([
+                'pharmacy_id' => $pharmacy->id,
+                'medicine_id' => $medicine->id,
+            ]);
+        }
+
+        $firstPage = $this->actingAs($consumer)
+            ->get(route('consumer.pharmacy.details', $pharmacy->id))
+            ->assertOk()
+            ->assertSee('Detail Medicine 1')
+            ->assertDontSee('Detail Medicine 16')
+            ->viewData('pharmacy');
+
+        $this->assertSame(16, $firstPage->inventory->total());
+        $this->assertCount(5, $firstPage->inventory);
+
+        $secondPage = $this->get(route('consumer.pharmacy.details', [
+            'id' => $pharmacy->id,
+            'page' => 2,
+        ]))
+            ->assertOk()
+            ->assertSee('Detail Medicine 6')
+            ->viewData('pharmacy');
+
+        $this->assertSame(16, $secondPage->inventory->total());
+        $this->assertCount(5, $secondPage->inventory);
+    }
+
     public function test_pending_pharmacy_detail_returns_404(): void
     {
         $consumer = User::factory()->create(['role' => 'consumer']);

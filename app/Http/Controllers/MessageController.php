@@ -367,14 +367,23 @@ class MessageController extends Controller
             return redirect()->back()->with('error', 'Unauthorized.');
         }
 
-        // Get all messages grouped by pharmacy, latest message per pharmacy first
-        $messages = Message::where('consumer_id', $user->id)
+        $conversations = Message::query()
+            ->where('consumer_id', $user->id)
+            ->select('pharmacy_id')
+            ->groupBy('pharmacy_id')
+            ->orderByRaw('MAX(created_at) DESC')
+            ->orderByRaw('MAX(id) DESC')
+            ->paginate(5)
+            ->withQueryString();
+        $messages = Message::query()
+            ->where('consumer_id', $user->id)
+            ->whereIn('pharmacy_id', $conversations->pluck('pharmacy_id'))
             ->with('pharmacy')
             ->orderBy('created_at', 'desc')
             ->get()
             ->groupBy('pharmacy_id');
 
-        return view('consumer.messages', compact('messages'));
+        return view('consumer.messages', compact('messages', 'conversations'));
     }
 
     /**

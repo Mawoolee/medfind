@@ -31,7 +31,7 @@
         <div class="bg-white rounded-lg shadow-lg p-6">
             <h3 class="font-semibold text-gray-800 mb-2">Total Inventory Value</h3>
             <p class="text-2xl font-bold text-blue-600">₱{{ number_format($totalValue, 2) }}</p>
-            <p class="text-sm text-gray-500 mt-2">{{ $sorted->count() }} items analyzed</p>
+            <p class="text-sm text-gray-500 mt-2">{{ $totalItems }} items analyzed</p>
         </div>
     </div>
 
@@ -55,7 +55,7 @@
     </div>
 
     <!-- Detailed table -->
-    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
         <div class="p-6">
             <h3 class="text-lg font-semibold text-gray-800 mb-4">Item Classification Details</h3>
             <div class="data-scroll-region overflow-x-auto -mx-6 px-6">
@@ -98,5 +98,8 @@
             </div>
         </div>
     </div>
+    @if($sorted->hasPages())
+        {{ $sorted->links() }}
+    @endif
 </div>
 @endsection

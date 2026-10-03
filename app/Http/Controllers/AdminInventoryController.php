@@ -47,7 +47,8 @@ class AdminInventoryController extends Controller
         $items = $query
             ->orderBy('pharmacy_id')
             ->orderBy('created_at', 'desc')
-            ->paginate(25)
+            ->orderByDesc('id')
+            ->paginate(5)
             ->withQueryString();
 
         // Summary stats (across all approved pharmacies, unfiltered)
@@ -62,10 +63,16 @@ class AdminInventoryController extends Controller
         $lowStockCount = $systemCounts['low'];
 
         // Per-pharmacy mini summaries (for overview cards when no filters are applied)
+        $summaryPharmacies = Pharmacy::query()
+            ->where('status', 'approved')
+            ->orderBy('pharmacy_name')
+            ->orderBy('id')
+            ->paginate(5, ['*'], 'summary_page')
+            ->withQueryString();
         $pharmacySummaries = [];
         $pharmacies = Pharmacy::where('status', 'approved')->orderBy('pharmacy_name')->get();
 
-        foreach ($pharmacies as $pharmacy) {
+        foreach ($summaryPharmacies as $pharmacy) {
             $counts = $this->stockCounts(
                 InventoryItem::where('pharmacy_id', $pharmacy->id),
                 $aggregateQuery
@@ -93,6 +100,7 @@ class AdminInventoryController extends Controller
         return view('admin.inventory', compact(
             'items',
             'pharmacies',
+            'summaryPharmacies',
             'pharmacySummaries',
             'categories',
             'q',

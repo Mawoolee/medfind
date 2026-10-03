@@ -21,7 +21,7 @@
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{{ session('error') }}</div>
     @endif
 
-    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
         <div class="data-scroll-region overflow-x-auto">
         <table class="w-full text-sm min-w-[720px]">
             <thead>
@@ -61,5 +61,8 @@
         </table>
         </div>
     </div>
+    @if($counts->hasPages())
+        {{ $counts->links() }}
+    @endif
 </div>
 @endsection

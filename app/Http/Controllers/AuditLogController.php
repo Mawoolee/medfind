@@ -65,7 +65,7 @@ class AuditLogController extends Controller
         $audits = $query
             ->orderByDesc('created_at')
             ->orderByDesc('id')
-            ->paginate(20)
+            ->paginate(5)
             ->withQueryString();
 
         // Summary counts are pharmacy-wide and intentionally ignore the filters above.

@@ -18,7 +18,7 @@
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4">{{ session('success') }}</div>
     @endif
 
-    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
         <div class="data-scroll-region overflow-x-auto">
             <table class="w-full text-sm min-w-[800px]">
                 <thead>
@@ -59,7 +59,7 @@
     </div>
 
     @if($suppliers->hasPages())
-        <div class="mt-4">{{ $suppliers->links() }}</div>
+        {{ $suppliers->links() }}
     @endif
 </div>
 @endsection

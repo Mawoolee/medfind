@@ -83,6 +83,9 @@
                 </div>
             @endforelse
         </div>
+        @if($conversations->hasPages())
+            <div class="border-t p-3" style="border-color:rgba(148,0,211,0.3);">{{ $conversations->links() }}</div>
+        @endif
     </div>
 
     {{-- RIGHT PANEL: Chat View --}}

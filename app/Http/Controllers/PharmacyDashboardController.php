@@ -125,16 +125,27 @@ class PharmacyDashboardController extends Controller
             $status = 'all';
         }
 
-        $query = Message::query()->where('pharmacy_id', $pharmacy->id)->with('consumer');
+        $query = Message::query()->where('pharmacy_id', $pharmacy->id);
         if ($status === 'unread') {
             $query->where('is_read', false);
         } elseif ($status === 'read') {
             $query->where('is_read', true);
         }
 
-        $messages = $query->orderByDesc('created_at')->get();
+        $conversations = (clone $query)
+            ->select('consumer_id')
+            ->groupBy('consumer_id')
+            ->orderByRaw('MAX(created_at) DESC')
+            ->orderByRaw('MAX(id) DESC')
+            ->paginate(5)
+            ->withQueryString();
+        $messages = $query
+            ->with('consumer')
+            ->whereIn('consumer_id', $conversations->pluck('consumer_id'))
+            ->orderByDesc('created_at')
+            ->get();
 
-        return view('pharmacy.messages', compact('pharmacy', 'messages', 'status'));
+        return view('pharmacy.messages', compact('pharmacy', 'messages', 'conversations', 'status'));
     }
 
     public function replyMessage(Request $request, int|string $id)

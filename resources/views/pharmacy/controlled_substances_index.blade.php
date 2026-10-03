@@ -16,7 +16,7 @@
     </div>
 
     <!-- Controlled items snapshot -->
-    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden p-6 mb-6">
         <h3 class="text-lg font-semibold text-gray-800 mb-3">Medicines in Stock</h3>
         <div class="data-scroll-region overflow-x-auto -mx-6 px-6">
             <table class="w-full text-sm min-w-[640px]">
@@ -47,6 +47,9 @@
             </table>
         </div>
     </div>
+    @if($controlledItems->hasPages())
+        {{ $controlledItems->links() }}
+    @endif
 
     <!-- Logbook -->
     <div class="bg-white rounded-xl shadow-lg overflow-hidden">
@@ -94,5 +97,8 @@
         </table>
         </div>
     </div>
+    @if($logs->hasPages())
+        {{ $logs->links() }}
+    @endif
 </div>
 @endsection

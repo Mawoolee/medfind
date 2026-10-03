@@ -107,6 +107,9 @@
         </div>
         @endforeach
     </div>
+    @if($summaryPharmacies->hasPages())
+        <div class="mb-6">{{ $summaryPharmacies->links() }}</div>
+    @endif
     @endif
 
     {{-- Inventory Table --}}
@@ -181,11 +184,9 @@
                 </tbody>
             </table>
         </div>
-        @if($items->hasPages())
-            <div class="px-4 py-3 border-t border-gray-200">
-                {{ $items->withQueryString()->links() }}
-            </div>
-        @endif
     </div>
+    @if($items->hasPages())
+        {{ $items->withQueryString()->links() }}
+    @endif
 </div>
 @endsection

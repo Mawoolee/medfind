@@ -27,7 +27,9 @@ class CycleCountController extends Controller
             ->with(['items', 'conductedBy'])
             ->where('pharmacy_id', $pharmacy->id)
             ->orderByDesc('created_at')
-            ->get();
+            ->orderByDesc('id')
+            ->paginate(5)
+            ->withQueryString();
 
         return view('pharmacy.cycle_counts_index', compact('pharmacy', 'counts'));
     }

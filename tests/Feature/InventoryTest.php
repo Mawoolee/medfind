@@ -79,7 +79,15 @@ class InventoryTest extends TestCase
             InventoryItem::factory()->create(['pharmacy_id' => $pharmacy->id, 'medicine_id' => $medicine->id]);
         }
 
-        $this->actingAs($user)->get(route('pharmacy.inventory'))->assertOk();
+        $response = $this->actingAs($user)
+            ->get(route('pharmacy.inventory'))
+            ->assertOk()
+            ->assertSee('aria-label="Pagination Navigation"', false);
+
+        $inventory = $response->viewData('inventory');
+        $this->assertSame(20, $inventory->total());
+        $this->assertSame(5, $inventory->count());
+        $this->assertSame(5, $inventory->perPage());
     }
 
     public function test_inventory_can_be_filtered_by_stock_status(): void

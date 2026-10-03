@@ -9,7 +9,7 @@ class SupplierController extends Controller
 {
     public function index()
     {
-        $suppliers = Supplier::orderBy('name')->paginate(20);
+        $suppliers = Supplier::orderBy('name')->orderBy('id')->paginate(5);
         return view('pharmacy.suppliers_index', compact('suppliers'));
     }
 

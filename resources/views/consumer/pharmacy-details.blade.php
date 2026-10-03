@@ -96,6 +96,9 @@
                     <p class="text-gray-400 text-sm text-center py-3 font-medium">No medicines currently available.</p>
                 @endif
             </div>
+            @if($pharmacy->inventory->hasPages())
+                {{ $pharmacy->inventory->links() }}
+            @endif
 
             
 

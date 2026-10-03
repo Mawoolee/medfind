@@ -94,9 +94,9 @@
             </table>
         </div>
 
-        @if($batches->hasPages())
-            <div class="p-5 border-t border-gray-200">{{ $batches->links() }}</div>
-        @endif
     </div>
+    @if($batches->hasPages())
+        {{ $batches->links() }}
+    @endif
 </div>
 @endsection

@@ -77,5 +77,9 @@
             </div>
         @endforelse
     </div>
+
+    @if($notifications->hasPages())
+        {{ $notifications->links() }}
+    @endif
 </div>
 @endsection

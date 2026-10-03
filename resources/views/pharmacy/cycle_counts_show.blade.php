@@ -19,7 +19,7 @@
         </div>
     @endif
 
-    <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden p-6 mb-6">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
                 <p class="text-sm text-gray-500">Scheduled</p>
@@ -49,7 +49,7 @@
         @endif
     </div>
 
-    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
         <div class="p-6 pb-0 flex flex-col md:flex-row md:items-center md:justify-between">
             <h3 class="text-lg font-semibold text-gray-800">Count Items</h3>
             @if(!$count->completed_at)

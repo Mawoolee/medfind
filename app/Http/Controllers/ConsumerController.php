@@ -80,12 +80,18 @@ class ConsumerController extends Controller
 
     public function pharmacyDetails($id, InventoryAggregateQuery $aggregateQuery)
     {
-        $pharmacy = Pharmacy::with([
-            'inventory' => fn ($relation) => $aggregateQuery->withProjections($relation->getQuery()),
-            'inventory.medicine',
-        ])
+        $pharmacy = Pharmacy::query()
             ->where('status', 'approved')
             ->findOrFail($id);
+        $inventoryQuery = InventoryItem::query()
+            ->with('medicine')
+            ->where('pharmacy_id', $pharmacy->id)
+            ->orderBy('id');
+        $aggregateQuery->withProjections($inventoryQuery);
+        $pharmacy->setRelation(
+            'inventory',
+            $inventoryQuery->paginate(5)->withQueryString()
+        );
 
         return view('consumer.pharmacy-details', compact('pharmacy'));
     }
@@ -103,7 +109,9 @@ class ConsumerController extends Controller
             });
         $aggregateQuery->withProjections($resultsQuery);
         $results = $resultsQuery
-            ->paginate(20)
+            ->orderBy('pharmacy_id')
+            ->orderBy('id')
+            ->paginate(5)
             ->withQueryString();
 
         // Record search logs for each matched pharmacy (track store interest)

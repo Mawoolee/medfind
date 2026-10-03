@@ -26,7 +26,9 @@ class ReturnRecallController extends Controller
             ->with(['inventoryItem.medicine', 'requestedBy'])
             ->whereHas('inventoryItem', fn ($query) => $query->where('pharmacy_id', $pharmacy->id))
             ->orderByDesc('created_at')
-            ->get();
+            ->orderByDesc('id')
+            ->paginate(5)
+            ->withQueryString();
 
         return view('pharmacy.returns_index', compact('pharmacy', 'records'));
     }

@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Notifications\DatabaseNotification;
-
 class NotificationController extends Controller
 {
     public function index()
     {
         $user          = auth()->user();
-        $notifications = $user->notifications()->latest()->get();
+        $notifications = $user->notifications()
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->paginate(5)
+            ->withQueryString();
         $unreadCount   = $user->unreadNotifications()->count();
 
         return view('notifications.index', compact('notifications', 'unreadCount'));

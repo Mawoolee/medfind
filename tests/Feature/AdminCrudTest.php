@@ -372,6 +372,27 @@ class AdminCrudTest extends TestCase
             ->assertOk();
     }
 
+    public function test_admin_inventory_pharmacy_summaries_are_paginated_separately(): void
+    {
+        $admin = $this->makeAdmin();
+        Pharmacy::factory()->approved()->count(16)->create();
+
+        $firstPage = $this->actingAs($admin)
+            ->get(route('admin.inventory'))
+            ->assertOk()
+            ->viewData('summaryPharmacies');
+
+        $this->assertSame(16, $firstPage->total());
+        $this->assertCount(5, $firstPage);
+
+        $secondPage = $this->get(route('admin.inventory', ['summary_page' => 2]))
+            ->assertOk()
+            ->viewData('summaryPharmacies');
+
+        $this->assertSame(16, $secondPage->total());
+        $this->assertCount(5, $secondPage);
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // Activity log
     // ─────────────────────────────────────────────────────────────────────────

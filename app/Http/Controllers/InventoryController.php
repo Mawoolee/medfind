@@ -70,7 +70,7 @@ class InventoryController extends Controller
             default => $query->orderByDesc('updated_at')->orderByDesc('id'),
         };
 
-        $inventory = $query->paginate(15)->withQueryString();
+        $inventory = $query->paginate(5)->withQueryString();
         $inventoryMedicineNames = $inventory->getCollection()
             ->pluck('medicine.medicine_name')
             ->filter()

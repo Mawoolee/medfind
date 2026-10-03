@@ -53,7 +53,7 @@ final class InventoryBatchController extends Controller
             });
         }
 
-        $batches = $query->fefo()->paginate(20)->withQueryString();
+        $batches = $query->fefo()->orderBy('id')->paginate(5)->withQueryString();
         $inventory = InventoryItem::query()
             ->with('medicine')
             ->where('pharmacy_id', $pharmacy->id)

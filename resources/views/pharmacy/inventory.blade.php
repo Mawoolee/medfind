@@ -132,9 +132,9 @@
             </table>
         </div>
 
-        @if($inventory->hasPages())
-            <div class="p-6 border-t border-gray-200">{{ $inventory->links() }}</div>
-        @endif
     </div>
+    @if($inventory->hasPages())
+        {{ $inventory->links() }}
+    @endif
 </div>
 @endsection

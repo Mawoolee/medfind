@@ -6,6 +6,7 @@ use App\Domain\Inventory\InventoryAggregateQuery;
 use App\Models\InventoryItem;
 use App\Models\Pharmacy;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class AnalysisController extends Controller
 {
@@ -80,9 +81,20 @@ class AnalysisController extends Controller
             'D' => $sorted->where('ved', 'D')->count(),
         ];
 
+        $totalItems = $sorted->count();
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $sorted = new LengthAwarePaginator(
+            $sorted->forPage($currentPage, 5)->values(),
+            $totalItems,
+            5,
+            $currentPage,
+            ['path' => $request->url(), 'query' => $request->query()],
+        );
+
         return view('pharmacy.analysis', compact(
             'pharmacy',
             'sorted',
+            'totalItems',
             'totalValue',
             'matrix',
             'abcCounts',

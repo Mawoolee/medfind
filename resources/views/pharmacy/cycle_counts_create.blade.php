@@ -17,7 +17,7 @@
         </div>
     @endif
 
-    <div class="bg-white rounded-lg shadow-lg p-6">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden p-6">
         <form method="POST" action="{{ route('pharmacy.cycle-counts.store') }}">
             @csrf
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">

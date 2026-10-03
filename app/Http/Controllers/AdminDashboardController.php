@@ -59,7 +59,7 @@ class AdminDashboardController extends Controller
             $query->where('role', $request->role);
         }
 
-        $users = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
+        $users = $query->orderByDesc('created_at')->orderByDesc('id')->paginate(5)->withQueryString();
 
         return view('admin.users', compact('users'));
     }
@@ -112,7 +112,7 @@ class AdminDashboardController extends Controller
             $query->where('status', $request->status);
         }
 
-        $pharmacies = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
+        $pharmacies = $query->orderByDesc('created_at')->orderByDesc('id')->paginate(5)->withQueryString();
 
         return view('admin.pharmacies', compact('pharmacies'));
     }
@@ -320,7 +320,7 @@ class AdminDashboardController extends Controller
             $query->whereCategory($request->category);
         }
 
-        $medicines = $query->orderBy('medicine_name')->paginate(10)->withQueryString();
+        $medicines = $query->orderBy('medicine_name')->orderBy('id')->paginate(5)->withQueryString();
         $categories = Medicine::query()->get(['category', 'categories'])
             ->flatMap(fn (Medicine $medicine) => $medicine->category_names)
             ->unique()
@@ -476,7 +476,7 @@ class AdminDashboardController extends Controller
             $query->where('entity_type', $request->entity);
         }
 
-        $activities = $query->latest()->paginate(15)->withQueryString();
+        $activities = $query->orderByDesc('created_at')->orderByDesc('id')->paginate(5)->withQueryString();
 
         return view('admin.activity', compact('activities'));
     }
@@ -493,7 +493,7 @@ class AdminDashboardController extends Controller
             $query->where('status', 'pending');
         }
 
-        $pharmacies = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
+        $pharmacies = $query->orderByDesc('created_at')->orderByDesc('id')->paginate(5)->withQueryString();
 
         return view('admin.requirements', compact('pharmacies'));
     }

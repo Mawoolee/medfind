@@ -79,7 +79,7 @@
         <div class="bg-white rounded-xl shadow-lg p-6 flex flex-col"><h2 class="text-lg font-semibold text-gray-800 mb-2">Stock Movement Log</h2><p class="text-gray-600 mb-4 flex-1">Record dispensing, wastage, and transfers.</p><a href="{{ route('pharmacy.controlled-substances.index') }}" class="bg-rose-600 hover:bg-rose-700 text-white inline-flex items-center justify-center gap-2 text-center font-semibold px-6 py-3 rounded-xl transition duration-200 w-full min-h-11">  <i class="fas fa-book"></i>View Logbook</a><a href="{{ route('pharmacy.controlled-substances.create') }}" class="mt-2 bg-rose-100 hover:bg-rose-200 text-rose-800 border border-rose-200 inline-flex items-center justify-center gap-2 text-center font-semibold px-6 py-3 rounded-xl transition duration-200 w-full min-h-12 whitespace-normal break-words leading-tight"><i class="fas fa-shield-halved"></i>Log Stock Movement</a></div>
     </div>
 
-    <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
+    <div class="mt-8 bg-white rounded-xl shadow-lg overflow-hidden p-6">
         <h2 class="text-lg font-semibold text-gray-800 mb-4">Recent Inventory Overview</h2>
         <div class="data-scroll-region overflow-x-auto -mx-6 px-6">
             <table class="w-full text-sm">

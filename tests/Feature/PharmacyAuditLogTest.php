@@ -75,19 +75,16 @@ class PharmacyAuditLogTest extends TestCase
 
         rsort($ids);
 
-        $firstPage = $this->actingAs($owner)->get(route('pharmacy.audit-log'))
-            ->assertOk()
-            ->viewData('audits');
-        $secondPage = $this->actingAs($owner)->get(route('pharmacy.audit-log', ['page' => 2]))
-            ->assertOk()
-            ->viewData('audits');
+        $paginated = [];
+        for ($page = 1; $page <= 5; $page++) {
+            $audits = $this->actingAs($owner)
+                ->get(route('pharmacy.audit-log', ['page' => $page]))
+                ->assertOk()
+                ->viewData('audits');
+            $this->assertCount(5, $audits);
+            array_push($paginated, ...$audits->pluck('id')->all());
+        }
 
-        $firstPageIds = $firstPage->pluck('id')->all();
-        $secondPageIds = $secondPage->pluck('id')->all();
-        $paginated = array_merge($firstPageIds, $secondPageIds);
-
-        $this->assertCount(20, $firstPageIds);
-        $this->assertCount(5, $secondPageIds);
         $this->assertSame($ids, $paginated, 'Rows sharing a timestamp must page newest-id-first without gaps.');
         $this->assertSame($paginated, array_values(array_unique($paginated)), 'No row may appear on two pages.');
     }
@@ -96,7 +93,7 @@ class PharmacyAuditLogTest extends TestCase
     {
         [$owner, $pharmacy] = $this->makeOwnerAndPharmacy();
         $item = $this->item($pharmacy, 'Paracetamol');
-        for ($i = 0; $i < 21; $i++) {
+        for ($i = 0; $i < 36; $i++) {
             $this->audit($item, $i, $i + 1);
         }
 
@@ -104,19 +101,40 @@ class PharmacyAuditLogTest extends TestCase
             ->get(route('pharmacy.audit-log', [
                 'q' => 'Paracetamol',
                 'change' => 'increase',
-                'page' => 2,
+                'page' => 4,
             ]))
             ->assertOk()
             ->assertSee('class="data-scroll-region', false)
             ->assertSee('aria-label="Pagination Navigation"', false)
+            ->assertDontSee('Previous')
+            ->assertDontSee('Next')
             ->assertSee('aria-current="page"', false)
             ->assertSee('q=Paracetamol', false)
             ->assertSee('change=increase', false);
 
         $audits = $response->viewData('audits');
-        $this->assertSame(21, $audits->total());
-        $this->assertSame(1, $audits->count());
-        $this->assertSame(21, $audits->firstItem());
+        $this->assertSame(36, $audits->total());
+        $this->assertSame(5, $audits->count());
+        $this->assertSame(16, $audits->firstItem());
+    }
+
+    public function test_pagination_shows_at_most_five_page_numbers(): void
+    {
+        [$owner, $pharmacy] = $this->makeOwnerAndPharmacy();
+        $item = $this->item($pharmacy, 'Paracetamol');
+        for ($i = 0; $i < 36; $i++) {
+            $this->audit($item, $i, $i + 1);
+        }
+
+        $this->actingAs($owner)
+            ->get(route('pharmacy.audit-log', ['page' => 4]))
+            ->assertOk()
+            ->assertSee('page=2', false)
+            ->assertSee('page=6', false)
+            ->assertDontSee('page=1', false)
+            ->assertDontSee('page=7', false)
+            ->assertDontSee('Previous')
+            ->assertDontSee('Next');
     }
 
     public function test_increase_filter_returns_only_rows_where_available_stock_grew(): void

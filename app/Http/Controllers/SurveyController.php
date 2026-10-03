@@ -61,7 +61,7 @@ class SurveyController extends Controller
         }
 
         $total     = (clone $query)->count();
-        $responses = (clone $query)->latest()->paginate(15)->withQueryString();
+        $responses = (clone $query)->latest()->paginate(5)->withQueryString();
 
         // Per-question averages across all (filtered) responses
         $allCols = collect(SurveyResponse::questionColumns())

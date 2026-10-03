@@ -131,12 +131,10 @@
             </table>
         </div>
 
-        {{-- Pagination --}}
-        @if($audits->hasPages())
-            <div class="px-4 py-3 border-t border-gray-200">
-                {{ $audits->withQueryString()->links() }}
-            </div>
-        @endif
     </div>
+    {{-- Pagination --}}
+    @if($audits->hasPages())
+        {{ $audits->withQueryString()->links() }}
+    @endif
 </div>
 @endsection

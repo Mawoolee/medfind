@@ -200,6 +200,55 @@ class MessagingTest extends TestCase
             ->assertOk();
     }
 
+    public function test_pharmacy_inbox_paginates_conversations_at_five_per_page(): void
+    {
+        [$pharmacyUser, $pharmacy] = $this->makePharmacyUser();
+        $consumers = User::factory()->count(16)->create(['role' => 'consumer']);
+        foreach ($consumers as $consumer) {
+            Message::factory()->create([
+                'consumer_id' => $consumer->id,
+                'pharmacy_id' => $pharmacy->id,
+            ]);
+        }
+
+        $firstPage = $this->actingAs($pharmacyUser)
+            ->get(route('pharmacy.messages'))
+            ->assertOk()
+            ->assertSee('aria-label="Pagination Navigation"', false);
+        $this->assertSame(16, $firstPage->viewData('conversations')->total());
+        $this->assertCount(5, $firstPage->viewData('messages')->groupBy('consumer_id'));
+
+        $secondPage = $this->actingAs($pharmacyUser)
+            ->get(route('pharmacy.messages', ['page' => 2]))
+            ->assertOk();
+        $this->assertCount(5, $secondPage->viewData('conversations')->items());
+        $this->assertCount(5, $secondPage->viewData('messages')->groupBy('consumer_id'));
+    }
+
+    public function test_consumer_inbox_paginates_conversations_at_five_per_page(): void
+    {
+        $consumer = $this->makeConsumer();
+        for ($index = 0; $index < 16; $index++) {
+            [, $pharmacy] = $this->makePharmacyUser();
+            Message::factory()->create([
+                'consumer_id' => $consumer->id,
+                'pharmacy_id' => $pharmacy->id,
+            ]);
+        }
+
+        $firstPage = $this->actingAs($consumer)
+            ->get(route('consumer.messages'))
+            ->assertOk()
+            ->assertSee('aria-label="Pagination Navigation"', false);
+        $this->assertSame(16, $firstPage->viewData('conversations')->total());
+        $this->assertCount(5, $firstPage->viewData('messages'));
+
+        $secondPage = $this->actingAs($consumer)
+            ->get(route('consumer.messages', ['page' => 2]))
+            ->assertOk();
+        $this->assertCount(5, $secondPage->viewData('messages'));
+    }
+
     public function test_pharmacy_can_reply_to_message(): void
     {
         Event::fake();

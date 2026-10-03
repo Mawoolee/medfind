@@ -108,10 +108,8 @@
                 </table>
             </div>
 
-            <div class="mt-4">
-                {{ $medicines->links() }}
-            </div>
         </div>
     </div>
+    {{ $medicines->links() }}
 </div>
 @endsection

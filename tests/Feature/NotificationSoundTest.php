@@ -34,7 +34,7 @@ class NotificationSoundTest extends TestCase
             ->assertJsonPath('notification_total', 2);
     }
 
-    public function test_notifications_page_lists_all_notifications_without_pagination_controls(): void
+    public function test_notifications_page_paginates_notifications_at_five_per_page(): void
     {
         $user = User::factory()->create();
         for ($index = 1; $index <= 21; $index++) {
@@ -42,14 +42,25 @@ class NotificationSoundTest extends TestCase
                 'id' => (string) Str::uuid(),
                 'type' => 'test.notification',
                 'data' => ['title' => 'Notification '.$index],
+                'created_at' => now()->addSeconds($index),
+                'updated_at' => now()->addSeconds($index),
             ]);
         }
 
-        $this->actingAs($user)
+        $firstPage = $this->actingAs($user)
             ->get(route('notifications.index'))
             ->assertOk()
-            ->assertSee('Notification 1')
             ->assertSee('Notification 21')
-            ->assertDontSee('aria-label="Pagination Navigation"', false);
+            ->assertSee('aria-label="Pagination Navigation"', false)
+            ->viewData('notifications');
+        $this->assertSame(5, $firstPage->count());
+        $this->assertSame(21, $firstPage->total());
+
+        $secondPage = $this->actingAs($user)
+            ->get(route('notifications.index', ['page' => 2]))
+            ->assertOk()
+            ->assertSee('Notification 16')
+            ->viewData('notifications');
+        $this->assertSame(5, $secondPage->count());
     }
 }

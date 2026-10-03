@@ -27,19 +27,25 @@ class ControlledSubstanceController extends Controller
             ->with('medicine')
             ->where('pharmacy_id', $pharmacy->id);
         $aggregateQuery->withProjections($inventoryQuery);
-        $controlledItems = $inventoryQuery->get();
+        $controlledItems = $inventoryQuery
+            ->orderBy('id')
+            ->paginate(5, ['*'], 'items_page')
+            ->withQueryString();
 
         $action = (string) $request->query('action', '');
         $logsQuery = ControlledSubstanceLog::query()
             ->with(['inventoryItem.medicine', 'user'])
             ->whereHas('inventoryItem', fn ($query) => $query->where('pharmacy_id', $pharmacy->id))
-            ->orderByDesc('logged_at');
+            ->orderByDesc('logged_at')
+            ->orderByDesc('id');
 
         if ($action !== '') {
             $logsQuery->where('action', $action);
         }
 
-        $logs = $logsQuery->get();
+        $logs = $logsQuery
+            ->paginate(5, ['*'], 'logs_page')
+            ->withQueryString();
         $actions = ControlledSubstanceLog::query()
             ->whereHas('inventoryItem', fn ($query) => $query->where('pharmacy_id', $pharmacy->id))
             ->pluck('action')
